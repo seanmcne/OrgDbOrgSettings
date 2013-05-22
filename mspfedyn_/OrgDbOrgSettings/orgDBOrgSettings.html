@@ -434,7 +434,7 @@
                             function (sbv) {
                                 ///<summary>defines the ODATA query using params and operators.</summary>
                                 ///<param name="sbv" type="BuildVersion">SolutionBuildVersion</param>
-                                return (this.Major >= sbv.major && this.Minor >= sbv.minor && this.Build >= sbv.build && this.Revision >= sbv.revision && this.PublishedDate<=(new Date().toISOString()));
+                                return (this.PublishedDate<=(new Date().toISOString()));
                             }
                             , solutionBuildVersion)
                         .orderByDescending('PublishedDate')
