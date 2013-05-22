@@ -74,7 +74,6 @@
                     }
                 };
                 req.send(request);
-
             },
             getSettingsXmlFile: function (successCallBack) {
                 SDK.SOAP.xmlDocRequest(
@@ -180,6 +179,23 @@
                     req.onreadystatechange = null; //prevent IE8 leak
                 }
             },
+            _getOrgRootUrl: function () {
+                ///<summary>gets the root url with prepended or appended orgname given the environment and based on the browser.</summary> 
+                ///<returns type='String'>The root Url of the environment with orgName</returns> 
+                var browserUrl = window.location.href;
+                var orgName = Xrm.Page.context.getOrgUniqueName();
+                var firstSlashIndex = browserUrl.replace('//', "--").indexOf('/');
+                //ex firstSlashIndex for 'https://test.test.com/orgName///main//.aspx/.aspx/' would be 21 
+                //and https://testorg.crm.dynamics.com/main.aspx# 32 
+                if (browserUrl.indexOf(orgName) > firstSlashIndex) {
+                    //now we know the org is after the slash (onPrem internal or Claims internal)
+                    return browserUrl.substr(0, firstSlashIndex) + "/" + orgName;
+                }
+                else {
+                    //now we know the org is before the first slash and it's online or claims IFD 
+                    return browserUrl.substr(0, firstSlashIndex);
+                }
+            },
             _getServerUrl: function (appendToUrl) {
                 ///<summary>
                 /// Returns the URL for the SOAP endpoint using the context information available in the form
@@ -200,7 +216,7 @@
                 if (serverUrl.match(/\/$/)) {
                     serverUrl = serverUrl.substring(0, serverUrl.length - 1);
                 }
-                return serverUrl.replace('/CRMFargo', '') + OrgServicePath;
+                return serverUrl + OrgServicePath;
             },
             _getError: function (faultXml) {
                 ///<summary>
@@ -311,11 +327,11 @@
             _solutionBuildVersion = new BuildVersion(0, 0, 0, 0),
             _solutionModifiedDate,
             _latestUpdateDownloadUrl,
-            _azureClient = null, 
+            _azureClient = null,
             _daysOfCache = 7,
             _cacheKeyName = 'orgdborgsettings_lastupdatecheck',
             _newVersionAlertKeyName = 'orgdborgsettings_newVersionAlert'
-            _slnBuildVersionKeyName = 'orgdborgsettings_lastSolutionBuildNumber';
+        _slnBuildVersionKeyName = 'orgdborgsettings_lastSolutionBuildNumber';
 
         function getLatestCrmSolutionVersion(forceUpdateCheck) {
             ///<param name='forceUpdateCheck' type='Boolean'>Forces a check against AzureMobile</param>
@@ -340,7 +356,7 @@
                         _solutionBuildVersion = BuildVersion.parseBuildNumber(version);
                         _solutionModifiedDate = new Date(parseInt(results.d.results[0].ModifiedOn.replace("/Date(", "").replace(")/", ""), 10));
                         //compare the localStorage lastLoadedBuild# - if it's less than the current SLN version then force a check to make sure we're current
-                        try{
+                        try {
                             if (localStorageValueExists(_slnBuildVersionKeyName)) {
                                 var lastLoadedBuildNum = localStorageValue(_slnBuildVersionKeyName);//get value from localstorage
                                 if (lastLoadedBuildNum != "") {
@@ -355,10 +371,10 @@
                             else {
                                 //not set yet or doesn't have localstorage - let's check and set it 
                                 if (supports_html5_storage()) {
-                                    localStorage.setItem(_slnBuildVersionKeyName, _solutionBuildVersion.toBuildNumberString()); 
+                                    localStorage.setItem(_slnBuildVersionKeyName, _solutionBuildVersion.toBuildNumberString());
                                 }
                             }
-                        }catch (e) { }; 
+                        } catch (e) { };
                         if (!isManaged) {
                             alert("Warning: You are not running the managed solution of the settings editor.\rPlease download and use the managed version.", false, "managedslnmsg");
                         }
@@ -367,7 +383,7 @@
                             //if lastModDate + potential max days of cache > today - then it was recently updated so we'll clear the flag
                             //forceUpdateCheck=(localStorageValueExists(_newVersionAlertKeyName) && (_solutionModifiedDate.getTime() + (_daysOfCache * 86400000)) > Date.now());
                             getAzureMobileUpdateVersion(_solutionBuildVersion, forceUpdateCheck);
-                        } catch (e) {/*this is somewhat experimental - if it fails we want to silently fail*/}
+                        } catch (e) {/*this is somewhat experimental - if it fails we want to silently fail*/ }
                     }
                     else {
                         updateBanner("Unable to find the source OrgDbOrgSettings Solution in your CRM organization.", false, "orgDbOrgSettingsNotFoundMsg");
@@ -414,7 +430,7 @@
                 }
                 else {
                     localStorage.setItem(_cacheKeyName, Date.now()); //the value doesn't exist so we'll check for updates
-                    return true; 
+                    return true;
                 }
             }
             return false;
@@ -426,7 +442,7 @@
                 //using azureMobile for xdr's to read newer versions if the enviornment has internet access: 
                 if (shouldCheckAzureForUpdates(_daysOfCache) || forceUpdateCheck) {
                     //var query = _azureClient.getTable('applicationVersion').select('id', 'Major', 'Minor', 'Build', 'Revision', 'DownloadUrl', 'BlockUsage').take(1).where(function (sbv) {
-                        //return (this.Major >= sbv.major && this.Minor >= sbv.minor && this.Build >= sbv.build && this.Revision >= sbv.revision);
+                    //return (this.Major >= sbv.major && this.Minor >= sbv.minor && this.Build >= sbv.build && this.Revision >= sbv.revision);
                     _azureClient.getTable('applicationVersion')
                         .select('VersionNumber', 'DownloadUrl', 'PublishedDate')
                         .take(1)
@@ -434,7 +450,7 @@
                             function (sbv) {
                                 ///<summary>defines the ODATA query using params and operators.</summary>
                                 ///<param name="sbv" type="BuildVersion">SolutionBuildVersion</param>
-                                return (this.PublishedDate<=(new Date().toISOString()));
+                                return (this.PublishedDate <= (new Date().toISOString()));
                             }
                             , solutionBuildVersion)
                         .orderByDescending('PublishedDate')
@@ -447,27 +463,28 @@
                                 if (results.length == 0) {
                                     //reset version alert then 
                                     localStorage.removeItem(_newVersionAlertKeyName);
-                                    return; 
+                                    return;
                                 }
                                 var latestAzureSln = BuildVersion.parseBuildNumber(results[0].VersionNumber);
                                 if (latestAzureSln.isGreaterThan(_solutionBuildVersion)) {
                                     alert("You are not running the latest available version!\rSee the yellow ribbon for a download URL for the latest solution.");
-                                    var message = "Version " +
+                                    var openerCmd = 'javascript:openStdWindow(SDK.SOAP._getOrgRootUrl()+"/tools/solution/import/solutionimportwizard.aspx", null, 615, 177);';
+                                    var message = "<b>Version " +
                                             latestAzureSln.toBuildNumberString() +
-                                            " is now available! Go <a target='_blank' href='" +
+                                            " is now available! <a target='_blank' href='" +
                                             (results[0].DownloadUrl || "https://orgdborgsettings.codeplex.com/releases") +
-                                            "'>here</a> for the new version." +
-                                            " <a href='#' onclick='javascript:getLatestCrmSolutionVersion(true);'>Click here</a> to force a check for updates again."; 
+                                            "'>Download</a> and save the new solution package, then <a href='#' onclick='" + openerCmd + "'>Import</a> it into CRM. Once completed press F5 to reload this page.</b>" +
+                                            "</br>If you believe you're reaching this message in error <a href='#' onclick='javascript:getLatestCrmSolutionVersion(true);'>Click here</a> to force another update check.";
                                     updateBanner(message, false, "azureNewVersionMsg"); //same as below
                                     localStorage.setItem(_newVersionAlertKeyName, message);
                                 }
                                 else if (localStorageValueExists(_newVersionAlertKeyName)) {
                                     //we know that we've checked and there is NOT a newer version - time to clear this out
                                     localStorage.removeItem(_newVersionAlertKeyName);
-                                    localStorage.setItem(_slnBuildVersionKeyName, _solutionBuildVersion.toBuildNumberString()); 
+                                    localStorage.setItem(_slnBuildVersionKeyName, _solutionBuildVersion.toBuildNumberString());
                                 }
-                            }, 
-                            function (err) {updateBanner("Error in message response from AzureMobile: " + err, false, "azureResponseErrorMsg");}
+                            },
+                            function (err) { updateBanner("Error in message response from AzureMobile: " + err, false, "azureResponseErrorMsg"); }
                         );
                 }
                 else if (localStorageValueExists(_newVersionAlertKeyName)) {
@@ -477,6 +494,15 @@
             catch (err) {
                 updateBanner("Failure encountered when checking AzureMobile for updates...", false, "azureConnectionErrorMsg");
             }
+        };
+        function openStdWindow(url, name, width, height) {
+            ///<summary>open a standard window and returns the reference.</summary>
+            ///<param name='url' type='String'>Description</param>
+            ///<param name='name' type='String'>Description</param>
+            ///<param name='width' type='Number'>Description</param>
+            ///<param name='height' type='Number'>Description</param>
+            var windowOpened = window.open(url, name, "width=" + width + ",height=" + height + ",status=1,resizable=1");
+            return windowOpened;
         };
         function supports_html5_storage() {
             try {
@@ -515,7 +541,7 @@
             this.minor = minor;
             this.build = build;
             this.revision = revision;
-        }; 
+        };
         BuildVersion.prototype = {
             toBuildNumberString: function () {
                 ///<summary>returns the build version in a string format of "5.0.9690.983"</summary>
@@ -523,11 +549,11 @@
                 ///<retuns type='String'>String format Build Version</returns>
                 return (this.major + '.' + this.minor + '.' + this.build + '.' + this.revision).toString();
             },
-            equals : function (BuildVersionToCompare) {
+            equals: function (BuildVersionToCompare) {
                 ///<param type='BuildVersion' name='BuildVersionToCompare'>Build Version to Compare To</param>
                 return (this.major == BuildVersionToCompare.major && this.minor == BuildVersionToCompare.minor && this.build == BuildVersionToCompare.build && this.revision == BuildVersionToCompare.revision);
-            }, 
-            isGreaterThan : function (BuildVersionToCompare) {
+            },
+            isGreaterThan: function (BuildVersionToCompare) {
                 ///<param type='BuildVersion' name='BuildVersionToCompare'>Build Version to Compare To</param>
                 if (this.major > BuildVersionToCompare.major) {
                     return true;
@@ -548,11 +574,11 @@
                     }
                 }
                 return false; //if all else fails - then our BV is greater 
-            }, 
+            },
             isGreaterThanOrEq: function (BuildVersionToCompare) {
                 ///<param type='BuildVersion' name='BuildVersionToCompare'>Build Version to Compare To</param>
                 return this.equals(BuildVersionToCompare) || this.isGreaterThan(BuildVersionToCompare)
-            }, 
+            },
             isLessThan: function (BuildVersionToCompare) {
                 ///<param type='BuildVersion' name='BuildVersionToCompare'>Build Version to Compare To</param>
                 //if the BV passed greater than mine then current BV is less - etc
@@ -575,11 +601,11 @@
                     }
                 }
                 return false; //if all else fails - then our BV is greater 
-            }, 
+            },
             isLessThanOrEq: function (BuildVersionToCompare) {
                 ///<param type='BuildVersion' name='BuildVersionToCompare'>Build Version to Compare To</param>
                 return this.equals(BuildVersionToCompare) || this.isLessThan(BuildVersionToCompare)
-            }, 
+            },
         };
         BuildVersion.parseBuildNumber = function (strBuildNumber) {
             ///<summary>Parses a four decimal build number ie: 5.0.9690.583</summary> 
@@ -597,7 +623,7 @@
                 throw Error("Build version must have a format of x.x.xxxx.xxxx");
             }
         };
-        
+
         function orgSetting(name, value, type, min, max, defaultValue, supportUrl, description, minSupportedVersion, urlTitle) {
             /// <summary>Object defention of orgSetting</summary> 
             /// <param name='name' type='String'>Setting name</param>
@@ -609,16 +635,16 @@
             this.name = name;
             this.value = value;
             this.type = type;
-            this.minNumber = parseInt(min).toString()==="NaN" ? null:parseInt(min);
-            this.maxNumber = parseInt(max).toString()=== "NaN" ? null : parseInt(max);
+            this.minNumber = parseInt(min).toString() === "NaN" ? null : parseInt(min);
+            this.maxNumber = parseInt(max).toString() === "NaN" ? null : parseInt(max);
             this.defaultValue = defaultValue;
             this.supportUrl = supportUrl;
             this.description = description;
             this.minSupportedVersion = minSupportedVersion;
-            this.urlTitle = urlTitle || "URL"; 
+            this.urlTitle = urlTitle || "URL";
         };
         orgSetting.prototype = {
-            toXmlForUpdate : function (useDefaultValue) {
+            toXmlForUpdate: function (useDefaultValue) {
                 /// <Summary>Returns the setting XML for an update to CRM</Summary>
                 /// <param type='Boolean'>Use the default value of the setting</param>
                 /// <returns type='String'>XML for an orgDbOrgSetting update to CRM</returns>
@@ -630,17 +656,17 @@
                     return '<OrgSettings><' + this.name + '>' + this.defaultValue + '</' + this.name + '></OrgSettings>'
                 }
                 else {
-                    throw "Setting value of " + this.value + "is not a valid " + this.type.__typeName.toLowerCase()||this.type.toString();
+                    throw "Setting value of " + this.value + "is not a valid " + this.type.__typeName.toLowerCase() || this.type.toString();
                 }
                 return '<OrgSettings></OrgSettings>';
             },
-            resetToDefault : function () {
+            resetToDefault: function () {
                 this.value = this.defaultValue;
                 if (!this.isValid()) {
-                    throw "Default value is not valid!"; 
+                    throw "Default value is not valid!";
                 }
-            }, 
-            toXmlForDefaultValue : function () {
+            },
+            toXmlForDefaultValue: function () {
                 /// <Summary>returns the setting XML representation for an update</Summary>
                 /// <returns type'String'>XML for an orgDbOrgSetting update to CRM</returns>
                 //return <OrgSettings><settingName></settingName></OrgSettings>
@@ -648,38 +674,38 @@
                     return '<OrgSettings><' + this.name + '>' + this.defaultValue + '</' + this.name + '></OrgSettings>'
                 }
                 else {
-                    throw "Setting value of " + this.value + "is not a valid " + this.type.__typeName.toLowerCase()||this.type.toString();
+                    throw "Setting value of " + this.value + "is not a valid " + this.type.__typeName.toLowerCase() || this.type.toString();
                 }
-            }, 
-            isValid : function () {
+            },
+            isValid: function () {
                 switch ((this.type).toLowerCase()) {
                     case "number":
                         if (parseInt(this.value) != null && !isNaN(parseInt(this.value)) && this.value >= this.minNumber && this.value <= this.maxNumber) {
                             return true;
                         }
                         else {
-                            return false; 
+                            return false;
                         }
-                        break; 
+                        break;
                     case "boolean":
-                        if ((this.value!==null) && (this.value.toString().toLowerCase() == "false" || (this.value.toString().toLowerCase() == "true"))) {
+                        if ((this.value !== null) && (this.value.toString().toLowerCase() == "false" || (this.value.toString().toLowerCase() == "true"))) {
                             return true;
                         }
                         break;
-                    case "string": 
+                    case "string":
                         if (this.value != null && this.value != "null")
-                            return true; 
-                        break; 
+                            return true;
+                        break;
                     default:
                         return (typeof this.value).toLowerCase() === (this.type.__typeName || this.type.toString()).toLowerCase();
                         break
                 };
                 return false; //default 
             }
-        }; 
+        };
 
         function editSettingInCRM(resetToDefault) {
-            try{
+            try {
                 var setting = getSettingObjectByName(o$('#currentSetting').val());
                 var settingValue = o$('#txtSettingValue').val();
                 if (!resetToDefault) {
@@ -719,10 +745,10 @@
         function pushSettingIntoCRM(settingName) {
             //get default and get xml, then add it to orgdborgsettings w/ default value
             var settingObj = getSettingObjectByName(settingName);
-            if (!settingObj.isValid()){//if not valid setting
-                settingObj.resetToDefault(); 
+            if (!settingObj.isValid()) {//if not valid setting
+                settingObj.resetToDefault();
             }
-            var result = true; 
+            var result = true;
             if (chkPromptBeforeChange.checked) {
                 result = confirm("Proceed with pushing a change into CRM?");
             }
@@ -731,9 +757,9 @@
                     type: "POST",
                     contentType: "application/json; charset=utf-8",
                     datatype: "json",
-                    method: "MERGE", 
+                    method: "MERGE",
                     url: Xrm.Page.context.getServerUrl() + "/XRMServices/2011/OrganizationData.svc/OrganizationSet" + "(guid'" + _organizationId + "')",
-                    data: JSON.stringify({ OrgDbOrgSettings: settingObj.toXmlForUpdate() }), 
+                    data: JSON.stringify({ OrgDbOrgSettings: settingObj.toXmlForUpdate() }),
                     beforeSend: function (XMLHttpRequest) {
                         //Specifying this header ensures that the results will be returned as JSON.
                         XMLHttpRequest.setRequestHeader("Accept", "application/json");
@@ -747,18 +773,18 @@
                 });
             }
         };
-        function updateSettingObjValue (setting, settingStringValue) {
+        function updateSettingObjValue(setting, settingStringValue) {
             /// <summary>Updates the current value of a given setting by name</summary>
             /// <param name='setting' type='orgSetting'>Setting object to update</param> 
             /// <param name='settingStringValue' type='string'>Value of the setting as a string</param>
-            var parseFailure = false; 
+            var parseFailure = false;
             switch (setting.type) {
                 case "String" || String:
                     setting.value = settingStringValue;
                     //settingObj.value = settingStringValue.toLowerCase()==="null" ? null : settingStringValue; 
                     break;
                 case "Boolean" || Boolean: //parse text and convert
-                    if ((settingStringValue||"null").toLowerCase() === "true") {
+                    if ((settingStringValue || "null").toLowerCase() === "true") {
                         setting.value = true;
                     }
                     else if ((settingStringValue || "null").toLowerCase() === "false") {
@@ -770,20 +796,20 @@
                     break;
                 case "Number" || Number:
                     var num = parseInt(settingStringValue);
-                    num === NaN ? parseFailure = true : setting.value = parseInt(settingStringValue); 
+                    num === NaN ? parseFailure = true : setting.value = parseInt(settingStringValue);
                     break;
                 default:
                     parseFailure = true;
-                    break; 
+                    break;
             }
-            if(parseFailure){
+            if (parseFailure) {
                 throw Error("Cannot parse the setting with name: " + setting.name + " and value of: " + settingStringValue + " with the type of: " + setting.type.toString());
             }
         };
         function rowMouseOver() { };
-        function rowMouseOut() { }; 
+        function rowMouseOut() { };
         function rowClick(settingName) {
-            o$('#infoRow').html("<span><b>"+settingName+":</b> "+getSettingObjectByName(settingName).description+"</span>"); 
+            o$('#infoRow').html("<span><b>" + settingName + ":</b> " + getSettingObjectByName(settingName).description + "</span>");
         };
         function rowDblClick(settingName) {
             o$('#infoRow').html('');
@@ -835,7 +861,7 @@
                 o$('#messageBar').html(bannerTxt.substr(5, bannerTxt.length - 5));
             }
             else {
-                var spanToUpdate = o$('#messageBar').children(id = "#"+messageSpanId);
+                var spanToUpdate = o$('#messageBar').children(id = "#" + messageSpanId);
                 if (spanToUpdate.length == 1) {
                     spanToUpdate[0].innerHTML = text; //append to just the span we want 
                 }
@@ -945,7 +971,7 @@
                     e.preventDefault();
                     if (supports_html5_storage()) {
                         clearAutoUpdateCache(true);
-                        try { getLatestCrmSolutionVersion(true) } catch (e) { alert("The forced update check has failed with an error" + (e.message||"null")); };
+                        try { getLatestCrmSolutionVersion(true) } catch (e) { alert("The forced update check has failed with an error" + (e.message || "null")); };
                     }
                     return false;
                 }
@@ -956,10 +982,10 @@
                         //Not a recommended or necessarily supported action however, the window defaults to a height too small to read the settings 
                         //to limit issues - we're testing for the /solution/edit.aspx URL first and wrapping it in a try/catch.  
                         //additionally this will only be used by an admin and should always be in the managed solution editor page
-                        parent.window.resizeTo(1050, 825);
+                        parent.window.resizeTo(1080, 825);
                     } catch (e) { };
                 }
-            }, 1500); 
+            }, 1500);
         };
         function resetBanner() {
             updateBanner("", true);
@@ -976,16 +1002,16 @@
             updateBanner("Click a setting row for more details at the bottom of the page. NOTE: you should not change any setting without having a specific reason to do so.", false, "howtomessage");
         };
         function onPageLoad() {
-            try{
+            try {
                 //try to load AzureMobile, if we fail we'll do it silently 
-                try{
+                try {
                     _azureClient = new WindowsAzure.MobileServiceClient(
                         "https://orgdborgsettings.azure-mobile.net/",
                         "SJJAJKWgJGFTMkJmXsetIytXmxMxqM37");
-                }catch(e){}
-                
+                } catch (e) { }
+
                 setupHelpers();
-                
+
                 //only load the page if we aren't in an iframe of main.aspx because it breaks azure mobile
                 if (parent.document && parent.document.URL.indexOf("main.aspx") > -1) {
                     if (Xrm.Utility) {
@@ -1002,21 +1028,21 @@
                     o$('#chkPromptBeforeChange').css('visibility', 'visible');
                     o$('#lblPromptLabel').css('visibility', 'visible');
                     o$('#ServerVersionDiv').css('visibility', 'visible');
-                    resetBanner(); 
+                    resetBanner();
                     getLatestCrmSolutionVersion(false);
                     getOrgDbOrgSettings();
                 }
             }
             catch (e) {
                 updateBanner("Something went very wrong when loading the page.  For reference the error info is:" +
-                        "<br>Name:" + (e.name || "Error Name Is Null") +
-                        "<br>Message:" + (e.message || "Error Message Is Null") +
-                        "<br>Number:" + (e.number|| "Error Number Is Null") +
-                        "<br>Description:" + (e.description || "Er ror Description Is Null")
+                        "</br>Name:" + (e.name || "Error Name Is Null") +
+                        "</br>Message:" + (e.message || "Error Message Is Null") +
+                        "</br>Number:" + (e.number || "Error Number Is Null") +
+                        "</br>Description:" + (e.description || "Er ror Description Is Null")
                     , true, "massiveerrormsg");
             }
-            
-        }; 
+
+        };
     </script>
     <Style type="text/css">
        Body
