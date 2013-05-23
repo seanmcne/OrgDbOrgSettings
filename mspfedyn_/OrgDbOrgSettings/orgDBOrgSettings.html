@@ -379,9 +379,8 @@
                             alert("Warning: You are not running the managed solution of the settings editor.\rPlease download and use the managed version.", false, "managedslnmsg");
                         }
                         try {
-                            //TODO: Bug here - once you have an expired version and if you've recently updated - it will check for 7 days :( 
+                            //Fixed bug in 1.0.0.13
                             //if lastModDate + potential max days of cache > today - then it was recently updated so we'll clear the flag
-                            //forceUpdateCheck=(localStorageValueExists(_newVersionAlertKeyName) && (_solutionModifiedDate.getTime() + (_daysOfCache * 86400000)) > Date.now());
                             getAzureMobileUpdateVersion(_solutionBuildVersion, forceUpdateCheck);
                         } catch (e) {/*this is somewhat experimental - if it fails we want to silently fail*/ }
                     }
@@ -468,7 +467,7 @@
                                 var latestAzureSln = BuildVersion.parseBuildNumber(results[0].VersionNumber);
                                 if (latestAzureSln.isGreaterThan(_solutionBuildVersion)) {
                                     alert("You are not running the latest available version!\rSee the yellow ribbon for a download URL for the latest solution.");
-                                    var openerCmd = 'javascript:openStdWindow(SDK.SOAP._getOrgRootUrl()+"/tools/solution/import/solutionimportwizard.aspx", null, 615, 177);';
+                                    var openerCmd = 'javascript:openStdWindow(SDK.SOAP._getOrgRootUrl()+"/tools/solution/import/solutionimportwizard.aspx", null, 615, 400);';
                                     var message = "<b>Version " +
                                             latestAzureSln.toBuildNumberString() +
                                             " is now available! <a target='_blank' href='" +
