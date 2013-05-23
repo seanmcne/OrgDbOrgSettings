@@ -388,7 +388,7 @@
                     }
                 },
                 error: function (XMLHttpRequest, textStatus, errorThrown) {
-                    updateBanner("There was an error retrieving the Solution Version Number from CRM: " + JSON.parse(XMLHttpRequest.responseText).error.message.value, false, "versionErrorMsg");
+                    updateBanner("There was an error retrieving the Solution Version Number from CRM: " + oJSON.parse(XMLHttpRequest.responseText).error.message.value, false, "versionErrorMsg");
                 }
             });
         };
@@ -758,7 +758,7 @@
                     datatype: "json",
                     //method: "MERGE", //not working on some IE/JQUERY versions 
                     url: Xrm.Page.context.getServerUrl() + "/XRMServices/2011/OrganizationData.svc/OrganizationSet" + "(guid'" + _organizationId + "')",
-                    data: JSON.stringify({ OrgDbOrgSettings: settingObj.toXmlForUpdate() }),
+                    data: oJSON.stringify({ OrgDbOrgSettings: settingObj.toXmlForUpdate() }),
                     beforeSend: function (XMLHttpRequest) {
                         XMLHttpRequest.setRequestHeader("Accept", "application/json");
                         XMLHttpRequest.setRequestHeader("X-HTTP-Method", "MERGE");
@@ -947,7 +947,7 @@
                     printSettingsToDiv();
                 },
                 error: function (XMLHttpRequest, textStatus, errorThrown) {
-                    alert("There was an error retrieving your orgDBOrgSettings: " + JSON.parse(XMLHttpRequest.responseText).error.message.value);
+                    alert("There was an error retrieving your orgDBOrgSettings: " + oJSON.parse(XMLHttpRequest.responseText).error.message.value);
                 }
             });
         };
@@ -1026,8 +1026,8 @@
 
                 //only load the page if we aren't in an iframe of main.aspx because it breaks azure mobile
                 //TODO: there is a JSON error if it's run in the same frame for some browsers & UR's 
-                if (parent.document && (parent.document.URL.indexOf("main.aspx") > -1 || parent.document.URL.indexOf('edit.aspx') > -1)) {
-                    if (Xrm.Utility && 1 == 5) {
+                if (1 == 5 && parent.document && (parent.document.URL.indexOf("main.aspx") > -1 || parent.document.URL.indexOf('edit.aspx') > -1)) {
+                    if (Xrm.Utility5) {
                         updateBanner("<span style='font-size:16px;'><a href='#' onclick=\"javascript:Xrm.Utility.openWebResource('mspfedyn_/orgdborgsettings/orgdborgsettings.html', null, 1024, 800);\">here</a> to open this in a new window</span>", false, "newwindowmsg");
                     }
                     else {
