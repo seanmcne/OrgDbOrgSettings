@@ -1025,13 +1025,14 @@
                 setupHelpers();
 
                 //only load the page if we aren't in an iframe of main.aspx because it breaks azure mobile
-                if (parent.document && parent.document.URL.indexOf("main.aspx") > -1) {
-                    if (Xrm.Utility) {
-                        updateBanner("Please click <a href='#' onclick=\"javascript:Xrm.Utility.openWebResource('crmfargo_/orgdborgsettings/orgdborgsettings.html', null, 1024, 800);\">here</a> to open this in a new window", false, "newwindowmsg");
+                //TODO: there is a JSON error if it's run in the same frame for some browsers & UR's 
+                if (parent.document && (parent.document.URL.indexOf("main.aspx") > -1 || parent.document.URL.indexOf('edit.aspx') > -1)) {
+                    if (Xrm.Utility && 1 == 5) {
+                        updateBanner("<span style='font-size:16px;'><a href='#' onclick=\"javascript:Xrm.Utility.openWebResource('mspfedyn_/orgdborgsettings/orgdborgsettings.html', null, 1024, 800);\">here</a> to open this in a new window</span>", false, "newwindowmsg");
                     }
                     else {
-                        var openerCmd = "var windowOpened = window.open('orgdborgsettings.html',null,'width=1024,height=800,status=1,resizable=1,left=128,top=72,scrollbars=1,toolbar=1,menubar=1,location=1',true);";
-                        updateBanner("Please click <a href='#' onclick=\"javascript:" + openerCmd + "\">here</a> to open this in a new window", false, "newwindowmsg");
+                        var openerCmd = "var windowOpened = window.open(SDK.SOAP._getOrgRootUrl() + '/WebResources/mspfedyn_/orgdborgsettings/orgdborgsettings.html',null,'width=1024,height=800,status=1,resizable=1,left=128,top=72,scrollbars=1,toolbar=1,menubar=1,location=1',true);";
+                        updateBanner("<span style='font-size:16px;'>Please click <a href='#' onclick=\"javascript:" + openerCmd + "\">here</a> to open this in a new window.</span>", false, "newwindowmsg");
                     }
                 }
                 else {
