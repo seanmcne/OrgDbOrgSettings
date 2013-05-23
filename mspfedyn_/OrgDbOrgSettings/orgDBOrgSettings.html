@@ -56,6 +56,7 @@
                 //try { req.responseType = 'msxml-document' } catch (e) { }
                 req.setRequestHeader("Accept", "application/xml, text/xml, */*");
                 req.setRequestHeader("Content-Type", "text/xml; charset=utf-8");
+                req.setRequestHeader("Content-Length", request.length);//experimental to increase soap message size. 
                 req.setRequestHeader("SOAPAction", "http://schemas.microsoft.com/xrm/2011/Contracts/Services/IOrganizationService/Execute");
                 req.onreadystatechange = function () {
                     if (req.readyState == 4 /* complete */) {
@@ -63,9 +64,6 @@
                         if (req.status == 200) {
                             //Success				
                             var doc = req.responseXML;
-
-                            //try { _setSelectionNamespaces(doc); } catch (e) { }
-
                             alert('we did it!');
                         }
                         else {
@@ -339,6 +337,7 @@
                 forceUpdateCheck = false; //default to false if not passed
             }
             o$.ajax({
+                async: true, //do this in the background
                 type: "GET",
                 contentType: "application/json; charset=utf-8",
                 datatype: "json",
@@ -753,15 +752,16 @@
             }
             if (result) {
                 o$.ajax({
+                    async: false, //set false for now  
                     type: "POST",
                     contentType: "application/json; charset=utf-8",
                     datatype: "json",
-                    method: "MERGE",
+                    //method: "MERGE", //not working on some IE/JQUERY versions 
                     url: Xrm.Page.context.getServerUrl() + "/XRMServices/2011/OrganizationData.svc/OrganizationSet" + "(guid'" + _organizationId + "')",
                     data: JSON.stringify({ OrgDbOrgSettings: settingObj.toXmlForUpdate() }),
                     beforeSend: function (XMLHttpRequest) {
-                        //Specifying this header ensures that the results will be returned as JSON.
                         XMLHttpRequest.setRequestHeader("Accept", "application/json");
+                        XMLHttpRequest.setRequestHeader("X-HTTP-Method", "MERGE");
                     },
                     success: function (results) {
                         getOrgDbOrgSettings(); //refresh results now 
@@ -914,6 +914,7 @@
             }
             o$('#addBox').css('visibility', 'hidden');
             o$.ajax({
+                ajax: true, //set true for now 
                 type: "GET",
                 contentType: "application/json; charset=utf-8",
                 datatype: "json",
@@ -960,6 +961,17 @@
             //localStorage.removeItem(_slnBuildVersionKeyName);
         };
         function setupHelpers() {
+            //IE9 and earlier does not support toISOString - so we'll make our own if it doesn't exist
+            Date.prototype.toISOString = Date.prototype.toISOString || function () {
+                return this.getUTCFullYear() + "-"
+                  + ("0" + (this.getUTCMonth() + 1) + "-").slice(-3)
+                  + ("0" + this.getUTCDate() + "T").slice(-3)
+                  + ("0" + this.getUTCHours() + ":").slice(-3)
+                  + ("0" + this.getUTCMinutes() + ":").slice(-3)
+                  + ("0" + this.getUTCSeconds() + ".").slice(-3)
+                  + ("00" + this.getUTCMilliseconds() + "Z").slice(-4);
+            };
+
             if (typeof String.prototype.endsWith !== 'function') {
                 String.prototype.endsWith = function (s) {
                     return this.indexOf(s, this.length - s.length) !== -1;
@@ -981,6 +993,7 @@
                         //Not a recommended or necessarily supported action however, the window defaults to a height too small to read the settings 
                         //to limit issues - we're testing for the /solution/edit.aspx URL first and wrapping it in a try/catch.  
                         //additionally this will only be used by an admin and should always be in the managed solution editor page
+                        //TODO: Future work here to add scrollbars and mathematics to the settings DIV to support any size and still show the setting info at the bottom
                         parent.window.resizeTo(1080, 825);
                     } catch (e) { };
                 }
