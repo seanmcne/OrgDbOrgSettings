@@ -1,7 +1,7 @@
 ﻿<!DOCTYPE html>
 <html>
 <head>
-    <meta http-equiv="X-UA-Compatible" content="IE=8">
+    <meta http-equiv="X-UA-Compatible" content="IE=8,IE=9,IE=10"/>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
     <title>Organization Settings Editor</title>
     <script type="text/javascript" src="jquery191min.js"></script>
@@ -14,6 +14,7 @@
         //CRM Required now post UR12
         var o$ = {};
         o$ = jQuery.noConflict(true);
+        o$.support.cors = true; //support CORS 
         if (typeof (SDK) == "undefined")
         { SDK = { __namespace: true }; };
         SDK.SOAP = {
@@ -51,6 +52,61 @@
                     },
                     complete: function (XMLHttpRequest, status) { }
                 });
+            },
+            getLatestAzureMobileSolutionVersion: function (AzureMobileUrl, appKey, useIECompat, successCallBack, errorCallBack) {
+                ///<param name="AzureMobileUrl" type="String">URL to the AzureMobileEndpoint on azure-mobile.net</param>
+                ///<param name="appKey" type="String">AzureMobile Application Key</param>
+                ///<param name="useIECompat" type="Boolean">Triggers an IECompat mode</param>
+                ///<returns type='jQuery.'>Returns ajax query</returns
+
+                //"https://orgdborgsettings.azure-mobile.net/",
+                //"SJJAJKWgJGFTMkJmXsetIytXmxMxqM37");
+                try {
+                    if (!useIECompat) {
+                        o$.ajax({
+                            timeout: _Settings.ajaxTimeout,
+                            crossDomain: true,
+                            type: "GET",
+                            contentType: "application/json; charset=utf-8",
+                            datatype: "json",
+                            url: AzureMobileUrl + "tables/applicationVersion?$orderby=PublishedDate%20desc&$top=1&$select=VersionNumber,DownloadUrl,PublishedDate",
+                            data: null,
+                            success: function (results, textStatus, XmlHttpRequest) {
+                                successCallBack(results);
+                            },
+                            error: function (XMLHttpRequest, textStatus, errorThrown) {
+                                errorCallBack(XMLHttpRequest, textStatus, errorThrown);
+                            },
+                            beforeSend: function (XMLHttpRequest) {
+                                //Specifying this header ensures that the results will be returned as JSON.
+                                XMLHttpRequest.setRequestHeader("Accept", "application/json");
+                                XMLHttpRequest.setRequestHeader("X-ZUMO-APPLICATION", appKey);
+                            }
+                        });
+                    }
+                    else if (useIECompat && window.XDomainRequest) {
+                        var url = AzureMobileUrl + "tables/applicationVersion?$orderby=PublishedDate%20desc&$top=1&$select=VersionNumber,DownloadUrl,PublishedDate"
+                        if (window.XDomainRequest) {
+                            xmlhttp = new XDomainRequest();
+                        }
+                        else if (window.XMLHttpRequest) {
+                            xmlhttp = new XMLHttpRequest();
+                        }
+                        else {
+                            xmlhttp = new ActiveXObject("Microsoft.XMLHTTP");
+                        }
+                        xmlhttp.open("GET", url, false);
+                        xmlhttp.send();
+                        var data = JSON.parse(xmlhttp.responseText);
+                        successCallBack(data);
+                    }
+                    else {
+                        errorCallBack(null, null, new Error("Could not find a suitable way to contact the AzureMobile service for updates.  Please go the the project website for updates"));
+                    }
+                }
+                catch (e) {
+                    errorCallBack(null, null, e);
+                }
             },
             getSettingsXmlFromUrl: function (settingsXmlPath, successCallback, errorCallback) {
                 ///<summary>Async retrieve settings xml from the server</summary>
@@ -154,6 +210,22 @@
                     },
                     error: function (XMLHttpRequest, textStatus, errorThrown) {
                         alert("There was an error retrieving your orgDBOrgSettings: " + oJSON.parse(XMLHttpRequest.responseText).error.message.value);
+                    }
+                });
+            },
+            getCrmSolutionVersion: function () {
+                ///<returns type='jQuery.'>Returns ajax query</returns> 
+                var rootUrl = this.getOrgRootUrl();  //IE8 required
+                return o$.ajax({
+                    timeout: _Settings.ajaxTimeout,
+                    type: "GET",
+                    contentType: "application/json; charset=utf-8",
+                    datatype: "json",
+                    url: rootUrl + "/xrmservices/2011/OrganizationData.svc/SolutionSet?$select=ModifiedOn,UniqueName,OrganizationId,IsManaged,PublisherId,Version,VersionNumber&$filter=UniqueName eq 'OrganizationSettingsEditor'",
+                    data: null,
+                    beforeSend: function (XMLHttpRequest) {
+                        //Specifying this header ensures that the results will be returned as JSON.
+                        XMLHttpRequest.setRequestHeader("Accept", "application/json");
                     }
                 });
             },
@@ -275,9 +347,10 @@
             __namespace: true
         };
         SDK.Settings = {
-            ajaxTimeout: 5000,
+            ajaxTimeout: 30000,
             daysOfCache: 7,
-            azureClient: null,
+            azureMobileUrl: "https://orgdborgsettings.azure-mobile.net/",
+            azureMobileKey: "SJJAJKWgJGFTMkJmXsetIytXmxMxqM37",
             OrganizationId: null,
             OrganizationName: Xrm.Page.context.getOrgUniqueName(),
             OrganizationSettings: function () {
@@ -286,6 +359,7 @@
                 }
                 return this._localSettingsCollection;
             },
+            projectUrl: "https://orgdborgsettings.codeplex.com/releases",
             _localSettingsCollection: {},
             LocalStorage: {
                 supports_html5_storage: function () {
@@ -321,18 +395,22 @@
             },
             __namespace: true
         };
-        var _Settings = SDK.Settings,
-            orgLocalStorage = _Settings.LocalStorage;
+        var _Settings = SDK.Settings;
+        var orgLocalStorage = _Settings.LocalStorage;
 
-        function getLatestCrmSolutionVersion(forceUpdateCheck) {
+        function getLatestCrmSolutionVersion(forceUpdateCheck, recursiveIECompat) {
             ///<summary>Checks the CRM Solution version, then fires off checks to azureMobile based on a cached date</summary>
             ///<param name='forceUpdateCheck' type='Boolean'>Forces a check against AzureMobile</param>
+            ///<param name='recursiveIECompat' type='Boolean'>flags a recursiveCall for XDomainRequest</param>
+            if (recursiveIECompat === null) { recursiveIECompat = false; }
+
             if (forceUpdateCheck === null) {
                 forceUpdateCheck = false; //default to false if not passed
             }
             if (forceUpdateCheck) {
                 enableProgressDiv(true);
             }
+
             o$.ajax({
                 timeout: _Settings.ajaxTimeout,
                 type: "GET",
@@ -379,53 +457,98 @@
                             //using azureMobile for xdr's to read newer versions if the enviornment has internet access: 
                             if (shouldCheckAzureForUpdates(_Settings.daysOfCache) || forceUpdateCheck) {
                                 clearAutoUpdateCache(false); //dump the cache if we require a check for updates
-                                //var query = _azureClient.getTable('applicationVersion').select('id', 'Major', 'Minor', 'Build', 'Revision', 'DownloadUrl', 'BlockUsage').take(1).where(function (sbv) {
-                                _Settings.azureClient.getTable('applicationVersion')
-                                    .select('VersionNumber', 'DownloadUrl', 'PublishedDate')
-                                    .take(1)
-                                    .where(
-                                        function (sbv) {
-                                            ///<summary>defines the ODATA query using params and operators.</summary>
-                                            ///<param name="sbv" type="BuildVersion">SolutionBuildVersion</param>
-                                            return (this.PublishedDate <= (new Date().toISOString()));
+                                //sadly due to some JSON issues w/ AzureMobile running in IE8 non-standards mode I've had to now call the REST endpoint directly 
+                                //instead of using this very handy helper :(
+                                //_Settings.azureClient.getTable('applicationVersion')
+                                //    .select('VersionNumber', 'DownloadUrl', 'PublishedDate')
+                                //    .take(1)
+                                //    .where(
+                                //        function (sbv) {
+                                //            ///<summary>defines the ODATA query using params and operators.</summary>
+                                //            ///<param name="sbv" type="BuildVersion">SolutionBuildVersion</param>
+                                //            return (this.PublishedDate <= (new Date().toISOString()));
+                                //        }
+                                //        , slnBuildVersion)
+                                //    .orderByDescending('PublishedDate')
+                                //    .read()
+                                //    .done(
+                                //        function (results) {
+                                //            //on successful Azure check 
+                                //            localStorage.setItem(orgLocalStorage.cacheKey, Date.now());
+                                //            //no results return and wait until next time 
+                                //            if (results.length == 0) {
+                                //                //reset version alert then 
+                                //                localStorage.removeItem(orgLocalStorage.newVersionAlertKey);
+                                //                return;
+                                //            }
+                                //            var latestAzureSln = BuildVersion.parseBuildNumber(results[0].VersionNumber);
+                                //            if (latestAzureSln.isGreaterThan(slnBuildVersion)) {
+                                //                alert("You are not running the latest available version!\rSee the yellow ribbon for a download URL for the latest solution.");
+                                //                var openerCmd = 'javascript:openStdWindow(SDK.SOAP.getOrgRootUrl()+"/tools/solution/import/solutionimportwizard.aspx", null, 615, 400);';
+                                //                var message = "<b>Version " +
+                                //                        latestAzureSln.toBuildNumberString() +
+                                //                        " is now available! <a target='_blank' href='" +
+                                //                        (results[0].DownloadUrl || "https://orgdborgsettings.codeplex.com/releases") +
+                                //                        "'>Download</a> and save the new solution package, then <a href='#' onclick='" + openerCmd + "'>Import</a> it into CRM. Once completed press F5 to reload this page.</b>" +
+                                //                        "</br>If you believe you're reaching this message in error <a href='#' onclick='javascript:getLatestCrmSolutionVersion(true);'>Click here</a> to force another update check.";
+                                //                updateBanner(message, false, "azureNewVersionMsg"); //alert admin of new version 
+                                //                localStorage.setItem(orgLocalStorage.newVersionAlertKey, message); //set new version in localStroage
+                                //            }
+                                //            else if (orgLocalStorage.contains(orgLocalStorage.newVersionAlertKey)) {
+                                //                //we know that we've checked and there is NOT a newer version, if there was we wouldn't be here so time to clear out new version alert 
+                                //                localStorage.removeItem(orgLocalStorage.newVersionAlertKey);
+                                //                localStorage.setItem(orgLocalStorage.slnBuildVerKey, slnBuildVersion.toBuildNumberString());
+                                //            }
+                                //        },
+                                //        function (err) {
+                                //            updateBanner("Error in message response from AzureMobile: " + err, false, "azureResponseErrorMsg");
+                                //            clearAutoUpdateCache(false);
+                                //        }
+                                //    );
+                                SDK.SOAP.getLatestAzureMobileSolutionVersion(
+                                    SDK.Settings.azureMobileUrl,
+                                    SDK.Settings.azureMobileKey,
+                                    recursiveIECompat,
+                                    successCallBack = function (results) {
+                                        //on successful Azure check 
+                                        localStorage.setItem(orgLocalStorage.cacheKey, Date.now());
+                                        //no results return and wait until next time 
+                                        if (results.length == 0) {
+                                            //reset version alert then 
+                                            localStorage.removeItem(orgLocalStorage.newVersionAlertKey);
+                                            return;
                                         }
-                                        , slnBuildVersion)
-                                    .orderByDescending('PublishedDate')
-                                    .read()
-                                    .done(
-                                        function (results) {
-                                            //on successful Azure check 
-                                            localStorage.setItem(orgLocalStorage.cacheKey, Date.now());
-                                            //no results return and wait until next time 
-                                            if (results.length == 0) {
-                                                //reset version alert then 
-                                                localStorage.removeItem(orgLocalStorage.newVersionAlertKey);
-                                                return;
-                                            }
-                                            var latestAzureSln = BuildVersion.parseBuildNumber(results[0].VersionNumber);
-                                            if (latestAzureSln.isGreaterThan(slnBuildVersion)) {
-                                                alert("You are not running the latest available version!\rSee the yellow ribbon for a download URL for the latest solution.");
-                                                var openerCmd = 'javascript:openStdWindow(SDK.SOAP.getOrgRootUrl()+"/tools/solution/import/solutionimportwizard.aspx", null, 615, 400);';
-                                                var message = "<b>Version " +
-                                                        latestAzureSln.toBuildNumberString() +
-                                                        " is now available! <a target='_blank' href='" +
-                                                        (results[0].DownloadUrl || "https://orgdborgsettings.codeplex.com/releases") +
-                                                        "'>Download</a> and save the new solution package, then <a href='#' onclick='" + openerCmd + "'>Import</a> it into CRM. Once completed press F5 to reload this page.</b>" +
-                                                        "</br>If you believe you're reaching this message in error <a href='#' onclick='javascript:getLatestCrmSolutionVersion(true);'>Click here</a> to force another update check.";
-                                                updateBanner(message, false, "azureNewVersionMsg"); //alert admin of new version 
-                                                localStorage.setItem(orgLocalStorage.newVersionAlertKey, message); //set new version in localStroage
-                                            }
-                                            else if (orgLocalStorage.contains(orgLocalStorage.newVersionAlertKey)) {
-                                                //we know that we've checked and there is NOT a newer version, if there was we wouldn't be here so time to clear out new version alert 
-                                                localStorage.removeItem(orgLocalStorage.newVersionAlertKey);
-                                                localStorage.setItem(orgLocalStorage.slnBuildVerKey, slnBuildVersion.toBuildNumberString());
-                                            }
-                                        },
-                                        function (err) {
-                                            updateBanner("Error in message response from AzureMobile: " + err, false, "azureResponseErrorMsg");
-                                            clearAutoUpdateCache(false);
+                                        var latestAzureSln = BuildVersion.parseBuildNumber(results[0].VersionNumber);
+                                        if (latestAzureSln.isGreaterThan(slnBuildVersion)) {
+                                            alert("You are not running the latest available version!\rSee the yellow ribbon for a download URL for the latest solution.");
+                                            var openerCmd = 'javascript:openStdWindow(SDK.SOAP.getOrgRootUrl()+"/tools/solution/import/solutionimportwizard.aspx", null, 615, 400);';
+                                            var message = "<b>Version " +
+                                                    latestAzureSln.toBuildNumberString() +
+                                                    " is now available! <a target='_blank' href='" +
+                                                    (results[0].DownloadUrl || SDK.Settings.projectUrl) +
+                                                    "'>Download</a> and save the new solution package, then <a href='#' onclick='" + openerCmd + "'>Import</a> it into CRM. Once completed press F5 to reload this page.</b>" +
+                                                    "</br>If you believe you're reaching this message in error <a href='#' onclick='javascript:getLatestCrmSolutionVersion(true);'>Click here</a> to force another update check.";
+                                            updateBanner(message, false, "azureNewVersionMsg"); //alert admin of new version 
+                                            localStorage.setItem(orgLocalStorage.newVersionAlertKey, message); //set new version in localStroage
                                         }
-                                    );
+                                        else if (orgLocalStorage.contains(orgLocalStorage.newVersionAlertKey)) {
+                                            //we know that we've checked and there is NOT a newer version, if there was we wouldn't be here so time to clear out new version alert 
+                                            localStorage.removeItem(orgLocalStorage.newVersionAlertKey);
+                                            localStorage.setItem(orgLocalStorage.slnBuildVerKey, slnBuildVersion.toBuildNumberString());
+                                        }
+                                    },
+                                    errorCallBack = function (jqXHR, textStatus, errorThrown) {
+                                        updateBanner("Error in message response from AzureMobile: " + errorThrown, false, "azureResponseErrorMsg");
+                                        clearAutoUpdateCache(false);
+
+                                        if ((errorThrown.message.trim() == "No Transport" || errorThrown.message.trim() == "Access is denied.") && !recursiveIECompat && window.XDomainRequest) {
+                                            getLatestCrmSolutionVersion(true, true);
+                                        }
+                                        else {
+                                            //"https://orgdborgsettings.codeplex.com/releases"
+                                            updateBanner("Error contacting AzureMobile: " + errorThrown + "\rPlease visit the <a href='" + SDK.Settings.projectUrl + "' target='_blank'>project website</a> periodically for updates.", false, "azureResponseErrorMsg");
+                                        }
+                                    });
                             }
                             else if (orgLocalStorage.contains(orgLocalStorage.newVersionAlertKey)) {
                                 //if we already know we need a new version, then we should continue alerting the admin
@@ -440,7 +563,6 @@
                     else {
                         updateBanner("Unable to find the source OrgDbOrgSettings Solution in your CRM organization.", false, "orgDbOrgSettingsNotFoundMsg");
                     }
-
                 },
                 error: function (XMLHttpRequest, textStatus, errorThrown) {
                     updateBanner("There was an error retrieving the Solution Version Number from CRM: " + XMLHttpRequest.responseText, false, "versionErrorMsg");
@@ -452,15 +574,26 @@
                 }
             });
         };
-
+        function isIE8BrowserMode() {
+            if (window.navigator.userAgent.indexOf("Trident/4.0") > -1) {
+                return true;
+            }
+            return false;
+        };
+        function isIE9BrowserMode() {
+            if (window.navigator.userAgent.indexOf("Trident/5.0") > -1) {
+                return true;
+            }
+            return false;
+        };
         function shouldCheckAzureForUpdates(minDaysInCache) {
             ///<param name='minDaysInCache' type='Number'>Minimum days between checking azure</param>
             ///<returns type='Boolean'>indicates if azure should be checked</returns>
-            if (window.navigator.userAgent.indexOf("MSIE 7.0") > -1) {
-                updateBanner("<span style='font-weight:bold;'><span style='color:red;'>IE 8 is only supported in IE8 Standards Mode.</span> We are unable to check for updates because of this, please use IE9, IE10 or another supported modern browser to allow for update checking. In the meantime check <a href='http://orgdborgsettings.codeplex.com/releases'>here</a> for updates.</span>", false, "IE7ModeNotSupported");
-                return false;
-            }
-            else if (orgLocalStorage.supports_html5_storage()) {
+            //if (window.navigator.userAgent.indexOf("MSIE 7.0") > -1) {
+            //    updateBanner("<span style='font-weight:bold;'><span style='color:red;'>IE 8 is only supported in IE8 Standards Mode.</span> We are unable to check for updates because of this, please use IE9, IE10 or another supported modern browser to allow for update checking. In the meantime check <a href='http://orgdborgsettings.codeplex.com/releases'>here</a> for updates.</span>", false, "IE7ModeNotSupported");
+            //    return false; 
+            //}
+            if (orgLocalStorage.supports_html5_storage()) {
                 var lastUpdateDateString = localStorage.getItem(orgLocalStorage.cacheKey);
                 if (lastUpdateDateString) {
                     var lastUpdateDate = parseInt(lastUpdateDateString);
@@ -895,14 +1028,14 @@
         };
         function setupHelpers() {
             //try to load AzureMobile, if we fail we'll do it silently 
-            try {
-                _Settings.azureClient = new WindowsAzure.MobileServiceClient(
-                        "https://orgdborgsettings.azure-mobile.net/",
-                        "SJJAJKWgJGFTMkJmXsetIytXmxMxqM37");
-            }
-            catch (e) {
-                dumpErrorInBanner(e);
-            }
+            //try {
+            //    _Settings.azureClient = new WindowsAzure.MobileServiceClient(
+            //            "https://orgdborgsettings.azure-mobile.net/",
+            //            "SJJAJKWgJGFTMkJmXsetIytXmxMxqM37");
+            //}
+            //catch (e) {
+            //    dumpErrorInBanner(e);
+            //}
             //IE9 and earlier does not support toISOString - so we'll make our own if it doesn't exist
             Date.prototype.toISOString = Date.prototype.toISOString || function () {
                 return this.getUTCFullYear() + "-"
