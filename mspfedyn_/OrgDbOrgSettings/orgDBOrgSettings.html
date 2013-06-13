@@ -948,7 +948,7 @@
                 if (chkPromptBeforeChange.checked) {
                     result = confirm("Proceed with pushing a change into CRM?");
                 }
-                if (result) {
+                if (result || !chkPromptBeforeChange.checked) {
                     enableProgressDiv(true);
                     //get setting from UI 
                     var setting = _Settings.OrganizationSettings.getSetting(settingName);
