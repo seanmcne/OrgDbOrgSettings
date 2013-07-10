@@ -437,7 +437,7 @@
                         //compare the localStorage lastLoadedBuild# - if it's less than the current SLN version then force a check to make sure we're current
                         try {
                             if (orgLocalStorage.contains(orgLocalStorage.slnBuildVerKey)) {
-                                var lastLoadedBuildNum = localStorageValue(orgLocalStorage.slnBuildVerKey);//get value from localstorage
+                                var lastLoadedBuildNum = orgLocalStorage.localStorageValue(orgLocalStorage.slnBuildVerKey);//get value from localstorage
                                 if (lastLoadedBuildNum != "") {
                                     var localStorageBuild = BuildVersion.parseBuildNumber(lastLoadedBuildNum);
                                     if (!localStorageBuild.equals(slnBuildVersion)) {
@@ -463,62 +463,56 @@
                                 clearAutoUpdateCache(false); //dump the cache if we require a check for updates
                                 //sadly AzureMobile only supports >=IE8 standards mode which apparently cannot be forced :(
                                 _Settings.azureClient.getTable('applicationVersion')
-                                    .select('VersionNumber', 'DownloadUrl', 'PublishedDate')
-                                    .take(1)
-                                    .where(
-                                        function (sbv) {
-                                            ///<summary>defines the ODATA query using params and operators.</summary>
-                                            ///<param name="sbv" type="BuildVersion">SolutionBuildVersion</param>
-                                            return (this.PublishedDate <= (new Date().toISOString()));
+                                .take(1)
+                                .orderByDescending('PublishedDate')
+                                .read()
+                                .done(
+                                    function (results) {
+                                        //on successful Azure check 
+                                        localStorage.setItem(orgLocalStorage.cacheKey, Date.now());
+                                        //no results return and wait until next time 
+                                        if (results.length == 0) {
+                                            //reset version alert then 
+                                            localStorage.removeItem(orgLocalStorage.newVersionAlertKey);
+                                            return;
                                         }
-                                        , slnBuildVersion)
-                                    .orderByDescending('PublishedDate')
-                                    .read()
-                                    .done(
-                                        function (results) {
-                                            //on successful Azure check 
-                                            localStorage.setItem(orgLocalStorage.cacheKey, Date.now());
-                                            //no results return and wait until next time 
-                                            if (results.length == 0) {
-                                                //reset version alert then 
-                                                localStorage.removeItem(orgLocalStorage.newVersionAlertKey);
-                                                return;
-                                            }
-                                            var latestAzureSln = BuildVersion.parseBuildNumber(results[0].VersionNumber);
-                                            if (latestAzureSln.isGreaterThan(slnBuildVersion)) {
-                                                alert("You are not running the latest available version!\rSee the yellow ribbon for a download URL for the latest solution.");
-                                                var openerCmd = 'javascript:openStdWindow(SDK.SOAP.getOrgRootUrl()+"/tools/solution/import/solutionimportwizard.aspx", null, 615, 400);';
-                                                var message = "<b>Version " +
-                                                        latestAzureSln.toBuildNumberString() +
-                                                        " is now available! <a target='_blank' href='" +
-                                                        (results[0].DownloadUrl || "https://orgdborgsettings.codeplex.com/releases") +
-                                                        "'>Download</a> and save the new solution package, then <a href='#' onclick='" + openerCmd + "'>Import</a> it into CRM. Once completed press F5 to reload this page.</b>" +
-                                                        "</br>If you believe you're reaching this message in error <a href='#' onclick='javascript:getLatestCrmSolutionVersion(true);'>Click here</a> to force another update check.";
-                                                updateBanner(message, false, "azureNewVersionMsg"); //alert admin of new version 
-                                                localStorage.setItem(orgLocalStorage.newVersionAlertKey, message); //set new version in localStroage
-                                            }
-                                            else if (orgLocalStorage.contains(orgLocalStorage.newVersionAlertKey)) {
-                                                //we know that we've checked and there is NOT a newer version, if there was we wouldn't be here so time to clear out new version alert 
-                                                localStorage.removeItem(orgLocalStorage.newVersionAlertKey);
-                                                localStorage.setItem(orgLocalStorage.slnBuildVerKey, slnBuildVersion.toBuildNumberString());
-                                            }
-                                        },
-                                        function (err) {
-                                            updateBanner("Error in message response from AzureMobile: " + err, false, "azureResponseErrorMsg");
-                                            clearAutoUpdateCache(false);
+                                        var latestAzureSln = BuildVersion.parseBuildNumber(results[0].VersionNumber);
+                                        if (latestAzureSln.isGreaterThan(slnBuildVersion)) {
+                                            alert("You are not running the latest available version!\rSee the yellow ribbon for a download URL for the latest solution.");
+                                            var openerCmd = 'javascript:openStdWindow(SDK.SOAP.getOrgRootUrl()+"/tools/solution/import/solutionimportwizard.aspx", null, 615, 400);';
+                                            var message = "<b>Version " +
+                                                    latestAzureSln.toBuildNumberString() +
+                                                    " is now available! <a target='_blank' href='" +
+                                                    (results[0].DownloadUrl || "https://orgdborgsettings.codeplex.com/releases") +
+                                                    "'>Download</a> and save the new solution package, then <a href='#' onclick='" + openerCmd + "'>Import</a> it into CRM. Once completed press F5 to reload this page.</b>" +
+                                                    "</br>If you believe you're reaching this message in error <a href='#' onclick='javascript:getLatestCrmSolutionVersion(true);'>Click here</a> to force another update check.";
+                                            updateBanner(message, false, "azureNewVersionMsg"); //alert admin of new version 
+                                            localStorage.setItem(orgLocalStorage.newVersionAlertKey, message); //set new version in localStroage
                                         }
-                                    );
+                                        else if (orgLocalStorage.contains(orgLocalStorage.newVersionAlertKey)) {
+                                            //we know that we've checked and there is NOT a newer version, if there was we wouldn't be here so time to clear out new version alert 
+                                            localStorage.removeItem(orgLocalStorage.newVersionAlertKey);
+                                            localStorage.setItem(orgLocalStorage.slnBuildVerKey, slnBuildVersion.toBuildNumberString());
+                                        }
+                                    },
+                                    function (error) {
+                                        updateBanner("Error in message response from AzureMobile: " + err, false, "azureResponseErrorMsg");
+                                        clearAutoUpdateCache(false);
+                                    }
+                                );
                             }
                             else if (orgLocalStorage.contains(orgLocalStorage.newVersionAlertKey)) {
                                 //if we already know we need a new version, then we should continue alerting the admin
-                                updateBanner(localStorageValue(orgLocalStorage.newVersionAlertKey), false, "azureNewVersionMsg");
+                                updateBanner(orgLocalStorage.localStorageValue(orgLocalStorage.newVersionAlertKey), false, "azureNewVersionMsg");
                             }
                             else if (!supportedBrowser) {
-                                updateBanner("<b>This utility will only operate in IE8 standards or higher</b>: For details please read <a href='" + _Settings.projectIEDocumentationUrl + "'>this FAQ</a>, to check for project updates please see <a href='" + _Settings.projectUrl + "'>here</a>.", false, "IENotSupported");
+                                updateBanner("<b>This utility will only operate in IE8 standards or higher</b>: For details please read <a href='" + _Settings.projectIEDocumentationUrl + "'>this FAQ</a>, to check for project updates please see <a href='" + _Settings.projectUrl + "' target='_blank'>here</a>.", false, "IENotSupported");
                             }
-                        } catch (e) {
-                            /*this is somewhat experimental - if it fails we want to silently fail and queue up another update check*/
-                            dumpErrorInBanner(e);
+                        }
+                        catch (e) {
+                            /*this is somewhat experimental - if it fails we want to gracefully fail and queue up another update check*/
+                            updateBanner("An error was encountered when comparing solution build versions to AzureMobile.  Please manually check for updates at the <a href='" + _Settings.projectUrl + "' target='_blank'>project site</a>.", false, "versionErrorMsg");
+                            //dumpErrorInBanner(e); 
                             clearAutoUpdateCache(false);
                         }
                     }
@@ -1189,7 +1183,7 @@
             }
             localStorage.removeItem(orgLocalStorage.cacheKey);
             localStorage.removeItem(orgLocalStorage.newVersionAlertKey);
-            //localStorage.removeItem(orgLocalStorage.slnBuildVerKey);
+            localStorage.removeItem(orgLocalStorage.slnBuildVerKey);
         };
         function downloadAzureBlob(blobId) {
             ///<param name='blobId' type='Number'>blobId</param>
