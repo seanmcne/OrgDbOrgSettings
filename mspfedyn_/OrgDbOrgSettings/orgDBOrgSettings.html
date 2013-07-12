@@ -870,9 +870,12 @@
             update: function (stringValue) {
                 /// <summary>Updates the current value of a given setting by name</summary>
                 /// <param name='stringValue' type='string'>Value of the setting as a string</param>
-                this.value = this.parseStringToValue(stringValue);
+                var currentValue = this.value;
+                var newValue = this.parseStringToValue(stringValue);
+                this.value = newValue;
                 if (!this.isValid()) {
-                    throw Error("Setting with name: " + this.name + " and value of: " + this.value + " is not valid");
+                    this.value = currentValue; //reset value back to what it was
+                    throw Error("Setting with name: " + this.name + " and value of: " + newValue + " is not valid. Setting did not change and still remains at: " + currentValue);
                 }
             }
         };
