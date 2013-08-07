@@ -38,23 +38,23 @@
               urlTitle="Javascript &amp; CRM"
               description="Default: &lt;b&gt;True&lt;/b&gt;.  &lt;b&gt;False&lt;/b&gt;: will disable address book materialized views." />
   <orgSetting minSupportedVersion="5.0.9690.2903"
-              name="AddressBookmaterializedViewsEnabled"
-              min="0.0"
-              max="1.0"
-              defaultValue="1.0"
-              settingType="Double"
+              name="AddressBookMaterializedViewsEnabled"
+              min="null"
+              max="null"
+              defaultValue="true"
+              settingType="Boolean"
               supportUrl="http://support.microsoft.com/kb/2691237"
               urlTitle="Javascript &amp; CRM"
               description="Changes the way the CRM Client queries SQL CE. Default: &lt;b&gt;True&lt;/b&gt;.  &lt;b&gt;False&lt;/b&gt;: will disable address book materialized views." />
   <orgSetting minSupportedVersion="5.0.9690.2903"
               name="ClientDisableTrackingForReplyForwardEmails"
-              min="null"
-              max="null"
-              defaultValue="false"
-              settingType="Boolean"
+              min="0"
+              max="1"
+              defaultValue="0"
+              settingType="Number"
               supportUrl="http://support.microsoft.com/kb/2691237"
               urlTitle="Javascript &amp; CRM"
-              description="Default: &lt;b&gt;False&lt;/b&gt;.  &lt;b&gt;True&lt;/b&gt;: disables tracking of replies and forwarded emails. " />
+              description="Default: &lt;b&gt;0&lt;/b&gt;.  &lt;b&gt;1&lt;/b&gt;: disables tracking of replies and forwarded emails. " />
   <orgSetting minSupportedVersion="5.0.9690.2903"
               name="DisableImplicitSharingOfCommunicationActivities"
               min="null"
@@ -67,15 +67,12 @@
 
   <orgSetting minSupportedVersion="5.0.9690.3233" name="DisableIECompatMode" min="null" max="null" defaultValue="false" settingType="Boolean" supportUrl="http://technet.microsoft.com/en-us/library/hh771584.aspx#BKMK_IECompatibiltyView" urlTitle="Javascript &amp; CRM" description="Changes the server-side, automatic, IE Compatability Mode Flag for Internet Explorer browsers. If you want pages to render in the most recent version of Internet Explorer set this to &lt;b&gt;True&lt;/b&gt;. If you have form scripts or other cusotmizations that require earlier versions of Internet Explorer this should be set to &lt;b&gt;False&lt;/b&gt;. This is also controlled via Settings | Administration | System Settings | Customization" />
   <orgSetting minSupportedVersion="5.0.9690.3233" name="IncludeHTC" min="null" max="null" defaultValue="true" settingType="Boolean" supportUrl="http://technet.microsoft.com/en-us/library/hh771584.aspx#BKMK_HTCSupport" urlTitle="Javascript &amp; CRM" description="Set whether forms should support HTML component.  The CRM 4.0 API uses this feature which is deprecated and will no longer be included after the next major release.  If you  have javascript code relying on CRM 4.0 javascript API's you should enable this and work to update your code to support CRM 2011. This is also controlled via Settings | Administration | System Settings | Customization" />
-  <orgSetting minSupportedVersion="5.0.9690.3541" name="ClientDisableTrackingForReplyForwardEmails" min="0" max="1" defaultValue="0" settingType="String" supportUrl="http://support.microsoft.com/kb/2691237" urlTitle="KB 2691237" description="Provide mechanism to not track replies and forwards of already tracked emails. &lt;br/&gt;&lt;b&gt;0 (default)&lt;/b&gt; Default is to automatically track replies (and forwards) of emails that are tracked in the first place. &lt;br/&gt;&lt;b&gt;1 (disabled)&lt;/b&gt; Do not automatically track replies (and forwards) of emails that are already tracked. " />
   <orgSetting minSupportedVersion="5.0.9690.3541" name="ChangeDoubleQuoteToSingleQuote" min="null" max="null" defaultValue="false" settingType="Boolean" supportUrl="http://support.microsoft.com/kb/2849744" urlTitle="KB 2849744" description="UR14 and UR11+ with a COD update: By default CRM has, historically, converted double quotes to single quotes. In UR14 the behavior in CRM changes to preserve double quotes in KB articles, use this setting to revert the behavior back to changing double quotes to single quotes (true)" />
-  <orgSetting minSupportedVersion="5.0.9690.3541" name="DisableMapiCaching" min="null" max="null" defaultValue="true" settingType="Boolean" supportUrl="http://support.microsoft.com/kb/2849744" urlTitle="KB 2849744" description="UR14 and UR11+ with a COD update: Used to set an organization default for this Outlook Client setting." />
-  <orgSetting minSupportedVersion="5.0.9690.3541" name="AddressBookMaterializedViewsEnabled" min="null" max="null" defaultValue="true" settingType="Boolean" supportUrl="http://support.microsoft.com/kb/2849744" urlTitle="KB 2849744" description="UR14: Used to set an organization default for this Outlook Client setting." />
   <orgSetting minSupportedVersion="5.0.9690.3541" name="DefaultHeightForWizardReports" min="0.0" max="100.00" defaultValue="8.25" settingType="Double" supportUrl="http://support.microsoft.com/kb/2849744" urlTitle="KB 2849744" description="UR14: With a default value 0: CRM will use 8.25 inches (A4), any other double value will override the default of 8.25.  Some printers may reject printed reports if the height is any less than the height of the paper loaded in the tray, this setting will override the height used." />
   <!--currently the only supported types are Double, Int, Boolean, and String - UR14 needs Double Support-->
   <!--
   3557 is UR14
-  3541 is UR14-A test Release build#
+  3541 is UR14-A test Release build#a
   3445 is UR13
   3236 is ur12 
   2903 is ur11CU-COD
