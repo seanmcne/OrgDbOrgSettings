@@ -27,7 +27,6 @@
   <orgSetting minSupportedVersion="5.0.9690.2835" name="SetRegardingLookupDefaultEntityType" min="null" max="null" defaultValue="" settingType="String" supportUrl="http://support.microsoft.com/kb/2691237" urlTitle="KB 2691237" description="Change default entity for Regarding Lookup Dialog" />
   <orgSetting minSupportedVersion="5.0.9690.2835" name="IntegratedAuthenticationMethod" min="null" max="null" defaultValue="" settingType="String" supportUrl="http://support.microsoft.com/kb/2691237" urlTitle="KB 2691237" description="Changes the request sent to the ADFS server. This changes the authentication when users access the org using the context https://internal.domain.com/org. &lt;br/&gt;&lt;b&gt;Integrated&lt;/b&gt; as a value uses - urn:federation:authentication:windows &lt;br/&gt;&lt;b&gt;Forms&lt;/b&gt; as a value uses - urn:oasis:names:tc:SAML:1.0:am:password " />
   <orgSetting minSupportedVersion="5.0.9690.2835" name="IfdAuthenticationMethod" min="null" max="null" defaultValue="" settingType="String" supportUrl="http://support.microsoft.com/kb/2691237" urlTitle="KB 2691237" description="Changes the request sent to the ADFS server. This changes the authentication when users access the org using the context https://internal.domain.com/org. &lt;br/&gt;&lt;b&gt;Integrated&lt;/b&gt; as a value uses - urn:federation:authentication:windows &lt;br/&gt;&lt;b&gt;Forms&lt;/b&gt; as a value uses - urn:oasis:names:tc:SAML:1.0:am:password " />
-
   <orgSetting minSupportedVersion="5.0.9690.2903"
               name="DisableMapiCaching"
               min="null"
@@ -44,7 +43,7 @@
               defaultValue="true"
               settingType="Boolean"
               supportUrl="http://support.microsoft.com/kb/2691237"
-              urlTitle="Javascript &amp; CRM"
+              urlTitle="KB2691237"
               description="Changes the way the CRM Client queries SQL CE. Default: &lt;b&gt;True&lt;/b&gt;.  &lt;b&gt;False&lt;/b&gt;: will disable address book materialized views." />
   <orgSetting minSupportedVersion="5.0.9690.2903"
               name="ClientDisableTrackingForReplyForwardEmails"
@@ -53,7 +52,7 @@
               defaultValue="0"
               settingType="Number"
               supportUrl="http://support.microsoft.com/kb/2691237"
-              urlTitle="Javascript &amp; CRM"
+              urlTitle="KB2691237"
               description="Default: &lt;b&gt;0&lt;/b&gt;.  &lt;b&gt;1&lt;/b&gt;: disables tracking of replies and forwarded emails. " />
   <orgSetting minSupportedVersion="5.0.9690.2903"
               name="DisableImplicitSharingOfCommunicationActivities"
@@ -62,17 +61,80 @@
               defaultValue="false"
               settingType="Boolean"
               supportUrl="http://support.microsoft.com/kb/2691237"
-              urlTitle="Javascript &amp; CRM"
+              urlTitle="KB2691237"
               description="Default: &lt;b&gt;False&lt;/b&gt;.  &lt;b&gt;True&lt;/b&gt;: disables  implicit sharing of records to recipients that are added to existing activities." />
-
   <orgSetting minSupportedVersion="5.0.9690.3233" name="DisableIECompatMode" min="null" max="null" defaultValue="false" settingType="Boolean" supportUrl="http://technet.microsoft.com/en-us/library/hh771584.aspx#BKMK_IECompatibiltyView" urlTitle="Javascript &amp; CRM" description="Changes the server-side, automatic, IE Compatability Mode Flag for Internet Explorer browsers. If you want pages to render in the most recent version of Internet Explorer set this to &lt;b&gt;True&lt;/b&gt;. If you have form scripts or other cusotmizations that require earlier versions of Internet Explorer this should be set to &lt;b&gt;False&lt;/b&gt;. This is also controlled via Settings | Administration | System Settings | Customization" />
   <orgSetting minSupportedVersion="5.0.9690.3233" name="IncludeHTC" min="null" max="null" defaultValue="true" settingType="Boolean" supportUrl="http://technet.microsoft.com/en-us/library/hh771584.aspx#BKMK_HTCSupport" urlTitle="Javascript &amp; CRM" description="Set whether forms should support HTML component.  The CRM 4.0 API uses this feature which is deprecated and will no longer be included after the next major release.  If you  have javascript code relying on CRM 4.0 javascript API's you should enable this and work to update your code to support CRM 2011. This is also controlled via Settings | Administration | System Settings | Customization" />
+  <orgSetting minSupportedVersion="5.0.9690.3445"
+            name="ActivateAdditionalRefreshOfWorkflowConditions"
+            min="null"
+            max="null"
+            defaultValue="false"
+            settingType="Boolean"
+            supportUrl="http://support.microsoft.com/kb/2691237"
+            urlTitle="KB2691237"
+            description="Default: &lt;b&gt;False&lt;/b&gt;.  &lt;b&gt;True&lt;/b&gt;: " />
   <orgSetting minSupportedVersion="5.0.9690.3541" name="ChangeDoubleQuoteToSingleQuote" min="null" max="null" defaultValue="false" settingType="Boolean" supportUrl="http://support.microsoft.com/kb/2849744" urlTitle="KB 2849744" description="UR14 and UR11+ with a COD update: By default CRM has, historically, converted double quotes to single quotes. In UR14 the behavior in CRM changes to preserve double quotes in KB articles, use this setting to revert the behavior back to changing double quotes to single quotes (true)" />
   <orgSetting minSupportedVersion="5.0.9690.3541" name="DefaultHeightForWizardReports" min="0.0" max="100.00" defaultValue="8.25" settingType="Double" supportUrl="http://support.microsoft.com/kb/2849744" urlTitle="KB 2849744" description="UR14: With a default value 0: CRM will use 8.25 inches (A4), any other double value will override the default of 8.25.  Some printers may reject printed reports if the height is any less than the height of the paper loaded in the tray, this setting will override the height used." />
+  <orgSetting minSupportedVersion="5.0.9690.3731"
+             name="AllowPromoteDuplicates"
+             min="null"
+             max="null"
+             defaultValue="false"
+             settingType="Boolean"
+             supportUrl="http://support.microsoft.com/kb/2691237"
+             urlTitle="None"
+             description="Default: &lt;b&gt;False&lt;/b&gt;. Options are: &lt;b&gt;False&lt;/b&gt;: Does not allow for the promotion of duplicate records.   &lt;b&gt;True&lt;/b&gt;: Allows for the promotion of duplicate records." />
+  <orgSetting minSupportedVersion="5.0.9690.3731"
+             name="SecuritySettingForEmail"
+             min="1"
+             max="3"
+             defaultValue="1"
+             settingType="Number"
+             supportUrl="http://support.microsoft.com/kb/2691237"
+             urlTitle="None"
+             description="Default: &lt;b&gt;1&lt;/b&gt;. Options are:&lt;br/&gt;1:Display a Warning Message And give an option to open&lt;br/&gt;2: Display a Warning Message and do not give an option to open &lt;br/&gt;3: Do not display a Warning Message and do not give any option to open" />
+  <orgSetting minSupportedVersion="6.0.0.0"
+             name="MobileClientMaxTabs"
+             min="1"
+             max="50"
+             defaultValue="5"
+             settingType="Number"
+             supportUrl="http://support.microsoft.com/kb/2691237"
+             urlTitle="None"
+             description="Default: &lt;b&gt;5&lt;/b&gt;.  Max tablet tabs." />
+  <orgSetting minSupportedVersion="6.0.0.0"
+             name="MobileClientMaxLists"
+             min="1"
+             max="50"
+             defaultValue="10"
+             settingType="Number"
+             supportUrl="http://support.microsoft.com/kb/2691237"
+             urlTitle="None"
+             description="Default: &lt;b&gt;10&lt;/b&gt;.  Max tablet lists." />
+  <orgSetting minSupportedVersion="6.0.0.0"
+             name="MobileClientMaxFields"
+             min="1"
+             max="500"
+             defaultValue="75"
+             settingType="Number"
+             supportUrl="http://support.microsoft.com/kb/2691237"
+             urlTitle="None"
+             description="Default: &lt;b&gt;75&lt;/b&gt;.  Max mobile fields." />
+  <orgSetting minSupportedVersion="6.0.0.0"
+              name="EnableBulkReparent"
+              min="null"
+              max="null"
+              defaultValue="true"
+              settingType="Boolean"
+              supportUrl="http://support.microsoft.com/kb/2691237"
+              urlTitle="KB2691237"
+              description="Default: &lt;b&gt;True&lt;/b&gt;.  &lt;b&gt;False&lt;/b&gt;: Disables and reparents using a one record at a time approach." />
   <!--currently the only supported types are Double, Int, Boolean, and String - UR14 needs Double Support-->
   <!--
+  3731 is UR15
   3557 is UR14
-  3541 is UR14-A test Release build#a
+  3541 is UR14-A test Release build#
   3445 is UR13
   3236 is ur12 
   2903 is ur11CU-COD
