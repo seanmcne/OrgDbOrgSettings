@@ -28,35 +28,54 @@
                 ///<param name="successCallback" Type="Function(BuildVersion)">The function to perform when an successfult response is returned. 
                 ///Should accept a single parameter which will accept an argument of type BuildVersion</param>
                 ///<param name="errorCallback" Type="Function">The function to perform when an error is returned.</param>
-                var rootUrl = this.getOrgRootUrl(); //required IE8
-                o$.ajax({
-                    timeout: _Settings.ajaxTimeout,
-                    type: "GET",
-                    datatype: "html",
-                    url: rootUrl + "/about/default.aspx",
-                    data: null,
-                    beforeSend: function (XMLHttpRequest) { },
-                    success: function (results, textStatus, XmlHttpRequest) {
-                        var finalBv = new BuildVersion(0, 0, 0, 0);
-                        var matches = results.match(/(\d)\.(\d)\.(\d{4})\.(\d{4})/gm);
-                        if (matches.length > 0) {
-                            o$.each(matches, function (index, match) {
-                                var curBv = BuildVersion.parseBuildNumber(match);
-                                if (curBv.isGreaterThan(finalBv)) {
-                                    finalBv = curBv;
+
+                //try to get the parent doc app version - we can't necessarly rely on this, so we'll try to safely check.
+                //added 1.0.1.7. 
+                var gotParentVersion = false;
+                try {
+                    if (window.parent != null && window.parent.APPLICATION_FULL_VERSION != null) {
+                        var parsedBV = BuildVersion.parseBuildNumber(window.parent.APPLICATION_FULL_VERSION);
+                        successCallback(parsedBV);
+                        gotParentVersion = true;
+                    }
+                }
+                catch (e) { }
+                if (!gotParentVersion) {
+                    var rootUrl = this.getOrgRootUrl(); //required IE8
+                    o$.ajax({
+                        timeout: _Settings.ajaxTimeout,
+                        type: "GET",
+                        datatype: "html",
+                        url: rootUrl + "/about/default.aspx",
+                        data: null,
+                        beforeSend: function (XMLHttpRequest) { },
+                        success: function (results, textStatus, XmlHttpRequest) {
+                            try {
+                                var finalBv = new BuildVersion(0, 0, 0, 0);
+                                var matches = results.match(/(\d)\.(\d)\.(\d{4})\.(\d{4})/gm);
+                                if (matches.length > 0) {
+                                    o$.each(matches, function (index, match) {
+                                        var curBv = BuildVersion.parseBuildNumber(match);
+                                        if (curBv.isGreaterThan(finalBv)) {
+                                            finalBv = curBv;
+                                        }
+                                    });
                                 }
-                            });
-                        }
-                        else {
-                            errorCallback(new Error("Cannot detect a version number from /about/default.aspx"));
-                        }
-                        successCallback(finalBv);
-                    },
-                    error: function (XMLHttpRequest, textStatus, errorThrown) {
-                        errorCallback(errorThrown);
-                    },
-                    complete: function (XMLHttpRequest, status) { }
-                });
+                                else {
+                                    errorCallback(new Error("Cannot detect a version number from /about/default.aspx"));
+                                }
+                                successCallback(finalBv);
+                            }
+                            catch (e) {
+                                errorCallback(new Error("Cannot detect a version number from /about/default.aspx"));
+                            }
+                        },
+                        error: function (XMLHttpRequest, textStatus, errorThrown) {
+                            errorCallback(errorThrown);
+                        },
+                        complete: function (XMLHttpRequest, status) { }
+                    });
+                }
             },
             getLatestAzureMobileSolutionVersion: function (AzureMobileUrl, appKey, useIECompat, successCallBack, errorCallBack) {
                 ///<param name="AzureMobileUrl" type="String">URL to the AzureMobileEndpoint on azure-mobile.net</param>
@@ -197,26 +216,27 @@
                         completionCallback();
                     }
                 });
-                var rootUrl = this.getOrgRootUrl(); //required IE8
 
-                o$.ajax({
-                    timeout: _Settings.ajaxTimeout,
-                    type: "GET",
-                    contentType: "application/json; charset=utf-8",
-                    datatype: "json",
-                    url: rootUrl + "/XRMServices/2011/OrganizationData.svc/OrganizationSet?$select=OrganizationId,Name,OrgDbOrgSettings",
-                    data: null,
-                    beforeSend: function (XMLHttpRequest) {
-                        //Specifying this header ensures that the results will be returned as JSON.
-                        XMLHttpRequest.setRequestHeader("Accept", "application/json");
-                    },
-                    success: function (results, textStatus, XmlHttpRequest) {
-                        successCallback();
-                    },
-                    error: function (XMLHttpRequest, textStatus, errorThrown) {
-                        alert("There was an error retrieving your orgDBOrgSettings: " + oJSON.parse(XMLHttpRequest.responseText).error.message.value);
-                    }
-                });
+                //removed 1.0.1.7 - doesn't need to be here. 
+                //var rootUrl = this.getOrgRootUrl(); //required IE8
+                //o$.ajax({
+                //    timeout: _Settings.ajaxTimeout,
+                //    type: "GET",
+                //    contentType: "application/json; charset=utf-8",
+                //    datatype: "json",
+                //    url: rootUrl + "/XRMServices/2011/OrganizationData.svc/OrganizationSet?$select=OrganizationId,Name,OrgDbOrgSettings",
+                //    data: null,
+                //    beforeSend: function (XMLHttpRequest) {
+                //        //Specifying this header ensures that the results will be returned as JSON.
+                //        XMLHttpRequest.setRequestHeader("Accept", "application/json");
+                //    },
+                //    success: function (results, textStatus, XmlHttpRequest) {
+                //        successCallback();
+                //    },
+                //    error: function (XMLHttpRequest, textStatus, errorThrown) {
+                //        alert("There was an error retrieving your orgDBOrgSettings: " + oJSON.parse(XMLHttpRequest.responseText).error.message.value);
+                //    }
+                //});
             },
             getCrmSolutionVersion: function () {
                 ///<returns type='jQuery.'>Returns ajax query</returns> 
@@ -890,17 +910,26 @@
                     enableProgressDiv(true);
                     //get setting from UI 
                     var setting = _Settings.OrganizationSettings.getSetting(settingName);
+                    //deep clone the object and we'll use the clone to sort out our changes first 
+                    var cloneSetting = o$.extend(true, {}, setting);
                     if (!resetToDefault) {
                         ///<var name='tempSetting' type='orgSetting'/>
-                        setting.update(settingValue);
+                        //setting.update(settingValue);
+                        cloneSetting.update(settingValue);
                     }
                     else {
-                        setting.resetToDefault();
+                        //setting.resetToDefault();
+                        cloneSetting.resetToDefault();
+                        //update the current settingValue to the default
+                        settingValue = cloneSetting.value;
                     }
+                    //submit the xml change from our clone which is not bound to the UI setting
+                    //in the future updateOrgDbOrgSetting should sort this out by itself 
                     SDK.SOAP.updateOrgDbOrgSettingOnServer(
-                        setting.toXmlForUpdate(),
+                        cloneSetting.toXmlForUpdate(), //setting.toXmlForUpdate(),
                         _Settings.OrganizationId,
                         success = function () {
+                            setting.update(settingValue); //update the underlying value in the UI
                             printSettingsToDiv();
                         },
                         error = function (error) {
@@ -1106,7 +1135,7 @@
                                         var DisableIECompatModeSetting = baseOrgSettings.getSetting("DisableIECompatMode");
 
                                         if (!supportedBrowser || (DisableIECompatModeSetting && DisableIECompatModeSetting.value == false)) {
-                                            updateBanner("<b>This utility will not operate in compatability mode or a non IE8+ standards mode</b>: For details please read <a href='" + _Settings.projectIECompatDocUrl + "' target='_blank'>this FAQ</a>, to manually check for project updates please see <a href='" + _Settings.projectUrl + "' target='_blank'>here</a>.", false, "IENotSupported");
+                                            updateBanner("<b>This may not operate in compatability or a non standards mode</b>: For details please read <a href='" + _Settings.projectIECompatDocUrl + "' target='_blank'>this FAQ</a>, manually check <a href='" + _Settings.projectUrl + "' target='_blank'>here</a> for updates.", false, "IENotSupported");
                                         }
 
                                         //instruct user on how this works
@@ -1141,7 +1170,7 @@
             updateBanner("We've handled an error, for reference the error info is:" +
                         "</br>Name:" + (e.name || "Error Name Is Null") +
                         "</br>Message:" + (e.message || "Error Message Is Null") +
-                        "</br>Description:" + (e.description || "Er ror Description Is Null")
+                        "</br>Description:" + (e.description || "Error Description Is Null")
                     , true, "massiveerrormsg");
         };
         function enableProgressDiv(flag) {

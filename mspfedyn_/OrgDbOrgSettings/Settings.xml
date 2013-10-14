@@ -64,7 +64,14 @@
               urlTitle="KB2691237"
               description="Default: &lt;b&gt;False&lt;/b&gt;.  &lt;b&gt;True&lt;/b&gt;: disables  implicit sharing of records to recipients that are added to existing activities." />
   <orgSetting minSupportedVersion="5.0.9690.3233" name="DisableIECompatMode" min="null" max="null" defaultValue="false" settingType="Boolean" supportUrl="http://technet.microsoft.com/en-us/library/hh771584.aspx#BKMK_IECompatibiltyView" urlTitle="Javascript &amp; CRM" description="Changes the server-side, automatic, IE Compatability Mode Flag for Internet Explorer browsers. If you want pages to render in the most recent version of Internet Explorer set this to &lt;b&gt;True&lt;/b&gt;. If you have form scripts or other cusotmizations that require earlier versions of Internet Explorer this should be set to &lt;b&gt;False&lt;/b&gt;. This is also controlled via Settings | Administration | System Settings | Customization" />
-  <orgSetting minSupportedVersion="5.0.9690.3233" name="IncludeHTC" min="null" max="null" defaultValue="true" settingType="Boolean" supportUrl="http://technet.microsoft.com/en-us/library/hh771584.aspx#BKMK_HTCSupport" urlTitle="Javascript &amp; CRM" description="Set whether forms should support HTML component.  The CRM 4.0 API uses this feature which is deprecated and will no longer be included after the next major release.  If you  have javascript code relying on CRM 4.0 javascript API's you should enable this and work to update your code to support CRM 2011. This is also controlled via Settings | Administration | System Settings | Customization" />
+  <orgSetting minSupportedVersion="5.0.9690.3233"
+              name="IncludeHTC"
+              min="null" max="null"
+              defaultValue="true"
+              settingType="Boolean"
+              supportUrl="http://technet.microsoft.com/en-us/library/hh771584.aspx#BKMK_HTCSupport"
+              urlTitle="Javascript &amp; CRM"
+              description="Set whether forms should support HTML component.  The CRM 4.0 API uses this feature which is deprecated and will no longer be included after the next major release.  If you  have javascript code relying on CRM 4.0 javascript API's you should enable this and work to update your code to support CRM 2011. This is also controlled via Settings | Administraton | System Settings | Customization. &lt;br/&gt;&lt;b&gt;NOTE:&lt;/b&gt; This setting is NOT SUPPORTED IN CRM2013 as of build 809." />
   <orgSetting minSupportedVersion="5.0.9690.3445"
             name="ActivateAdditionalRefreshOfWorkflowConditions"
             min="null"
@@ -84,7 +91,7 @@
              settingType="Boolean"
              supportUrl="http://support.microsoft.com/kb/2691237"
              urlTitle="None"
-             description="Default: &lt;b&gt;False&lt;/b&gt;. Options are: &lt;b&gt;False&lt;/b&gt;: Does not allow for the promotion of duplicate records.   &lt;b&gt;True&lt;/b&gt;: Allows for the promotion of duplicate records." />
+             description="Default: &lt;b&gt;False&lt;/b&gt;. Options are: &lt;b&gt;False&lt;/b&gt;: Does not allow for the promotion of duplicate records.   &lt;b&gt;True&lt;/b&gt;: Allows for the promotion of duplicate records. &lt;br/&gt;&lt;b&gt;NOTE:&lt;/b&gt; This setting is NOT SUPPORTED IN CRM2013 as of build 809." />
   <orgSetting minSupportedVersion="5.0.9690.3731"
              name="SecuritySettingForEmail"
              min="1"
@@ -93,9 +100,9 @@
              settingType="Number"
              supportUrl="http://support.microsoft.com/kb/2691237"
              urlTitle="None"
-             description="Default: &lt;b&gt;1&lt;/b&gt;. Options are:&lt;br/&gt;1:Display a Warning Message And give an option to open&lt;br/&gt;2: Display a Warning Message and do not give an option to open &lt;br/&gt;3: Do not display a Warning Message and do not give any option to open" />
-  <orgSetting minSupportedVersion="6.0.0.0"
-             name="MobileClientMaxTabs"
+             description="Default: &lt;b&gt;1&lt;/b&gt;. Options are:&lt;br/&gt;1:Display a Warning Message And give an option to open&lt;br/&gt;2: Display a Warning Message and do not give an option to open &lt;br/&gt;3: Do not display a Warning Message and do not give any option to open. &lt;br/&gt;&lt;b&gt;NOTE:&lt;/b&gt; This setting is NOT SUPPORTED IN CRM2013 as of build 809." />
+  <orgSetting minSupportedVersion="6.0.0.809"
+             name="TabletClientMaxTabs"
              min="1"
              max="50"
              defaultValue="5"
@@ -103,8 +110,8 @@
              supportUrl="http://support.microsoft.com/kb/2691237"
              urlTitle="None"
              description="Default: &lt;b&gt;5&lt;/b&gt;.  Max tablet tabs." />
-  <orgSetting minSupportedVersion="6.0.0.0"
-             name="MobileClientMaxLists"
+  <orgSetting minSupportedVersion="6.0.0.809"
+             name="TabletClientMaxLists"
              min="1"
              max="50"
              defaultValue="10"
@@ -112,8 +119,8 @@
              supportUrl="http://support.microsoft.com/kb/2691237"
              urlTitle="None"
              description="Default: &lt;b&gt;10&lt;/b&gt;.  Max tablet lists." />
-  <orgSetting minSupportedVersion="6.0.0.0"
-             name="MobileClientMaxFields"
+  <orgSetting minSupportedVersion="6.0.0.809"
+             name="TabletClientMaxFields"
              min="1"
              max="500"
              defaultValue="75"
@@ -121,7 +128,7 @@
              supportUrl="http://support.microsoft.com/kb/2691237"
              urlTitle="None"
              description="Default: &lt;b&gt;75&lt;/b&gt;.  Max mobile fields." />
-  <orgSetting minSupportedVersion="6.0.0.0"
+  <orgSetting minSupportedVersion="6.0.0.809"
               name="EnableBulkReparent"
               min="null"
               max="null"
@@ -130,11 +137,30 @@
               supportUrl="http://support.microsoft.com/kb/2691237"
               urlTitle="KB2691237"
               description="Default: &lt;b&gt;True&lt;/b&gt;.  &lt;b&gt;False&lt;/b&gt;: Disables and reparents using a one record at a time approach." />
+  <orgSetting minSupportedVersion="6.0.0.809"
+             name="CreateSPFoldersUsingNameandGuid"
+             min="null"
+             max="null"
+             defaultValue="true"
+             settingType="Boolean"
+             supportUrl="http://support.microsoft.com/kb/2691237"
+             urlTitle="KB2691237"
+             description="Default: &lt;b&gt;True&lt;/b&gt; - creates SharePoint folders using the format of {Name}+{GUID}.  &lt;b&gt;False&lt;/b&gt;: Creates SharePoint folders using just the name." />
+  <orgSetting minSupportedVersion="6.0.0.809"
+            name="TraceExchangeSyncData"
+            min="null"
+            max="null"
+            defaultValue="true"
+            settingType="Boolean"
+            supportUrl="http://support.microsoft.com/kb/2691237"
+            urlTitle="KB2691237"
+            description="Default: &lt;b&gt;False&lt;/b&gt;.  &lt;b&gt;True&lt;/b&gt;: Enabled exchange sync tracing." />
+
   <!--currently the only supported types are Double, Int, Boolean, and String - UR14 needs Double Support-->
   <!--
   3731 is UR15
   3557 is UR14
-  3541 is UR14-A test Release build#
+  3541 is UR14-A test Release build#a
   3445 is UR13
   3236 is ur12 
   2903 is ur11CU-COD
