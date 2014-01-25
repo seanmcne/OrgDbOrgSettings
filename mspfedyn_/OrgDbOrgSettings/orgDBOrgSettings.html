@@ -759,7 +759,7 @@
             },
             _settings: new Array()
         };
-        function orgSetting(name, value, type, min, max, defaultValue, supportUrl, description, minSupportedVersion, urlTitle) {
+        function orgSetting(name, value, type, min, max, defaultValue, supportUrl, description, minSupportedVersion, urlTitle, maxSupportedVersion) {
             /// <summary>Object defention of orgSetting</summary> 
             /// <param name='name' type='String'>Setting name</param>
             /// <param name='value' type='Object'>Setting value</param>
@@ -776,6 +776,7 @@
             this.supportUrl = supportUrl || "#";
             this.description = description;
             this.minSupportedVersion = minSupportedVersion;
+            this.maxSupportedVersion = maxSupportedVersion;
             this.urlTitle = urlTitle || "No URL";
         };
         orgSetting.prototype = {
@@ -1091,7 +1092,8 @@
                                     //<orgSetting minSupportedVersion="5.0.9688.583" name="ActivityConvertDlgCampaignUnchecked" min="null" max="null" defaultValue="true" settingType="Boolean" supportUrl="http://url" description="stuff" />
                                     var curNode = o$(this)[0]; //current XML node 
                                     var minVer = curNode.attributes.getNamedItem("minSupportedVersion").value;
-                                    if (serverBuildVersion.isGreaterThanOrEq(BuildVersion.parseBuildNumber(minVer))) {
+                                    var maxVer = curNode.attributes.getNamedItem("maxSupportedVersion").value;
+                                    if (serverBuildVersion.isGreaterThanOrEq(BuildVersion.parseBuildNumber(minVer)) && serverBuildVersion.isLessThanOrEq(BuildVersion.parseBuildNumber(maxVer))) {
                                         baseOrgSettings.addSetting(new orgSetting(
                                             curNode.attributes.getNamedItem("name").value,
                                             null,
@@ -1102,7 +1104,9 @@
                                             curNode.attributes.getNamedItem("supportUrl").value,
                                             curNode.attributes.getNamedItem("description").value,
                                             curNode.attributes.getNamedItem("minSupportedVersion").value,
-                                            curNode.attributes.getNamedItem("urlTitle").value));
+                                            curNode.attributes.getNamedItem("urlTitle").value),
+                                            curNode.attributes.getNamedItem("minSupportedVersion").value
+                                        );
                                     }
                                 });
                                 //all default settings are now in baseOrgSettings 
