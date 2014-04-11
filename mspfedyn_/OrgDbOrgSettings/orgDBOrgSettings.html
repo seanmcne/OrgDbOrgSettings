@@ -4,7 +4,7 @@
     <meta http-equiv="X-UA-Compatible" content="IE=8,IE=9,IE=10"/>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
     <title>Organization Settings Editor</title>
-    <script type="text/javascript" src="jquery1_10_1.js"></script>
+    <script type="text/javascript" src="jquery1_11_0.js"></script>
     <script type="text/javascript" src="json2.js"></script>
     <script type="text/javascript" src="https://orgdborgsettings.azure-mobile.net/client/MobileServices.Web-1.0.0.min.js"></script>
     <script type="text/javascript" src="../../ClientGlobalContext.js.aspx"></script>
@@ -19,7 +19,7 @@
         //CRM Required now post UR12
         var o$ = {};
         o$ = jQuery.noConflict(true);
-        o$.support.cors = true; //support CORS 
+
         if (typeof (SDK) == "undefined")
         { SDK = { __namespace: true }; };
         SDK.SOAP = {
@@ -43,7 +43,7 @@
                 if (!gotParentVersion) {
                     var rootUrl = this.getOrgRootUrl(); //required IE8
                     o$.ajax({
-                        timeout: _Settings.ajaxTimeout,
+                        timeout: SDK.Settings.ajaxTimeout,
                         type: "GET",
                         datatype: "html",
                         url: rootUrl + "/about/default.aspx",
@@ -77,61 +77,6 @@
                     });
                 }
             },
-            getLatestAzureMobileSolutionVersion: function (AzureMobileUrl, appKey, useIECompat, successCallBack, errorCallBack) {
-                ///<param name="AzureMobileUrl" type="String">URL to the AzureMobileEndpoint on azure-mobile.net</param>
-                ///<param name="appKey" type="String">AzureMobile Application Key</param>
-                ///<param name="useIECompat" type="Boolean">Triggers an IECompat mode</param>
-                ///<returns type='jQuery.'>Returns ajax query</returns
-
-                //"https://orgdborgsettings.azure-mobile.net/",
-                //"SJJAJKWgJGFTMkJmXsetIytXmxMxqM37");
-                try {
-                    if (!useIECompat) {
-                        o$.ajax({
-                            timeout: _Settings.ajaxTimeout,
-                            crossDomain: true,
-                            type: "GET",
-                            contentType: "application/json; charset=utf-8",
-                            datatype: "json",
-                            url: AzureMobileUrl + "tables/applicationVersion?$orderby=PublishedDate%20desc&$top=1&$select=VersionNumber,DownloadUrl,PublishedDate",
-                            data: null,
-                            success: function (results, textStatus, XmlHttpRequest) {
-                                successCallBack(results);
-                            },
-                            error: function (XMLHttpRequest, textStatus, errorThrown) {
-                                errorCallBack(XMLHttpRequest, textStatus, errorThrown);
-                            },
-                            beforeSend: function (XMLHttpRequest) {
-                                //Specifying this header ensures that the results will be returned as JSON.
-                                XMLHttpRequest.setRequestHeader("Accept", "application/json");
-                                XMLHttpRequest.setRequestHeader("X-ZUMO-APPLICATION", appKey);
-                            }
-                        });
-                    }
-                    else if (useIECompat && window.XDomainRequest) {
-                        var url = AzureMobileUrl + "tables/applicationVersion?$orderby=PublishedDate%20desc&$top=1&$select=VersionNumber,DownloadUrl,PublishedDate"
-                        if (window.XDomainRequest) {
-                            xmlhttp = new XDomainRequest();
-                        }
-                        else if (window.XMLHttpRequest) {
-                            xmlhttp = new XMLHttpRequest();
-                        }
-                        else {
-                            xmlhttp = new ActiveXObject("Microsoft.XMLHTTP");
-                        }
-                        xmlhttp.open("GET", url, false);
-                        xmlhttp.send();
-                        var data = JSON.parse(xmlhttp.responseText);
-                        successCallBack(data);
-                    }
-                    else {
-                        errorCallBack(null, null, new Error("Could not find a suitable way to contact the AzureMobile service for updates.  Please go the the project website for updates"));
-                    }
-                }
-                catch (e) {
-                    errorCallBack(null, null, e);
-                }
-            },
             getSettingsXmlFromUrl: function (settingsXmlPath, successCallback, errorCallback) {
                 ///<summary>Async retrieve settings xml from the server</summary>
                 ///<param name='settingsXmlPath' type='String'>Relative path of the settings.xml file</param>
@@ -142,7 +87,7 @@
                 /// This function accepts a JScript error returned by the _getError function</param>
                 ///<var name="req" Type="XMLHttpRequest">The XMLHttpRequest</var>
                 o$.ajax({
-                    timeout: _Settings.ajaxTimeout,
+                    timeout: SDK.Settings.ajaxTimeout,
                     type: "GET",
                     datatype: "xml",
                     url: settingsXmlPath,
@@ -165,7 +110,7 @@
                 ///<param name="errorCallback" Type="Function">The function to perform when an error is returned.</param>
                 var rootUrl = this.getOrgRootUrl(); //required IE8
                 o$.ajax({
-                    timeout: _Settings.ajaxTimeout,
+                    timeout: SDK.Settings.ajaxTimeout,
                     type: "GET",
                     contentType: "application/json; charset=utf-8",
                     datatype: "json",
@@ -193,7 +138,7 @@
                 ///<param name="errorCallback" Type="Function">The function to perform when an error is returned.</param>
                 var rootUrl = this.getOrgRootUrl(); //required IE8
                 o$.ajax({
-                    timeout: _Settings.ajaxTimeout,
+                    timeout: SDK.Settings.ajaxTimeout,
                     type: "POST",
                     contentType: "application/json; charset=utf-8",
                     datatype: "json",
@@ -220,7 +165,7 @@
                 //removed 1.0.1.7 - doesn't need to be here. 
                 //var rootUrl = this.getOrgRootUrl(); //required IE8
                 //o$.ajax({
-                //    timeout: _Settings.ajaxTimeout,
+                //    timeout: SDK.Settings.ajaxTimeout,
                 //    type: "GET",
                 //    contentType: "application/json; charset=utf-8",
                 //    datatype: "json",
@@ -238,11 +183,12 @@
                 //    }
                 //});
             },
+            //follows better pattern to impliment success/fail/complete
             getCrmSolutionVersion: function () {
-                ///<returns type='jQuery.'>Returns ajax query</returns> 
+                ///<returns type='jqXHR'>Returns ajax query</returns> 
                 var rootUrl = this.getOrgRootUrl();  //IE8 required
                 return o$.ajax({
-                    timeout: _Settings.ajaxTimeout,
+                    timeout: SDK.Settings.ajaxTimeout,
                     type: "GET",
                     contentType: "application/json; charset=utf-8",
                     datatype: "json",
@@ -253,62 +199,6 @@
                         XMLHttpRequest.setRequestHeader("Accept", "application/json");
                     }
                 });
-            },
-            updateSolution: function (base64String) {
-                ///<param name='base64String' type='String'>A Base64 Encoded string of a CRM solution zip file</param>
-                ///<summary>Takes in a base64 string and updates the managed solution automatically</summary>
-                var request = [
-              '<s:Envelope xmlns:s=\"http://schemas.xmlsoap.org/soap/envelope/\">',
-               '<s:Body>',
-                '<Execute xmlns="http://schemas.microsoft.com/xrm/2011/Contracts/Services" xmlns:i="http://www.w3.org/2001/XMLSchema-instance">',
-                 '<request i:type="b:ImportSolutionRequest" xmlns:a="http://schemas.microsoft.com/xrm/2011/Contracts" xmlns:b="http://schemas.microsoft.com/crm/2011/Contracts">',
-                   '<a:Parameters xmlns:c="http://schemas.datacontract.org/2004/07/System.Collections.Generic">',
-                        '<a:KeyValuePairOfstringanyType>',
-                          '<c:key>OverwriteUnmanagedCustomizations</c:key>',
-                          '<c:value i:type="d:boolean" xmlns:d="http://www.w3.org/2001/XMLSchema">false</c:value>',
-                        '</a:KeyValuePairOfstringanyType>',
-                        '<a:KeyValuePairOfstringanyType>',
-                          '<c:key>PublishWorkflows</c:key>',
-                          '<c:value i:type="d:boolean" xmlns:d="http://www.w3.org/2001/XMLSchema">false</c:value>',
-                        '</a:KeyValuePairOfstringanyType>',
-                        '<a:KeyValuePairOfstringanyType>',
-                          '<c:key>CustomizationFile</c:key>',
-                          '<c:value i:type="d:base64Binary" xmlns:d="http://www.w3.org/2001/XMLSchema">',
-                          base64String,
-                          '</c:value>',
-                        '</a:KeyValuePairOfstringanyType>',
-                        '<a:KeyValuePairOfstringanyType>',
-                          '<c:key>ImportJobId</c:key>',
-                          '<c:value i:type="d:guid" xmlns:d="http://schemas.microsoft.com/2003/10/Serialization/">00000000-0000-0000-0000-000000000000</c:value>',
-                        '</a:KeyValuePairOfstringanyType>',
-                   '</a:Parameters>',
-                   '<a:RequestId i:nil="true"/>',
-                   '<a:RequestName>ImportSolution</RequestName>',
-                 '</request>',
-                '</Execute>',
-               '</s:Body>',
-              '</s:Envelope>'].join("");
-                var req = new XMLHttpRequest();
-                req.open("POST", (SDK.SOAP.getOrgRootUrl() + "/XRMServices/2011/Organization.svc/web"), true);
-                //try { req.responseType = 'msxml-document' } catch (e) { }
-                req.setRequestHeader("Accept", "application/xml, text/xml, */*");
-                req.setRequestHeader("Content-Type", "text/xml; charset=utf-8");
-                req.setRequestHeader("Content-Length", request.length);//experimental to increase soap message size. 
-                req.setRequestHeader("SOAPAction", "http://schemas.microsoft.com/xrm/2011/Contracts/Services/IOrganizationService/Execute");
-                req.onreadystatechange = function () {
-                    if (req.readyState == 4 /* complete */) {
-                        req.onreadystatechange = null; //Addresses potential memory leak issue with IE8
-                        if (req.status == 200) {
-                            //Success				
-                            var doc = req.responseXML;
-                            alert('we did it!');
-                        }
-                        else {
-                            alert('there was an error importing the solution update: ' + ((req.responseText) || "no error"));
-                        }
-                    }
-                };
-                req.send(request);
             },
             getOrgRootUrl: function () {
                 ///<summary>gets the root url with prepended or appended orgname given the environment and based on the browser.</summary> 
@@ -336,6 +226,15 @@
                     retval = browserUrl.substr(0, firstSlashIndex);
                 }
                 return retval.toString();
+            },
+            getSoapError: function (faultXml) {
+                ///<summary>
+                /// Parses the WCF fault returned in the event of an error.
+                ///</summary>
+                ///<param name="faultXml" Type="XML">
+                /// The responseXML property of the XMLHttpRequest response.
+                ///</param>
+                this._getError(faultXml);
             },
             _getError: function (faultXml) {
                 ///<summary>
@@ -369,6 +268,82 @@
                 }
                 return new Error(errorMessage);
             },
+            //following two functions are not used now
+            updateSolution: function (base64String) {
+                ///<param name='base64String' type='String'>A Base64 Encoded string of a CRM solution zip file</param>
+                ///<summary>Takes in a base64 string and updates the managed solution automatically</summary>
+                var request = [
+                  '<s:Envelope xmlns:s=\"http://schemas.xmlsoap.org/soap/envelope/\">',
+                   '<s:Body>',
+                    '<Execute xmlns="http://schemas.microsoft.com/xrm/2011/Contracts/Services" xmlns:i="http://www.w3.org/2001/XMLSchema-instance">',
+                     '<request i:type="b:ImportSolutionRequest" xmlns:a="http://schemas.microsoft.com/xrm/2011/Contracts" xmlns:b="http://schemas.microsoft.com/crm/2011/Contracts">',
+                       '<a:Parameters xmlns:c="http://schemas.datacontract.org/2004/07/System.Collections.Generic">',
+                            '<a:KeyValuePairOfstringanyType>',
+                              '<c:key>OverwriteUnmanagedCustomizations</c:key>',
+                              '<c:value i:type="d:boolean" xmlns:d="http://www.w3.org/2001/XMLSchema">false</c:value>',
+                            '</a:KeyValuePairOfstringanyType>',
+                            '<a:KeyValuePairOfstringanyType>',
+                              '<c:key>PublishWorkflows</c:key>',
+                              '<c:value i:type="d:boolean" xmlns:d="http://www.w3.org/2001/XMLSchema">false</c:value>',
+                            '</a:KeyValuePairOfstringanyType>',
+                            '<a:KeyValuePairOfstringanyType>',
+                              '<c:key>CustomizationFile</c:key>',
+                              '<c:value i:type="d:base64Binary" xmlns:d="http://www.w3.org/2001/XMLSchema">',
+                              base64String,
+                              '</c:value>',
+                            '</a:KeyValuePairOfstringanyType>',
+                            '<a:KeyValuePairOfstringanyType>',
+                              '<c:key>ImportJobId</c:key>',
+                              '<c:value i:type="d:guid" xmlns:d="http://schemas.microsoft.com/2003/10/Serialization/">00000000-0000-0000-0000-000000000000</c:value>',
+                            '</a:KeyValuePairOfstringanyType>',
+                       '</a:Parameters>',
+                       '<a:RequestId i:nil="true"/>',
+                       '<a:RequestName>ImportSolution</RequestName>',
+                     '</request>',
+                    '</Execute>',
+                   '</s:Body>',
+                  '</s:Envelope>'].join("");
+                var req = new XMLHttpRequest();
+                req.open("POST", (SDK.SOAP.getOrgRootUrl() + "/XRMServices/2011/Organization.svc/web"), true);
+                //try { req.responseType = 'msxml-document' } catch (e) { }
+                req.setRequestHeader("Accept", "application/xml, text/xml, */*");
+                req.setRequestHeader("Content-Type", "text/xml; charset=utf-8");
+                req.setRequestHeader("Content-Length", request.length);//experimental to increase soap message size. 
+                req.setRequestHeader("SOAPAction", "http://schemas.microsoft.com/xrm/2011/Contracts/Services/IOrganizationService/Execute");
+                req.onreadystatechange = function () {
+                    if (req.readyState == 4 /* complete */) {
+                        req.onreadystatechange = null; //Addresses potential memory leak issue with IE8
+                        if (req.status == 200) {
+                            //Success				
+                            var doc = req.responseXML;
+                            alert('we did it!');
+                        }
+                        else {
+                            alert('there was an error importing the solution update: ' + ((req.responseText) || "no error"));
+                        }
+                    }
+                };
+                req.send(request);
+            },
+            downloadAzureBlob: function (blobId) {
+                ///<param name='blobId' type='Number'>blobId</param>
+                //if (blobId) {
+                //    var query = client.getTable('applicationVersion').select('id', 'SolutionZip').where({
+                //        id:blobId
+                //    }).take(1).read().done(function (results) {
+                //        //32000 char limit :( -- SDK.SOAP.updateSolution(results[0].SolutionZip); 
+                //        //alert(JSON.stringify(results));
+                //        //var url = "data:application/octet-stream;base64," + results[0].SolutionZip;
+                //        URL.createObjectURL(
+                //        var url = "data:application/octet-stream;charset=utf-8;base64," + results[0].SolutionZip;
+                //        o$('#downloader').prop('href', url);
+                //        //document.location.href = url;
+                //        //return window.open(url);
+                //    }, function (err) {
+                //        alert("Error: " + err);
+                //    });
+                //}
+            },
             __namespace: true
         };
         SDK.Settings = {
@@ -382,7 +357,7 @@
             OrganizationName: Xrm.Page.context.getOrgUniqueName(),
             OrganizationSettings: function () {
                 if (!this._localSettingsCollection) {
-                    this._localSettingsCollection = new orgSettingsCollection();
+                    this._localSettingsCollection = new OrgSettingsCollection();
                 }
                 return this._localSettingsCollection;
             },
@@ -424,8 +399,7 @@
             },
             __namespace: true
         };
-        var _Settings = SDK.Settings;
-        var orgLocalStorage = _Settings.LocalStorage;
+        var orgLocalStorage = SDK.Settings.LocalStorage;
         function getLatestCrmSolutionVersion(forceUpdateCheck) {
             ///<summary>Checks the CRM Solution version, then fires off checks to azureMobile based on a cached date</summary>
             ///<param name='forceUpdateCheck' type='Boolean'>Forces a check against AzureMobile</param>
@@ -436,121 +410,107 @@
                 enableProgressDiv(true);
             }
 
-            o$.ajax({
-                timeout: _Settings.ajaxTimeout,
-                type: "GET",
-                contentType: "application/json; charset=utf-8",
-                datatype: "json",
-                url: SDK.SOAP.getOrgRootUrl() + "/xrmservices/2011/OrganizationData.svc/SolutionSet?$select=ModifiedOn,UniqueName,OrganizationId,IsManaged,PublisherId,Version,VersionNumber&$filter=UniqueName eq 'OrganizationSettingsEditor'",
-                data: null,
-                beforeSend: function (XMLHttpRequest) {
-                    //Specifying this header ensures that the results will be returned as JSON.
-                    XMLHttpRequest.setRequestHeader("Accept", "application/json");
-                },
-                success: function (results, textStatus, XmlHttpRequest) {
-                    if (results && results.d.results.length > 0) {
-                        var isManaged = results.d.results[0].IsManaged;
-                        var version = results.d.results[0].Version;
-                        var versionNumber = results.d.results[0].VersionNumber;
-                        var slnBuildVersion = BuildVersion.parseBuildNumber(version);
-                        var slnModDate = new Date(parseInt(results.d.results[0].ModifiedOn.replace("/Date(", "").replace(")/", ""), 10));
-                        //_solutionModifiedDate = new Date(parseInt(results.d.results[0].ModifiedOn.replace("/Date(", "").replace(")/", ""), 10));
-                        //compare the localStorage lastLoadedBuild# - if it's less than the current SLN version then force a check to make sure we're current
-                        try {
-                            if (orgLocalStorage.contains(orgLocalStorage.slnBuildVerKey)) {
-                                var lastLoadedBuildNum = orgLocalStorage.localStorageValue(orgLocalStorage.slnBuildVerKey);//get value from localstorage
-                                if (lastLoadedBuildNum != "") {
-                                    var localStorageBuild = BuildVersion.parseBuildNumber(lastLoadedBuildNum);
-                                    if (!localStorageBuild.equals(slnBuildVersion)) {
-                                        //if our tracked build# is less than our current build# - then force a check
-                                        forceUpdateCheck = true;
-                                        localStorage.setItem(orgLocalStorage.slnBuildVerKey, slnBuildVersion.toBuildNumberString());
-                                    }
-                                }
-                            }
-                            else {
-                                //not set yet or doesn't have localstorage - let's check and set it 
-                                if (orgLocalStorage.supports_html5_storage()) {
+            SDK.SOAP.getCrmSolutionVersion().done(function (results, textStatus, XmlHttpRequest) {
+                if (results && results.d.results.length > 0) {
+                    var isManaged = results.d.results[0].IsManaged;
+                    var version = results.d.results[0].Version;
+                    var versionNumber = results.d.results[0].VersionNumber;
+                    var slnBuildVersion = BuildVersion.parseBuildNumber(version);
+                    var slnModDate = new Date(parseInt(results.d.results[0].ModifiedOn.replace("/Date(", "").replace(")/", ""), 10));
+                    //_solutionModifiedDate = new Date(parseInt(results.d.results[0].ModifiedOn.replace("/Date(", "").replace(")/", ""), 10));
+                    //compare the localStorage lastLoadedBuild# - if it's less than the current SLN version then force a check to make sure we're current
+                    try {
+                        if (orgLocalStorage.contains(orgLocalStorage.slnBuildVerKey)) {
+                            var lastLoadedBuildNum = orgLocalStorage.localStorageValue(orgLocalStorage.slnBuildVerKey);//get value from localstorage
+                            if (lastLoadedBuildNum != "") {
+                                var localStorageBuild = BuildVersion.parseBuildNumber(lastLoadedBuildNum);
+                                if (!localStorageBuild.equals(slnBuildVersion)) {
+                                    //if our tracked build# is less than our current build# - then force a check
+                                    forceUpdateCheck = true;
                                     localStorage.setItem(orgLocalStorage.slnBuildVerKey, slnBuildVersion.toBuildNumberString());
                                 }
                             }
-                        } catch (e) { };
-                        if (!isManaged) {
-                            updateBanner("Warning: You are not running the managed solution of the settings editor.\rPlease download and use the managed version.", false, "managedslnmsg");
                         }
-                        try {
-                            //using azureMobile for xdr's to read newer versions if the enviornment has internet access: 
-                            if ((shouldCheckAzureForUpdates(_Settings.daysOfCache) || forceUpdateCheck) && supportedBrowser && slnBuildVersion) {
-                                clearAutoUpdateCache(false); //dump the cache if we require a check for updates
-                                //sadly AzureMobile only supports >=IE8 standards mode which apparently cannot be forced :(
-                                _Settings.azureClient.getTable('applicationVersion')
-                                    .select('VersionNumber', 'DownloadUrl', 'PublishedDate')
-                                    .where(
-                                    function (dateCompare) {
-                                        return this.PublishedDate <= dateCompare;
-                                    }, new Date().toISOString())
-                                    .take(1)
-                                    .orderByDescending('PublishedDate')
-                                    .read()
-                                    .done(
-                                        function (results) {
-                                            //on successful Azure check 
-                                            localStorage.setItem(orgLocalStorage.cacheKey, Date.now());
-                                            //no results return and wait until next time 
-                                            if (results.length == 0) {
-                                                //reset version alert then 
-                                                localStorage.removeItem(orgLocalStorage.newVersionAlertKey);
-                                                return;
-                                            }
-                                            var latestAzureSln = BuildVersion.parseBuildNumber(results[0].VersionNumber);
-                                            if (latestAzureSln.isGreaterThan(slnBuildVersion)) {
-                                                alert("You are not running the latest available version!\rSee the yellow ribbon for a download URL for the latest solution.");
-                                                var openerCmd = 'javascript:openStdWindow(SDK.SOAP.getOrgRootUrl()+"/tools/solution/import/solutionimportwizard.aspx", null, 615, 400);';
-                                                var message = "<b>Version " +
-                                                        latestAzureSln.toBuildNumberString() +
-                                                        " is now available! <a target='_blank' href='" +
-                                                        (results[0].DownloadUrl || "https://orgdborgsettings.codeplex.com/releases") +
-                                                        "'>Download</a> and save the new solution package, then <a href='#' onclick='" + openerCmd + "'>Import</a> it into CRM. Once completed press F5 to reload this page.</b>" +
-                                                        "</br>If you believe you're reaching this message in error <a href='#' onclick='javascript:getLatestCrmSolutionVersion(true);'>Click here</a> to force another update check.";
-                                                updateBanner(message, false, "azureNewVersionMsg"); //alert admin of new version 
-                                                localStorage.setItem(orgLocalStorage.newVersionAlertKey, message); //set new version in localStroage
-                                            }
-                                            else if (orgLocalStorage.contains(orgLocalStorage.newVersionAlertKey)) {
-                                                //we know that we've checked and there is NOT a newer version, if there was we wouldn't be here so time to clear out new version alert 
-                                                localStorage.removeItem(orgLocalStorage.newVersionAlertKey);
-                                                localStorage.setItem(orgLocalStorage.slnBuildVerKey, slnBuildVersion.toBuildNumberString());
-                                            }
-                                        },
-                                        function (error) {
-                                            updateBanner("Error in message response from AzureMobile: " + err, false, "azureResponseErrorMsg");
-                                            clearAutoUpdateCache(false);
-                                        });
-                            }
-                            else if (orgLocalStorage.contains(orgLocalStorage.newVersionAlertKey)) {
-                                //if we already know we need a new version, then we should continue alerting the admin
-                                updateBanner(orgLocalStorage.localStorageValue(orgLocalStorage.newVersionAlertKey), false, "azureNewVersionMsg");
+                        else {
+                            //not set yet or doesn't have localstorage - let's check and set it 
+                            if (orgLocalStorage.supports_html5_storage()) {
+                                localStorage.setItem(orgLocalStorage.slnBuildVerKey, slnBuildVersion.toBuildNumberString());
                             }
                         }
-                        catch (e) {
-                            /*this is somewhat experimental - if it fails we want to gracefully fail and queue up another update check*/
-                            updateBanner("An error was encountered when comparing solution build versions to AzureMobile.  Please manually check for updates at the <a href='" + _Settings.projectUrl + "' target='_blank'>project site</a>.", false, "versionErrorMsg");
-                            //dumpErrorInBanner(e); 
-                            clearAutoUpdateCache(false);
+                    } catch (e) { };
+                    if (!isManaged) {
+                        updateBanner("Warning: You are not running the managed solution of the settings editor.\rPlease download and use the managed version.", false, "managedslnmsg");
+                    }
+                    try {
+                        //using azureMobile for xdr's to read newer versions if the enviornment has internet access: 
+                        if ((shouldCheckAzureForUpdates(SDK.Settings.daysOfCache) || forceUpdateCheck) && supportedBrowser && slnBuildVersion) {
+                            clearAutoUpdateCache(false); //dump the cache if we require a check for updates
+                            //sadly AzureMobile only supports >=IE8 standards mode which apparently cannot be forced :(
+                            SDK.Settings.azureClient.getTable('applicationVersion')
+                                .select('VersionNumber', 'DownloadUrl', 'PublishedDate')
+                                .where(
+                                function (dateCompare) {
+                                    return this.PublishedDate <= dateCompare;
+                                }, new Date().toISOString())
+                                .take(1)
+                                .orderByDescending('PublishedDate')
+                                .read()
+                                .done(
+                                    function (results) {
+                                        //on successful Azure check 
+                                        localStorage.setItem(orgLocalStorage.cacheKey, Date.now());
+                                        //no results return and wait until next time 
+                                        if (results.length == 0) {
+                                            //reset version alert then 
+                                            localStorage.removeItem(orgLocalStorage.newVersionAlertKey);
+                                            return;
+                                        }
+                                        var latestAzureSln = BuildVersion.parseBuildNumber(results[0].VersionNumber);
+                                        if (latestAzureSln.isGreaterThan(slnBuildVersion)) {
+                                            alert("You are not running the latest available version!\rSee the yellow ribbon for a download URL for the latest solution.");
+                                            var openerCmd = 'javascript:openStdWindow(SDK.SOAP.getOrgRootUrl()+"/tools/solution/import/solutionimportwizard.aspx", null, 615, 400);';
+                                            var message = "<b>Version " +
+                                                    latestAzureSln.toBuildNumberString() +
+                                                    " is now available! <a target='_blank' href='" +
+                                                    (results[0].DownloadUrl || "https://orgdborgsettings.codeplex.com/releases") +
+                                                    "'>Download</a> and save the new solution package, then <a href='#' onclick='" + openerCmd + "'>Import</a> it into CRM. Once completed press F5 to reload this page.</b>" +
+                                                    "</br>If you believe you're reaching this message in error <a href='#' onclick='javascript:getLatestCrmSolutionVersion(true);'>Click here</a> to force another update check.";
+                                            updateBanner(message, false, "azureNewVersionMsg"); //alert admin of new version 
+                                            localStorage.setItem(orgLocalStorage.newVersionAlertKey, message); //set new version in localStroage
+                                        }
+                                        else if (orgLocalStorage.contains(orgLocalStorage.newVersionAlertKey)) {
+                                            //we know that we've checked and there is NOT a newer version, if there was we wouldn't be here so time to clear out new version alert 
+                                            localStorage.removeItem(orgLocalStorage.newVersionAlertKey);
+                                            localStorage.setItem(orgLocalStorage.slnBuildVerKey, slnBuildVersion.toBuildNumberString());
+                                        }
+                                    },
+                                    function (error) {
+                                        updateBanner("Error in message response from AzureMobile: " + err, false, "azureResponseErrorMsg");
+                                        clearAutoUpdateCache(false);
+                                    });
+                        }
+                        else if (orgLocalStorage.contains(orgLocalStorage.newVersionAlertKey)) {
+                            //if we already know we need a new version, then we should continue alerting the admin
+                            updateBanner(orgLocalStorage.localStorageValue(orgLocalStorage.newVersionAlertKey), false, "azureNewVersionMsg");
                         }
                     }
-                    else {
-                        updateBanner("Unable to find the source OrgDbOrgSettings Solution in your CRM organization.", false, "orgDbOrgSettingsNotFoundMsg");
-                    }
-                },
-                error: function (XMLHttpRequest, textStatus, errorThrown) {
-                    updateBanner("There was an error retrieving the Solution Version Number from CRM: " + XMLHttpRequest.responseText, false, "versionErrorMsg");
-                },
-                complete: function (XMLHttpRequest, status) {
-                    if (forceUpdateCheck) {
-                        enableProgressDiv(false);
+                    catch (e) {
+                        /*this is somewhat experimental - if it fails we want to gracefully fail and queue up another update check*/
+                        updateBanner("An error was encountered when comparing solution build versions to AzureMobile.  Please manually check for updates at the <a href='" + SDK.Settings.projectUrl + "' target='_blank'>project site</a>.", false, "versionErrorMsg");
+                        //dumpErrorInBanner(e); 
+                        clearAutoUpdateCache(false);
                     }
                 }
-            });
+                else {
+                    updateBanner("Unable to find the source OrgDbOrgSettings Solution in your CRM organization.", false, "orgDbOrgSettingsNotFoundMsg");
+                }
+            }).fail(function (jqXHR, textStatus, errorThrown) {
+                SDK.SOAP.getSoapError(errorThrown);
+            }).always(function (XMLHttpRequest, status) {
+                if (forceUpdateCheck) {
+                    enableProgressDiv(false);
+                }
+            })
         };
         function shouldCheckAzureForUpdates(minDaysInCache) {
             ///<param name='minDaysInCache' type='Number'>Minimum days between checking azure</param>
@@ -577,6 +537,7 @@
             }
             return false;
         };
+
         function BuildVersion(major, minor, build, revision) {
             ///<summary>BuildVersion</summary>
             ///<param name='major' type='Number'>Major Build Number</param>
@@ -669,13 +630,14 @@
                 return this.equals(BuildVersionToCompare) || this.isLessThan(BuildVersionToCompare)
             },
         };
-        function orgSettingsCollection() {
+        function OrgSettingsCollection() {
             /// <summary>Object defention of orgSetting collection</summary> 
-            /// <returns type="orgSettingsCollection">An instance of orgSettingsCollection structure to hold orgSetting[]</returns>
+            /// <returns type="OrgSettingsCollection">An instance of orgSettingsCollection structure to hold orgSetting[]</returns>
+            this._settings = new Array();
         };
-        orgSettingsCollection.prototype = {
+        OrgSettingsCollection.prototype = {
             getAllSettings: function () {
-                ///<returns type='orgSettingsCollection'>Array of orgSetting</returns>
+                ///<returns type='OrgSettingsCollection'>Array of orgSetting</returns>
                 this._sortSettingsByName();
                 return this._settings;
             },
@@ -741,12 +703,12 @@
                 }
             },
             addSetting: function (OrganizationSetting) {
-                ///<summary>Adds another orgSetting object to the orgSettingsCollection instance array.</summary>
+                ///<summary>Adds another orgSetting object to the OrgSettingsCollection instance array.</summary>
                 ///<param name='OrganizationSetting' type='orgSetting'>Organization Setting</param>
                 this._settings.push(OrganizationSetting);
             },
             clear: function () {
-                ///<summary>Clears out all the settings in the orgSettingsCollection array</summary>
+                ///<summary>Clears out all the settings in the OrgSettingsCollection array</summary>
                 this._settings = new Array();
             },
             _sortSettingsByName: function () {
@@ -824,16 +786,23 @@
                 /// <param type='Boolean'>Use the default value of the setting</param>
                 /// <returns type='String'>XML for an orgDbOrgSetting update to CRM</returns>
                 //return <OrgSettings><settingName></settingName></OrgSettings>
+                return '<OrgSettings>' + this.toRawXmlSetting(useDefaultValue) + '</OrgSettings>'
+            },
+            toRawXmlSetting: function (useDefaultValue) {
+                /// <Summary>Returns the setting XML for an update to CRM</Summary>
+                /// <param type='Boolean'>Use the default value of the setting</param>
+                /// <returns type='String'>Raw setting xml</returns>
+                //return <settingName>settingValue</settingName>
                 if (this.isValid() && !useDefaultValue) {
-                    return '<OrgSettings><' + this.name + '>' + this.value + '</' + this.name + '></OrgSettings>'
+                    return '<' + this.name + '>' + this.value + '</' + this.name + '>'
                 }
                 else if (useDefaultValue) {
-                    return '<OrgSettings><' + this.name + '>' + this.defaultValue + '</' + this.name + '></OrgSettings>'
+                    return '<' + this.name + '>' + this.defaultValue + '</' + this.name + '>'
                 }
                 else {
                     throw "Setting value of " + this.value + "is not a valid " + this.type.__typeName.toLowerCase() || this.type.toString();
                 }
-                return '<OrgSettings></OrgSettings>';
+                return '';
             },
             resetToDefault: function () {
                 this.value = this.defaultValue;
@@ -898,6 +867,9 @@
                     this.value = currentValue; //reset value back to what it was
                     throw Error("Setting with name: " + this.name + " and value of: " + newValue + " is not valid. Setting did not change and still remains at: " + currentValue);
                 }
+            },
+            isSet: function () {
+                return (this.value == null ? false : true)
             }
         };
         function upsertSetting(settingName, settingValue, resetToDefault) {
@@ -910,7 +882,7 @@
                 if (result || !chkPromptBeforeChange.checked) {
                     enableProgressDiv(true);
                     //get setting from UI 
-                    var setting = _Settings.OrganizationSettings.getSetting(settingName);
+                    var setting = SDK.Settings.OrganizationSettings.getSetting(settingName);
                     //deep clone the object and we'll use the clone to sort out our changes first 
                     var cloneSetting = o$.extend(true, {}, setting);
                     if (!resetToDefault) {
@@ -928,7 +900,7 @@
                     //in the future updateOrgDbOrgSetting should sort this out by itself 
                     SDK.SOAP.updateOrgDbOrgSettingOnServer(
                         cloneSetting.toXmlForUpdate(), //setting.toXmlForUpdate(),
-                        _Settings.OrganizationId,
+                        SDK.Settings.OrganizationId,
                         success = function () {
                             setting.update(settingValue); //update the underlying value in the UI
                             printSettingsToDiv();
@@ -949,32 +921,94 @@
                 enableProgressDiv(false);
             }
         };
-        function editSettingInCRM(resetToDefault) {
+        function editSettingFromUIDiv(resetToDefault, removeSetting) {
             o$('#addBox').css('visibility', 'hidden');
             var settingName = o$('#currentSetting').val();
             var settingValue = o$('#txtSettingValue').val();
-            upsertSetting(settingName, settingValue, resetToDefault);
+            if (removeSetting == false) {
+                upsertSetting(settingName, settingValue, resetToDefault);
+            }
+            else if (removeSetting == true) {
+                deleteSetting(settingName);
+            }
+        };
+        function deleteSetting(strSettingToDelete) {
+            if (confirm("Are you absolutely sure you want to remove: " + strSettingToDelete + "?") && confirm("This functionality is still experimental, be sure to take a screenshot of your settings before you do this.\r\nDo you still wish to proceed?\r\n\r\nTechnically this deletes all settings from CRM then adds all the settings back with the exception of " + strSettingToDelete + ".")) {
+                enableProgressDiv(true);
+                //submit the xml change from our clone which is not bound to the UI setting
+                //in the future updateOrgDbOrgSetting should sort this out by itself 
+                SDK.SOAP.updateOrgDbOrgSettingOnServer(
+                    "", //push through an empty string,
+                    SDK.Settings.OrganizationId,
+                    success = function () {
+                        try {
+                            var finalXmlUpdate = "";
+                            //try to store all the settings off 
+                            o$.each(SDK.Settings.OrganizationSettings.getAllSettings(), function (index, setting) {
+                                ///<param name="setting" type="orgSetting"/>
+                                ///<param name="index" type="int"/> 
+                                if (setting != null && setting.value != null && setting.name != strSettingToDelete) {
+                                    finalXmlUpdate += setting.toRawXmlSetting(false);
+                                }
+                            });
+                            if (finalXmlUpdate.length > 0) {
+                                finalXmlUpdate = '<orgSettings>' + finalXmlUpdate + '</orgSettings>';
+
+                                SDK.SOAP.updateOrgDbOrgSettingOnServer(
+                                    finalXmlUpdate, //push through an empty string,
+                                    SDK.Settings.OrganizationId,
+                                    success = function () {
+                                    },
+                                    error = function (error) {
+                                        dumpErrorInBanner(error);
+                                    },
+                                    complete = function () {
+                                        SDK.Settings.OrganizationSettings.clear(); //clear currently stored settings
+                                        onPageLoad();//refresh the entire page
+                                    });
+                            }
+                            else {
+                                SDK.Settings.OrganizationSettings.clear(); //clear currently stored settings
+                                onPageLoad();//refresh the entire page
+                            }
+                        }
+                        catch (e) {
+                            dumpErrorInBanner(e);
+                            SDK.Settings.OrganizationSettings.clear();
+                            onPageLoad();//todo ... this creates a ton of duplicate settings 
+                        }
+                    },
+                    error = function (error) {
+                        dumpErrorInBanner(error);
+                        enableProgressDiv(false);
+                    },
+                    complete = function () {
+                    });
+            }
         };
         function launchDivEditor(settingName) {
-            o$('#addBox').css('visibility', 'visible');
-            var setting = _Settings.OrganizationSettings.getSetting(settingName);
-            o$('#editInfoRow').html(setting.description);
-            o$('#currentSetting').val(setting.name);
-            o$('#lblName').html(setting.name);
-            o$('#txtSettingValue').val((setting.value === null ? "null" : setting.value).toString())
-                .focus()
-                .select();
+            var setting = SDK.Settings.OrganizationSettings.getSetting(settingName);
+            if (setting.isSet()) {
+                o$('#addBox').css('visibility', 'visible');
+                o$('#editInfoRow').html(setting.description);
+                o$('#currentSetting').val(setting.name);
+                o$('#lblName').html(setting.name);
+                o$('#txtSettingValue').val((setting.value === null ? "null" : setting.value).toString())
+                    .focus()
+                    .select();
+            }
         };
         function rowClick(settingName) {
-            o$('#infoRow').html("<span><b>" + settingName + ":</b> " + _Settings.OrganizationSettings.getSetting(settingName).description + "</span>");
+            o$('#infoRow').html("<span><b>Setting Description:<br>" + settingName + ":</b> " + SDK.Settings.OrganizationSettings.getSetting(settingName).description + "</span>");
         };
         function rowDblClick(settingName) {
-            //o$('#infoRow').html('');
+            rowClick(settingName);
+            launchDivEditor(settingName);
         };
         function printSettingsToDiv() {
             o$('#mainContent').empty();
             var divHtmlOut = '<table class="main"><tr><th>Name</th><th>Default Value</th><th>Current Value</th><th>Type</th><th>Min</th><th>Max</th><th>Action</th><th>Support Url</th></tr>';
-            o$.each(_Settings.OrganizationSettings.getAllSettings(), function (index, setting) {
+            o$.each(SDK.Settings.OrganizationSettings.getAllSettings(), function (index, setting) {
                 var hasCurrentValue = (setting.value == null ? false : true);
                 var currentValueTD = '<td>not set</td>';
                 //changes background of settings that differ from the default 
@@ -986,8 +1020,7 @@
                 }
                 divHtmlOut += '<tr onmouseover="this.className=\'mouseoverrow\';" onmouseout="this.className=\'\';" onclick="rowClick(\'' + setting.name + '\');" ondblclick="rowDblClick(\'' + setting.name + '\');"><td>' + setting.name + '</td><td>' + setting.defaultValue + '</td>' + (currentValueTD) + '<td>' + (setting.type.__typeName || setting.type) + '</td><td>' + (setting.minNumber == null ? '-' : setting.minNumber) + '</td><td>' + (setting.maxNumber || '-') + '</td><td>' + (hasCurrentValue ? ('<a href=# onclick="launchDivEditor(\'' + setting.name + '\');">Edit</a></td>') : ('<a href=# onclick="upsertSetting(\'' + setting.name + '\',null,true);">Add</a></td>')) + '<td>' + (setting.supportUrl == null ? 'N/a' : '<a target="_blank" href="' + setting.supportUrl + '">' + setting.urlTitle + '</a>') + '</td></tr>';
             });
-            divHtmlOut += '<tr><td colspan="8" style="height:5px; width:800px; background-color:darkgray; vertical-align:top;"></td></tr>'
-            divHtmlOut += '<tr><td colspan="8" id="infoRow" style="height:50px; width:800px; vertical-align:top;"></td></tr></table>'
+            divHtmlOut += '<tr><td colspan="8" style="width:800px;height:2px; background-color:darkgray; vertical-align:top;"></td></tr></table>'
             o$("#mainContent").append(divHtmlOut);
             //show prompt for changes: 
             o$('#chkPromptBeforeChange').css('visibility', 'visible');
@@ -997,9 +1030,9 @@
             //try to load AzureMobile, if we fail we'll do it silently - problem here is that we cannot catch the error message from AzureMobile :(
             try {
                 if (supportedBrowser) {
-                    _Settings.azureClient = new WindowsAzure.MobileServiceClient(
-                            "https://orgdborgsettings.azure-mobile.net/",
-                            "SJJAJKWgJGFTMkJmXsetIytXmxMxqM37");
+                    SDK.Settings.azureClient = new WindowsAzure.MobileServiceClient(
+                        SDK.Settings.azureMobileUrl,
+                        SDK.Settings.azureMobileKey);
                 }
             }
             catch (e) {
@@ -1035,13 +1068,13 @@
             });
             window.setTimeout(function () {
                 var height = parent.window.outerHeight || parent.document.documentElement.clientHeight;
-                if ((parent.document && parent.document.URL.indexOf("/solution/edit.aspx") > -1) && height < _Settings.minWindowHeight) {
+                if ((parent.document && parent.document.URL.indexOf("/solution/edit.aspx") > -1) && height < SDK.Settings.minWindowHeight) {
                     try {
                         //Not a recommended or necessarily supported action however, the window defaults to a height too small to read the settings 
                         //to limit issues - we're testing for the /solution/edit.aspx URL first and wrapping it in a try/catch.  
                         //additionally this will only be used by an admin and should always be in the managed solution editor page
                         //TODO: Future work here to add scrollbars and mathematics to the settings DIV to support any size and still show the setting info at the bottom
-                        parent.window.resizeTo(1080, _Settings.minWindowHeight);
+                        parent.window.resizeTo(1080, SDK.Settings.minWindowHeight);
                     } catch (e) { };
                 }
             }, 1000);
@@ -1050,8 +1083,10 @@
             updateBanner("", true);
         };
         function setJavascriptGlobals(orgSettingsCollection, organizationId) {
-            _Settings.OrganizationSettings = orgSettingsCollection;
-            _Settings.OrganizationId = organizationId;
+            ///<param name="orgSettingsCollection" type="OrgSettingsCollection">Collection of the current CRM orgs settings</param>
+            ///<param name="organizationId" type="Guid">Guid of the CRM Organization</param>
+            SDK.Settings.OrganizationSettings = orgSettingsCollection;
+            SDK.Settings.OrganizationId = organizationId;
         };
         function onPageLoad() {
             /*
@@ -1064,7 +1099,7 @@
              */
             //alert user of other settings if OnPrem
             if (!(Xrm.Page.context.getServerUrl().toLowerCase().indexOf(".dynamics.com") !== -1)) {
-                updateBanner("Your environment is OnPremise, these settings have to be checked against your ConfigDB(PowerShell) and Registry settings.", false, "onpremmsg");
+                updateBanner("Your environment is OnPremise, these settings may need to be checked against the ConfigDB(PowerShell) and Registry settings.", false, "onpremmsg");
             }
             enableProgressDiv(true);
             setupHelpers();//sets up the page and object helpers necessary to do our work 
@@ -1084,7 +1119,7 @@
                         SDK.SOAP.getSettingsXmlFromUrl(
                             "settings.xml",
                             success = function (responseXML) {
-                                var baseOrgSettings = new orgSettingsCollection();
+                                var baseOrgSettings = new OrgSettingsCollection();
                                 //success - parse XML into settings 
                                 var xmlDoc = o$.parseXML(responseXML);
                                 o$(xmlDoc).find('defaultorgSettings').children().each(function (i) {
@@ -1139,7 +1174,7 @@
                                         var DisableIECompatModeSetting = baseOrgSettings.getSetting("DisableIECompatMode");
 
                                         if (!supportedBrowser || (DisableIECompatModeSetting && DisableIECompatModeSetting.value == false)) {
-                                            updateBanner("<b>This may not operate in compatability or a non standards mode</b>: For details please read <a href='" + _Settings.projectIECompatDocUrl + "' target='_blank'>this FAQ</a>, manually check <a href='" + _Settings.projectUrl + "' target='_blank'>here</a> for updates.", false, "IENotSupported");
+                                            updateBanner("<b>This may not operate in compatability or a non standards mode</b>: For details please read <a href='" + SDK.Settings.projectIECompatDocUrl + "' target='_blank'>this FAQ</a>, manually check <a href='" + SDK.Settings.projectUrl + "' target='_blank'>here</a> for updates.", false, "IENotSupported");
                                         }
 
                                         //instruct user on how this works
@@ -1229,25 +1264,6 @@
             localStorage.removeItem(orgLocalStorage.newVersionAlertKey);
             localStorage.removeItem(orgLocalStorage.slnBuildVerKey);
         };
-        function downloadAzureBlob(blobId) {
-            ///<param name='blobId' type='Number'>blobId</param>
-            //if (blobId) {
-            //    var query = client.getTable('applicationVersion').select('id', 'SolutionZip').where({
-            //        id:blobId
-            //    }).take(1).read().done(function (results) {
-            //        //32000 char limit :( -- SDK.SOAP.updateSolution(results[0].SolutionZip); 
-            //        //alert(JSON.stringify(results));
-            //        //var url = "data:application/octet-stream;base64," + results[0].SolutionZip;
-            //        URL.createObjectURL(
-            //        var url = "data:application/octet-stream;charset=utf-8;base64," + results[0].SolutionZip;
-            //        o$('#downloader').prop('href', url);
-            //        //document.location.href = url;
-            //        //return window.open(url);
-            //    }, function (err) {
-            //        alert("Error: " + err);
-            //    });
-            //}
-        };
     </script>
     <style type="text/css">
         Body
@@ -1301,7 +1317,6 @@
             font-size: 11px;
             /*background-color:lightgray;/*rgb(233, 237, 241)rgb(207, 212, 218)*/
             border-collapse: collapse;
-            width: 800px;
         }
         .main table, th, td, tr
         {
@@ -1352,7 +1367,7 @@
             </table>
         </div>
     </div>
-    <div class="crmAppMessageBar" id="messageBar" style="width: 800px"></div>
+    <div class="crmAppMessageBar" id="messageBar" style="width:800px;"></div>
     <div id="addBox" style="visibility: hidden;">
         <div>
         </div>
@@ -1367,9 +1382,10 @@
             </tr>
             <tr>
                 <td colspan="3">
-                    <button onclick="editSettingInCRM(false);">Update</button>
-                    <button onclick="editSettingInCRM(true);">Reset Default</button>
-                    <button onclick="o$('#addBox').css('visibility','hidden');">Cancel</button>
+                    <button onclick="editSettingFromUIDiv(false, false);">Update</button>
+                    <button onclick="editSettingFromUIDiv(true, false);">Reset Default</button>
+                    <button onclick="editSettingFromUIDiv(false, true);">Remove Setting</button>
+                    <button onclick="o$('#addBox').css('visibility','hidden');o$('#currentSetting').val('');o$('#txtSettingValue').val('');">Cancel</button>
                 </td>
             </tr>
             <tr>
@@ -1377,10 +1393,14 @@
             </tr>
         </table>
     </div>
-    <div id="mainContent" class="main">
+    <div id="mainContent" class="main" style="width:800px;height:500px;overflow:auto;">
     </div>
+    <div id="infoRow" style="width:800px;vertical-align:top;border:1px solid darkgrey;">
+    </div>
+    <br>
     <div>
-        <input style="visibility: hidden;" type="checkbox" id="chkPromptBeforeChange" value="" checked="checked" /><label style="visibility: hidden;" id="lblPromptLabel" for="chkPromptBeforeChange">Prompt before making any changes in CRM</label>
+        <input style="visibility: hidden;" type="checkbox" id="chkPromptBeforeChange" value="" checked="checked" />
+        <label style="visibility: hidden;" id="lblPromptLabel" for="chkPromptBeforeChange">Prompt before making any changes in CRM</label>
     </div>
     <div style="visibility: hidden;" id="ServerVersionDiv"></div>
 </body>
