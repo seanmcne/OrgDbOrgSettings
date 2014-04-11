@@ -2,45 +2,234 @@
 <defaultorgSettings>
   <orgSetting minSupportedVersion="5.0.9690.583"
               maxSupportedVersion="6.0.9999.9999"
-              name="BackgroundSendBatchSize" min="1" max="255" defaultValue="10" settingType="Number" supportUrl="http://support.microsoft.com/kb/2691237" urlTitle="KB 2691237" description="Max email batch size per user for sending emails in the background. This sets the number of emails to download in one batch for the BackgroundSend API." />
+              name="BackgroundSendBatchSize"
+              min="1"
+              max="255"
+              defaultValue="10"
+              settingType="Number"
+              supportUrl="http://support.microsoft.com/kb/2691237"
+              urlTitle="KB 2691237"
+              description="Max email batch size per user for sending emails in the background. This sets the number of emails to download in one batch for the BackgroundSend API." />
   <orgSetting minSupportedVersion="5.0.9688.583"
               maxSupportedVersion="6.0.9999.9999"
-              name="AutoCreateContactOnPromote" min="null" max="null" defaultValue="true" settingType="Boolean" supportUrl="http://support.microsoft.com/kb/2691237" urlTitle="KB 2691237" description="Disables the ability for the entire organization to create contact records automatically when an email is tracked in CRM. This option can also be disabled from the user settings area for each user. &lt;b&gt;False&lt;/b&gt; - Disables the auto creation of contacts. &lt;b&gt;True&lt;/b&gt; - Enables the auto creation of contacts." />
+              name="AutoCreateContactOnPromote"
+              min="null"
+              max="null"
+              defaultValue="true"
+              settingType="Boolean"
+              supportUrl="http://support.microsoft.com/kb/2691237"
+              urlTitle="KB 2691237"
+              description="Disables the ability for the entire organization to create contact records automatically when an email is tracked in CRM. This option can also be disabled from the user settings area for each user. &lt;b&gt;False&lt;/b&gt; - Disables the auto creation of contacts. &lt;b&gt;True&lt;/b&gt; - Enables the auto creation of contacts." />
   <orgSetting minSupportedVersion="5.0.9688.583"
               maxSupportedVersion="6.0.9999.9999"
-              name="ClientUEIPDisabled" min="null" max="null" defaultValue="false" settingType="Boolean" supportUrl="http://support.microsoft.com/kb/2691237" urlTitle="KB 2691237" description="Disables the sending of customer experience feedback for the organization. This option can also be disabled from the user settings area for each user. &lt;b&gt;False&lt;/b&gt; - Enables the sending. &lt;b&gt;True&lt;/b&gt; - Disables the sending." />
+              name="ClientUEIPDisabled"
+              min="null"
+              max="null"
+              defaultValue="false"
+              settingType="Boolean"
+              supportUrl="http://support.microsoft.com/kb/2691237"
+              urlTitle="KB 2691237"
+              description="Disables the sending of customer experience feedback for the organization. This option can also be disabled from the user settings area for each user. &lt;b&gt;False&lt;/b&gt; - Enables the sending. &lt;b&gt;True&lt;/b&gt; - Disables the sending." />
   <orgSetting minSupportedVersion="5.0.9688.583"
               maxSupportedVersion="6.0.9999.9999"
-              name="DisableInactiveRecordFilterForMailMerge" min="null" max="null" defaultValue="false" settingType="Boolean" supportUrl="http://support.microsoft.com/kb/2691237" urlTitle="KB 2691237" description="When performing a mail merge inactive records are not included in the mail merge. This option allows you to override that functionality. &lt;b&gt;False&lt;/b&gt; - Inactive records will not be included in the mail merge. &lt;b&gt;True&lt;/b&gt; - Inactive records will be included in the mail merge." />
+              name="DisableInactiveRecordFilterForMailMerge"
+              min="null"
+              max="null"
+              defaultValue="false"
+              settingType="Boolean"
+              supportUrl="http://support.microsoft.com/kb/2691237"
+              urlTitle="KB 2691237"
+              description="When performing a mail merge inactive records are not included in the mail merge. This option allows you to override that functionality. &lt;b&gt;False&lt;/b&gt; - Inactive records will not be included in the mail merge. &lt;b&gt;True&lt;/b&gt; - Inactive records will be included in the mail merge." />
   <orgSetting minSupportedVersion="5.0.9688.583"
               maxSupportedVersion="6.0.9999.9999"
-              name="DisableSmartMatching" min="null" max="null" defaultValue="false" settingType="Boolean" supportUrl="http://support.microsoft.com/kb/2691237" urlTitle="KB 2691237" description="Disables the smart matching functionality and relies on the tracking token on the incoming e-mails for e-mail tracking. &lt;b&gt;False&lt;/b&gt; - Enables smart matching &lt;b&gt;True&lt;/b&gt; - Disables smart matching" />
+              name="DisableSmartMatching"
+              min="null"
+              max="null"
+              defaultValue="false"
+              settingType="Boolean"
+              supportUrl="http://support.microsoft.com/kb/2691237"
+              urlTitle="KB 2691237"
+              description="Disables the smart matching functionality and relies on the tracking token on the incoming e-mails for e-mail tracking. &lt;b&gt;False&lt;/b&gt; - Enables smart matching &lt;b&gt;True&lt;/b&gt; - Disables smart matching" />
   <orgSetting minSupportedVersion="5.0.9690.583"
               maxSupportedVersion="6.0.9999.9999"
-              name="LookupNameMatchesDuringImport" min="null" max="null" defaultValue="false" settingType="Boolean" supportUrl="http://support.microsoft.com/kb/2691237" urlTitle="KB 2691237" description="Importing a solution that was created from an upgraded 4.0 deployment fails. Changing this setting makes the import look up the names for forms, views, workflows and security roles." />
+              name="LookupNameMatchesDuringImport"
+              min="null"
+              max="null"
+              defaultValue="false"
+              settingType="Boolean"
+              supportUrl="http://support.microsoft.com/kb/2691237"
+              urlTitle="KB 2691237"
+              description="Importing a solution that was created from an upgraded 4.0 deployment fails. Changing this setting makes the import look up the names for forms, views, workflows and security roles." />
+  <orgSetting minSupportedVersion="5.0.9690.1533"
+              maxSupportedVersion="5.0.9999.9999"
+              name="DoNotIgnoreInternalEmailToQueues"
+              min="null"
+              max="null"
+              defaultValue="false"
+              settingType="Boolean"
+              supportUrl="http://support.microsoft.com/kb/2691237"
+              urlTitle="KB 2691237"
+              description="If you disable the &quot;Track e-mail sent between CRM users as two activities&quot; setting, e-mail messages from a CRM user to a queue are not delivered. Additionally, if a workflow rule sends an e-mail message to a queue, e-mail messages that are sent by the workflow rule are not delivered. &lt;b&gt;False&lt;/b&gt; - Internal e-mail messages to queues will not be delivered. &lt;b&gt;True&lt;/b&gt; - Internal e-mail messages to queues will be delivered." />
   <orgSetting minSupportedVersion="5.0.9690.1533"
               maxSupportedVersion="6.0.9999.9999"
-              name="DoNotIgnoreInternalEmailToQueues" min="null" max="null" defaultValue="false" settingType="Boolean" supportUrl="http://support.microsoft.com/kb/2691237" urlTitle="KB 2691237" description="If you disable the &quot;Track e-mail sent between CRM users as two activities&quot; setting, e-mail messages from a CRM user to a queue are not delivered. Additionally, if a workflow rule sends an e-mail message to a queue, e-mail messages that are sent by the workflow rule are not delivered. &lt;b&gt;False&lt;/b&gt; - Internal e-mail messages to queues will not be delivered. &lt;b&gt;True&lt;/b&gt; - Internal e-mail messages to queues will be delivered." />
-  <orgSetting minSupportedVersion="5.0.9690.1533"
-              maxSupportedVersion="6.0.9999.9999"
-              name="EnableRetrieveMultipleOptimization" min="0" max="3" defaultValue="0" settingType="Number" supportUrl="http://go.microsoft.com/fwlink/?LinkID=213093" urlTitle="White Paper" description="For more information see the Optimizing the Performance of Queries against Large Datasets section in the Optimizing and Maintaining the Performance of a Dynamics CRM 2011 Server Infrastructure" />
+              name="EnableRetrieveMultipleOptimization"
+              min="0"
+              max="3"
+              defaultValue="0"
+              settingType="Number"
+              supportUrl="http://go.microsoft.com/fwlink/?LinkID=213093"
+              urlTitle="White Paper"
+              description="For more information see the Optimizing the Performance of Queries against Large Datasets section in the Optimizing and Maintaining the Performance of a Dynamics CRM 2011 Server Infrastructure" />
   <orgSetting minSupportedVersion="5.0.9690.1992"
               maxSupportedVersion="6.0.9999.9999"
-              name="SkipSuffixOnKBArticles" min="null" max="null" defaultValue="false" settingType="Boolean" supportUrl="http://support.microsoft.com/kb/2691237" urlTitle="KB 2691237" description="When you create a knowledge base (KB) article the KB article number uses the &quot;Prefix-Number-Suffix&quot; format. You expect the format to be &quot;Prefix-Number.&quot; For more info see KB: &lt;a href=&quot;http://support.microsoft.com/kb/981840&quot;&gt;981840&lt;/a&gt;" />
-  <orgSetting minSupportedVersion="5.0.9690.1992" maxSupportedVersion="6.0.9999.9999" name="SkipGettingRecordCountForPaging" min="null" max="null" defaultValue="false" settingType="Boolean" supportUrl="http://support.microsoft.com/kb/2691237" urlTitle="KB 2691237" description="Disables the record count query. This query is responsible for getting the total number of records returned for each view. This query can cause longer search times and may lead to SQL timeouts or Exceptions. &lt;b&gt;False&lt;/b&gt; - Enables record count on views. &lt;b&gt;True&lt;/b&gt; - Disables record count on views." />
-  <orgSetting minSupportedVersion="5.0.9690.2165" maxSupportedVersion="6.0.9999.9999" name="VerboseErrorsOnPromoteToCRM" min="0" max="1" defaultValue="0" settingType="Number" supportUrl="http://support.microsoft.com/kb/2691237" urlTitle="KB 2691237" description="Enables verbose user error messaging when tracking items from Outlook to Dynamics CRM. By default some error messages during the tracking are suppressed from being shown to the end user and this setting enables those errors to be shown. &lt;b&gt;0&lt;/b&gt; - Disables the verbose errors. &lt;b&gt;1&lt;/b&gt; - Enables the verbose errors." />
-  <orgSetting minSupportedVersion="5.0.9690.2243" maxSupportedVersion="6.0.9999.9999" name="JumpBarAlphabetOverride" min="null" max="null" defaultValue="" settingType="String" supportUrl="http://support.microsoft.com/kb/2494984" urlTitle="KB 2494984" description="Allows for customization of the Alphabet Bar for the CRM Application Grids for Microsoft Dynamics CRM" />
-  <orgSetting minSupportedVersion="5.0.9690.2243" maxSupportedVersion="6.0.9999.9999" name="JumpBarNumberIndicatorOverride" min="null" max="null" defaultValue="" settingType="String" supportUrl="http://support.microsoft.com/kb/2494984" urlTitle="KB 2494984" description="Allows for customization of the Alphabet Bar for the CRM Application Grids for Microsoft Dynamics CRM" />
-  <orgSetting minSupportedVersion="5.0.9690.2243" maxSupportedVersion="6.0.9999.9999" name="OverrideV5SenderConflictResolution" min="null" max="null" defaultValue="false" settingType="Boolean" supportUrl="http://support.microsoft.com/kb/2691237" urlTitle="KB 2691237" description="When multiple records with the same e-mail address exist in the Dynamics CRM Organization and e-mail is auto tracked the e-mail is resolved to the record that was created first. This option allows you to override that functionality.&lt;b&gt;False&lt;/b&gt; - E-mails are tracked to the first record created &lt;b&gt;True&lt;/b&gt; - E-mails are not tracked automatically if there are multiple records with the same e-mail address." />
-  <orgSetting minSupportedVersion="5.0.9690.2720" maxSupportedVersion="6.0.9999.9999" name="OverrideTrackInCrmBehaviour" min="0" max="1" defaultValue="0" settingType="Number" supportUrl="http://support.microsoft.com/kb/2691237" urlTitle="KB 2691237" description="When this option is Enabled the Track in CRM button will function like the Set Regarding button. 0 - Normal behavior of the Track in CRM button not having to set a Regarding record. &lt;b&gt;1&lt;/b&gt; - Track in CRM will function like the Set Regarding and make you choose a regarding record." />
-  <orgSetting minSupportedVersion="5.0.9690.2720" maxSupportedVersion="6.0.9999.9999" name="ActivityConvertDlgCampaignUnchecked" min="null" max="null" defaultValue="true" settingType="Boolean" supportUrl="http://support.microsoft.com/kb/2691237" urlTitle="KB 2691237" description="Controls the default value of the Record Closed Campaign Response option. When converting an activity to an opportunity this default option controls whether the source campaign is set or not. &lt;b&gt;False&lt;/b&gt; - Record Closed Campaign Response checked and source campaign will be set. &lt;b&gt;True&lt;/b&gt; - Record Closed Campaign Response not checked and source campaign is not set." />
-  <orgSetting minSupportedVersion="5.0.9690.2720" maxSupportedVersion="6.0.9999.9999" name="EnableQuickFindOptimization" min="0" max="1" defaultValue="1" settingType="Number" supportUrl="http://go.microsoft.com/fwlink/?LinkID=213093" urlTitle="White Paper" description="For more information see the Optimizing the Performance of Quick Find Queries section in the Optimizing and Maintaining the Performance of a Dynamics CRM 2011 Server Infrastructure" />
-  <orgSetting minSupportedVersion="5.0.9690.2720" maxSupportedVersion="6.0.9999.9999" name="IdsCountForUsingGuidStringForSecurity" min="0" max="1000" defaultValue="20" settingType="Number" supportUrl="http://support.microsoft.com/kb/2691237" urlTitle="KB 2691237" description="Not yet documented in optimization paper."/>
-  <orgSetting minSupportedVersion="5.0.9690.2720" maxSupportedVersion="6.0.9999.9999" name="IdsCountBeforeUsingJoinsForSecurity" min="0" max="2147483647" defaultValue="1000" settingType="Number" supportUrl="http://support.microsoft.com/kb/2691237" urlTitle="KB 2691237" description="Not yet documented in optimization paper." />
-  <orgSetting minSupportedVersion="5.0.9690.2720" maxSupportedVersion="6.0.9999.9999" name="SharingLimitForPOASnapshotTable" min="1" max="2147483647" defaultValue="10" settingType="Number" supportUrl="http://support.microsoft.com/kb/2691237" urlTitle="KB 2691237" description="Not yet documented in optimization paper." />
-  <orgSetting minSupportedVersion="5.0.9690.2720" maxSupportedVersion="6.0.9999.9999" name="RecordCountLimitToSwitchToCteSecuritySql" min="1" max="2147483647" defaultValue="75000" settingType="Number" supportUrl="http://go.microsoft.com/fwlink/?LinkID=213093" urlTitle="White Paper" description="For more information see the Optimizing the Performance of Queries against Large Datasets section in the Optimizing and Maintaining the Performance of a Dynamics CRM 2011 Server Infrastructure. &lt;b&gt;Warning: do not increase this value unless it's for a *very* specific reason.&lt;/b&gt; " />
-  <orgSetting minSupportedVersion="5.0.9690.2720" maxSupportedVersion="6.0.9999.9999" name="RetrieveMultipleSharingCountThreshold" min="1" max="2147483647" defaultValue="1000" settingType="Number" supportUrl="http://go.microsoft.com/fwlink/?LinkID=213093" urlTitle="White Paper" description="For more information see the Optimizing the Performance of Queries against Large Datasets section in the Optimizing and Maintaining the Performance of a Dynamics CRM 2011 Server Infrastructure" />
-  <orgSetting minSupportedVersion="5.0.9690.2720" maxSupportedVersion="6.0.9999.9999" name="SendEmailSynchronously" min="0" max="1" defaultValue="0" settingType="Number" supportUrl="http://support.microsoft.com/kb/2691237" urlTitle="KB 2691237" description="If you have a plugin registered on the e-mail send flow you will want to update this setting to 1.&lt;b&gt;0&lt;/b&gt; - E-mail is sent asynchronously &lt;b&gt;1&lt;/b&gt; - E-mail is sent synchronously" />
+              name="SkipSuffixOnKBArticles"
+              min="null"
+              max="null"
+              defaultValue="false"
+              settingType="Boolean"
+              supportUrl="http://support.microsoft.com/kb/2691237"
+              urlTitle="KB 2691237"
+              description="When you create a knowledge base (KB) article the KB article number uses the &quot;Prefix-Number-Suffix&quot; format. You expect the format to be &quot;Prefix-Number.&quot; For more info see KB: &lt;a href=&quot;http://support.microsoft.com/kb/981840&quot;&gt;981840&lt;/a&gt;" />
+  <orgSetting minSupportedVersion="5.0.9690.1992"
+              maxSupportedVersion="6.0.9999.9999"
+              name="SkipGettingRecordCountForPaging"
+              min="null"
+              max="null"
+              defaultValue="false"
+              settingType="Boolean"
+              supportUrl="http://support.microsoft.com/kb/2691237"
+              urlTitle="KB 2691237"
+              description="Disables the record count query. This query is responsible for getting the total number of records returned for each view. This query can cause longer search times and may lead to SQL timeouts or Exceptions. &lt;b&gt;False&lt;/b&gt; - Enables record count on views. &lt;b&gt;True&lt;/b&gt; - Disables record count on views." />
+  <orgSetting minSupportedVersion="5.0.9690.2165"
+              maxSupportedVersion="6.0.9999.9999"
+              name="VerboseErrorsOnPromoteToCRM"
+              min="0"
+              max="1"
+              defaultValue="0"
+              settingType="Number"
+              supportUrl="http://support.microsoft.com/kb/2691237"
+              urlTitle="KB 2691237"
+              description="Enables verbose user error messaging when tracking items from Outlook to Dynamics CRM. By default some error messages during the tracking are suppressed from being shown to the end user and this setting enables those errors to be shown. &lt;b&gt;0&lt;/b&gt; - Disables the verbose errors. &lt;b&gt;1&lt;/b&gt; - Enables the verbose errors." />
+  <orgSetting minSupportedVersion="5.0.9690.2243"
+              maxSupportedVersion="6.0.9999.9999"
+              name="JumpBarAlphabetOverride"
+              min="null"
+              max="null"
+              defaultValue=""
+              settingType="String"
+              supportUrl="http://support.microsoft.com/kb/2494984"
+              urlTitle="KB 2494984"
+              description="Allows for customization of the Alphabet Bar for the CRM Application Grids for Microsoft Dynamics CRM" />
+  <orgSetting minSupportedVersion="5.0.9690.2243"
+              maxSupportedVersion="6.0.9999.9999"
+              name="JumpBarNumberIndicatorOverride"
+              min="null"
+              max="null"
+              defaultValue=""
+              settingType="String"
+              supportUrl="http://support.microsoft.com/kb/2494984"
+              urlTitle="KB 2494984"
+              description="Allows for customization of the Alphabet Bar for the CRM Application Grids for Microsoft Dynamics CRM" />
+  <orgSetting minSupportedVersion="5.0.9690.2243"
+              maxSupportedVersion="6.0.9999.9999"
+              name="OverrideV5SenderConflictResolution"
+              min="null"
+              max="null"
+              defaultValue="false"
+              settingType="Boolean"
+              supportUrl="http://support.microsoft.com/kb/2691237"
+              urlTitle="KB 2691237"
+              description="When multiple records with the same e-mail address exist in the Dynamics CRM Organization and e-mail is auto tracked the e-mail is resolved to the record that was created first. This option allows you to override that functionality.&lt;b&gt;False&lt;/b&gt; - E-mails are tracked to the first record created &lt;b&gt;True&lt;/b&gt; - E-mails are not tracked automatically if there are multiple records with the same e-mail address." />
+  <orgSetting minSupportedVersion="5.0.9690.2720"
+              maxSupportedVersion="6.0.9999.9999"
+              name="OverrideTrackInCrmBehaviour"
+              min="0"
+              max="1"
+              defaultValue="0"
+              settingType="Number"
+              supportUrl="http://support.microsoft.com/kb/2691237"
+              urlTitle="KB 2691237"
+              description="When this option is Enabled the Track in CRM button will function like the Set Regarding button. 0 - Normal behavior of the Track in CRM button not having to set a Regarding record. &lt;b&gt;1&lt;/b&gt; - Track in CRM will function like the Set Regarding and make you choose a regarding record." />
+  <orgSetting minSupportedVersion="5.0.9690.2720"
+              maxSupportedVersion="6.0.9999.9999"
+              name="ActivityConvertDlgCampaignUnchecked"
+              min="null"
+              max="null"
+              defaultValue="true"
+              settingType="Boolean"
+              supportUrl="http://support.microsoft.com/kb/2691237"
+              urlTitle="KB 2691237"
+              description="Controls the default value of the Record Closed Campaign Response option. When converting an activity to an opportunity this default option controls whether the source campaign is set or not. &lt;b&gt;False&lt;/b&gt; - Record Closed Campaign Response checked and source campaign will be set. &lt;b&gt;True&lt;/b&gt; - Record Closed Campaign Response not checked and source campaign is not set." />
+  <orgSetting minSupportedVersion="5.0.9690.2720"
+              maxSupportedVersion="6.0.9999.9999"
+              name="EnableQuickFindOptimization"
+              min="0"
+              max="1"
+              defaultValue="1"
+              settingType="Number"
+              supportUrl="http://go.microsoft.com/fwlink/?LinkID=213093"
+              urlTitle="White Paper"
+              description="For more information see the Optimizing the Performance of Quick Find Queries section in the Optimizing and Maintaining the Performance of a Dynamics CRM 2011 Server Infrastructure" />
+  <orgSetting minSupportedVersion="5.0.9690.2720"
+              maxSupportedVersion="6.0.9999.9999"
+              name="IdsCountForUsingGuidStringForSecurity"
+              min="0"
+              max="1000"
+              defaultValue="20"
+              settingType="Number"
+              supportUrl="http://support.microsoft.com/kb/2691237"
+              urlTitle="KB 2691237"
+              description="Not yet documented in optimization paper."/>
+  <orgSetting minSupportedVersion="5.0.9690.2720"
+              maxSupportedVersion="6.0.9999.9999"
+              name="IdsCountBeforeUsingJoinsForSecurity"
+              min="0"
+              max="2147483647"
+              defaultValue="1000"
+              settingType="Number"
+              supportUrl="http://support.microsoft.com/kb/2691237"
+              urlTitle="KB 2691237"
+              description="Not yet documented in optimization paper." />
+  <orgSetting minSupportedVersion="5.0.9690.2720"
+              maxSupportedVersion="6.0.9999.9999"
+              name="SharingLimitForPOASnapshotTable"
+              min="1"
+              max="2147483647"
+              defaultValue="10"
+              settingType="Number"
+              supportUrl="http://support.microsoft.com/kb/2691237"
+              urlTitle="KB 2691237"
+              description="Not yet documented in optimization paper." />
+  <orgSetting minSupportedVersion="5.0.9690.2720"
+              maxSupportedVersion="6.0.9999.9999"
+              name="RecordCountLimitToSwitchToCteSecuritySql"
+              min="1"
+              max="2147483647"
+              defaultValue="75000"
+              settingType="Number"
+              supportUrl="http://go.microsoft.com/fwlink/?LinkID=213093"
+              urlTitle="White Paper"
+              description="For more information see the Optimizing the Performance of Queries against Large Datasets section in the Optimizing and Maintaining the Performance of a Dynamics CRM 2011 Server Infrastructure. &lt;b&gt;Warning: do not increase this value unless it's for a *very* specific reason.&lt;/b&gt; " />
+  <orgSetting minSupportedVersion="5.0.9690.2720"
+              maxSupportedVersion="6.0.9999.9999"
+              name="RetrieveMultipleSharingCountThreshold"
+              min="1"
+              max="2147483647"
+              defaultValue="1000"
+              settingType="Number"
+              supportUrl="http://go.microsoft.com/fwlink/?LinkID=213093"
+              urlTitle="White Paper"
+              description="For more information see the Optimizing the Performance of Queries against Large Datasets section in the Optimizing and Maintaining the Performance of a Dynamics CRM 2011 Server Infrastructure" />
+  <orgSetting minSupportedVersion="5.0.9690.2720"
+              maxSupportedVersion="6.0.9999.9999"
+              name="SendEmailSynchronously"
+              min="0"
+              max="1"
+              defaultValue="0"
+              settingType="Number"
+              supportUrl="http://support.microsoft.com/kb/2691237"
+              urlTitle="KB 2691237"
+              description="If you have a plugin registered on the e-mail send flow you will want to update this setting to 1.&lt;b&gt;0&lt;/b&gt; - E-mail is sent asynchronously &lt;b&gt;1&lt;/b&gt; - E-mail is sent synchronously" />
   <orgSetting minSupportedVersion="5.0.9690.2720"
               maxSupportedVersion="6.0.9999.9999"
               name="UsePlainTextForEmailTemplateBody"
@@ -52,7 +241,7 @@
               urlTitle="KB 2691237"
               description="Will set CRM to send emails with only plain text instead of HTML text." />
   <orgSetting minSupportedVersion="5.0.9690.2835"
-              maxSupportedVersion="6.0.9999.9999"
+              maxSupportedVersion="5.0.9999.9999"
               name="SetRegardingLookupDefaultEntityType"
               min="null"
               max="null"
@@ -325,5 +514,6 @@
  CRM 2013: 
   6.0.0.809 is RTM 
   6.0.1.61  is UR1 
+  6.0.2.46  is UR2 - no new settings found
  -->
 </defaultorgSettings>
