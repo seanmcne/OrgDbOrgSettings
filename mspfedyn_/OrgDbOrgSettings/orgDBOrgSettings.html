@@ -77,7 +77,7 @@
                     });
                 }
             },
-            getSettingsXmlFromUrl: function (settingsXmlPath, successCallback, errorCallback) {
+            getSettingsXmlFromUrl: function (settingsXmlPath) {
                 ///<summary>Async retrieve settings xml from the server</summary>
                 ///<param name='settingsXmlPath' type='String'>Relative path of the settings.xml file</param>
                 ///<param name="successCallback" Type="Function">The function to perform when an successfult response is returned.
@@ -86,45 +86,31 @@
                 /// The function to perform when an error is returned. 
                 /// This function accepts a JScript error returned by the _getError function</param>
                 ///<var name="req" Type="XMLHttpRequest">The XMLHttpRequest</var>
-                o$.ajax({
+                return o$.ajax({
                     timeout: SDK.Settings.ajaxTimeout,
                     type: "GET",
                     datatype: "xml",
                     url: settingsXmlPath,
                     data: null,
-                    beforeSend: function (XMLHttpRequest) { },
-                    success: function (results, textStatus, XmlHttpRequest) {
-                        successCallback(XmlHttpRequest.responseText);
-                    },
-                    error: function (XMLHttpRequest, textStatus, errorThrown) {
-                        errorCallback(errorThrown);
-                    },
-                    complete: function (XMLHttpRequest, status) { }
+                    beforeSend: function (XMLHttpRequest) { }
                 });
             },
             //free up the UI - TODO change these functions to allow for Chaining of done, error, complete, etc... 
-            getOrgDbOrgSettingsFromCRM: function (successCallback, errorCallback) {
+            getOrganizationEntityFromCrm: function () {
                 ///<summary>Async retrieves the current orgdborgsettings from Dynamics CRM</summary>
-                ///<param name="successCallback" Type="Function(organizationSet[0])">The function to perform when an successfult response is returned. 
-                ///Should accept a single parameter which will accept an argument of type BuildVersion</param>
-                ///<param name="errorCallback" Type="Function">The function to perform when an error is returned.</param>
+                ///<returns type='jqXHR'>Ajax Query Object</returns>
                 var rootUrl = this.getOrgRootUrl(); //required IE8
-                o$.ajax({
+                return o$.ajax({
                     timeout: SDK.Settings.ajaxTimeout,
                     type: "GET",
                     contentType: "application/json; charset=utf-8",
                     datatype: "json",
-                    url: rootUrl + "/XRMServices/2011/OrganizationData.svc/OrganizationSet?$select=OrganizationId,Name,OrgDbOrgSettings",
+                    url: rootUrl + "/XRMServices/2011/OrganizationData.svc/OrganizationSet",
+                    //url: rootUrl + "/XRMServices/2011/OrganizationData.svc/OrganizationSet?$select=OrganizationId,Name,OrgDbOrgSettings",
                     data: null,
                     beforeSend: function (XMLHttpRequest) {
                         //Specifying this header ensures that the results will be returned as JSON.
                         XMLHttpRequest.setRequestHeader("Accept", "application/json");
-                    },
-                    success: function (results, textStatus, XmlHttpRequest) {
-                        successCallback(results);
-                    },
-                    error: function (XMLHttpRequest, textStatus, errorThrown) {
-                        alert("There was an error retrieving your orgDBOrgSettings: " + errorThrown);
                     }
                 });
             },
@@ -183,8 +169,50 @@
                 //    }
                 //});
             },
+            getOrganizationAttributeValue: function (attributeName) {
+                ///<returns type='jqXHR'>Returns ajax query</returns> 
+                var rootUrl = this.getOrgRootUrl();  //IE8 required
+                return o$.ajax({
+                    timeout: SDK.Settings.ajaxTimeout,
+                    type: "GET",
+                    contentType: "application/json; charset=utf-8",
+                    datatype: "json",
+                    url: rootUrl + "/XRMServices/2011/OrganizationData.svc/OrganizationSet?$select=OrganizationId,Name," + attributeName,
+                    data: null,
+                    beforeSend: function (XMLHttpRequest) {
+                        //Specifying this header ensures that the results will be returned as JSON.
+                        XMLHttpRequest.setRequestHeader("Accept", "application/json");
+                    }
+                });
+            },
+            setOrganizationAttributeValue: function (attributeName, attributeValue, organizationId) {
+                ///<summary>Async updates organizationbase attribute value</summary>
+                ///<param name='attributeName' type='String'>attribute name to update</param>
+                ///<param name="attributeValue" Type="Object">the value of the attribute to set</param>
+                ///<param name="organizationId" type="String">Org ID Guid to update in CRM</param> 
+                ///<returns type='jqXHR'>Returns ajax query</returns> 
+                var rootUrl = this.getOrgRootUrl();  //IE8 required
+
+                //create blank object and dynamically add the dynamic value
+                var update = {};
+                update[attributeName] = attributeValue;
+
+                return o$.ajax({
+                    timeout: SDK.Settings.ajaxTimeout,
+                    type: "POST",
+                    contentType: "application/json; charset=utf-8",
+                    datatype: "json",
+                    url: rootUrl + "/XRMServices/2011/OrganizationData.svc/OrganizationSet" + "(guid'" + organizationId + "')",
+                    data: oJSON.stringify(update),
+                    beforeSend: function (XMLHttpRequest) {
+                        XMLHttpRequest.setRequestHeader("Accept", "application/json");
+                        XMLHttpRequest.setRequestHeader("X-HTTP-Method", "MERGE");
+                    },
+                });
+            },
             //follows better pattern to impliment success/fail/complete
             getCrmSolutionVersion: function () {
+                ///<returns type='jqXHR'>Returns ajax query</returns> 
                 ///<returns type='jqXHR'>Returns ajax query</returns> 
                 var rootUrl = this.getOrgRootUrl();  //IE8 required
                 return o$.ajax({
@@ -348,6 +376,7 @@
         };
         SDK.Settings = {
             ajaxTimeout: 30000,
+            crmServerDBVersion: new BuildVersion(0, 0, 0, 0),
             azureClient: null,
             daysOfCache: 7,
             azureMobileUrl: "https://orgdborgsettings.azure-mobile.net/",
@@ -365,6 +394,7 @@
             projectIEDocumentationUrl: "https://orgdborgsettings.codeplex.com/wikipage?title=IE8%20Settings",
             projectIECompatDocUrl: "https://orgdborgsettings.codeplex.com/wikipage?title=CRM%20Disable%20IE%20Compatibility%20Mode",
             _localSettingsCollection: {},
+            CRMOrganizationResults: {}, //the result of an odata call for all organization columns 
             LocalStorage: {
                 supports_html5_storage: function () {
                     try {
@@ -449,9 +479,9 @@
                             SDK.Settings.azureClient.getTable('applicationVersion')
                                 .select('VersionNumber', 'DownloadUrl', 'PublishedDate')
                                 .where(
-                                function (dateCompare) {
-                                    return this.PublishedDate <= dateCompare;
-                                }, new Date().toISOString())
+                                function (dateCompare, majorVersion) {
+                                    return this.PublishedDate <= dateCompare && this.MinCrmVersion <= majorVersion && this.MaxCrmVersion >= majorVersion;
+                                }, new Date().toISOString(), SDK.Settings.crmServerDBVersion.major)
                                 .take(1)
                                 .orderByDescending('PublishedDate')
                                 .read()
@@ -663,45 +693,6 @@
                 });
                 return retVal;
             },
-            update: function (name, value) {
-                /// <summary>Updates the current value of a given setting by name</summary>
-                /// <param name='name' type='orgSetting'>Setting object to update</param> 
-                /// <param name='value' type='String'>Value of the setting as a string</param>
-                //DataType Sensative
-                var parseFailure = false;
-                var setting = this.getSetting(name);
-                switch (setting.type.toString().toLowerCase()) {
-                    case "string":
-                        setting.value = settingStringValue;
-                        //settingObj.value = settingStringValue.toLowerCase()==="null" ? null : settingStringValue; 
-                        break;
-                    case "boolean": //parse text and convert
-                        if ((settingStringValue || "null").toLowerCase() === "true") {
-                            setting.value = true;
-                        }
-                        else if ((settingStringValue || "null").toLowerCase() === "false") {
-                            setting.value = false;
-                        }
-                        else {
-                            parseFailure = true;
-                        }
-                        break;
-                    case "number":
-                        var num = parseInt(settingStringValue);
-                        num === NaN ? parseFailure = true : setting.value = parseInt(settingStringValue);
-                        break;
-                    case "double":
-                        var num = parseFloat(settingStringValue);
-                        num === NaN ? parseFailure = true : setting.value = parseFloat(settingStringValue);
-                        break;
-                    default:
-                        parseFailure = true;
-                        break;
-                }
-                if (parseFailure) {
-                    throw Error("Cannot parse the setting with name: " + setting.name + " and value of: " + settingStringValue + " with the type of: " + setting.type.toString());
-                }
-            },
             addSetting: function (OrganizationSetting) {
                 ///<summary>Adds another orgSetting object to the OrgSettingsCollection instance array.</summary>
                 ///<param name='OrganizationSetting' type='orgSetting'>Organization Setting</param>
@@ -721,13 +712,14 @@
             },
             _settings: new Array()
         };
-        function orgSetting(name, value, type, min, max, defaultValue, supportUrl, description, minSupportedVersion, urlTitle, maxSupportedVersion) {
+        function orgSetting(name, value, type, min, max, defaultValue, supportUrl, description, minSupportedVersion, urlTitle, maxSupportedVersion, isOrganizationAttribute) {
             /// <summary>Object defention of orgSetting</summary> 
             /// <param name='name' type='String'>Setting name</param>
             /// <param name='value' type='Object'>Setting value</param>
             /// <param name='type' type='Type'>Underlying object Type of the setting value</param>
             /// <param name='min' type='Number'>Minimum Int value</param>
             /// <param name='max' type='Number'>Maximum Int value</param>
+            /// <param name='isOrganizationAttribute' type='Boolean'>Does this setting exist in the OrganizationEntity? (Not orgDbOrgSettings)</param>
             /// <returns type="orgSetting">An instance of an orgSetting()</returns>
             this.name = name;
             this.value = value
@@ -740,46 +732,14 @@
             this.minSupportedVersion = minSupportedVersion;
             this.maxSupportedVersion = maxSupportedVersion;
             this.urlTitle = urlTitle || "No URL";
+            this.isOrganizationAttribute = isOrganizationAttribute || false; //default to false
         };
         orgSetting.prototype = {
             parseStringToValue: function (value) {
                 ///<summary>Parses a value and returns the type.</summary>
                 ///<param name='value' type='String'>String representation of the value</param>
                 ///<returns type='Object'>typed value</returns>
-                //DataType Sensative
-                var parseFailure = false, retval;
-                switch (this.type.toString().toLowerCase()) {
-                    case "string":
-                        retval = value;
-                        //settingObj.value = settingStringValue.toLowerCase()==="null" ? null : settingStringValue; 
-                        break;
-                    case "boolean": //parse text and convert
-                        if ((value || "null").toLowerCase() === "true") {
-                            retval = true;
-                        }
-                        else if ((value || "null").toLowerCase() === "false") {
-                            retval = false;
-                        }
-                        else {
-                            parseFailure = true;
-                        }
-                        break;
-                    case "number":
-                        var num = parseInt(value);
-                        num === NaN ? parseFailure = true : retval = parseInt(value);
-                        break;
-                    case "double":
-                        var num = parseFloat(value);
-                        num === NaN ? parseFailure = true : retval = parseFloat(value);
-                        break;
-                    default:
-                        parseFailure = true;
-                        break;
-                }
-                if (parseFailure) {
-                    throw Error("Cannot parse the setting with name: " + this.name + " and value of: " + value + " with the type of: " + this.type.toString());
-                }
-                return retval;
+                return parseValueFromTypeName(this.type, value);
             },
             toXmlForUpdate: function (useDefaultValue) {
                 /// <Summary>Returns the setting XML for an update to CRM</Summary>
@@ -809,6 +769,9 @@
                 if (!this.isValid()) {
                     throw "Default value is not valid!";
                 }
+            },
+            defaultValue: function () {
+                return this.defaultValue;
             },
             toXmlForDefaultValue: function () {
                 /// <Summary>returns the setting XML representation for an update</Summary>
@@ -872,6 +835,46 @@
                 return (this.value == null ? false : true)
             }
         };
+
+        function parseValueFromTypeName(TypeName, Value) {
+            ///<summary>Parses a value and returns the type.</summary>
+            ///<param name='TypeName' type='String'>A String defining which type of value to parse [string|boolean|number|double]</param>
+            ///<param name='Value' type='String'>String representation of the value</param>
+            ///<returns type='Object'>typed value</returns>
+            //DataType Sensative
+            var parseFailure = false, retval;
+            switch (TypeName.toString().toLowerCase()) {
+                case "string":
+                    retval = Value;
+                    break;
+                case "boolean": //parse text and convert
+                    if ((Value || "null").toLowerCase() === "true") {
+                        retval = true;
+                    }
+                    else if ((Value || "null").toLowerCase() === "false") {
+                        retval = false;
+                    }
+                    else {
+                        parseFailure = true;
+                    }
+                    break;
+                case "number":
+                    var num = parseInt(Value);
+                    num === NaN ? parseFailure = true : retval = parseInt(Value);
+                    break;
+                case "double":
+                    var num = parseFloat(Value);
+                    num === NaN ? parseFailure = true : retval = parseFloat(Value);
+                    break;
+                default:
+                    parseFailure = true;
+                    break;
+            }
+            if (parseFailure) {
+                throw Error("Cannot parse the value of: " + Value + " with the type of: " + this.type.toString());
+            }
+            return retval;
+        };
         function upsertSetting(settingName, settingValue, resetToDefault) {
             ///<summary>If setting exists it is updated, if it does not yet exist it's inserted with the default value</summary>
             try {
@@ -898,21 +901,36 @@
                     }
                     //submit the xml change from our clone which is not bound to the UI setting
                     //in the future updateOrgDbOrgSetting should sort this out by itself 
-                    SDK.SOAP.updateOrgDbOrgSettingOnServer(
-                        cloneSetting.toXmlForUpdate(), //setting.toXmlForUpdate(),
-                        SDK.Settings.OrganizationId,
-                        success = function () {
+                    if (setting.isOrganizationAttribute) {
+                        SDK.SOAP.setOrganizationAttributeValue(
+                            settingName,
+                            settingValue,
+                            SDK.Settings.OrganizationId)
+                        .done(function (results, textStatus, XmlHttpRequest) {
                             setting.update(settingValue); //update the underlying value in the UI
                             printSettingsToDiv();
-                        },
-                        error = function (error) {
+                            enableProgressDiv(false);
+                        }).fail(function (jqXHR, textStatus, errorThrown) {
                             dumpErrorInBanner(error);
                             enableProgressDiv(false);
-                            //o$('#addBox').css('visibility', 'visible');
-                        },
-                        complete = function () {
-                            enableProgressDiv(false);
                         });
+                    }
+                    else {
+                        SDK.SOAP.updateOrgDbOrgSettingOnServer(
+                            cloneSetting.toXmlForUpdate(), //setting.toXmlForUpdate(),
+                            SDK.Settings.OrganizationId,
+                            success = function () {
+                                setting.update(settingValue); //update the underlying value in the UI
+                                printSettingsToDiv();
+                            },
+                            error = function (error) {
+                                dumpErrorInBanner(error);
+                                enableProgressDiv(false);
+                            },
+                            complete = function () {
+                                enableProgressDiv(false);
+                            });
+                    }
                 }
             }
             catch (e) {
@@ -935,55 +953,69 @@
         function deleteSetting(strSettingToDelete) {
             if (confirm("Are you absolutely sure you want to remove: " + strSettingToDelete + "?") && confirm("This functionality is still experimental, be sure to take a screenshot of your settings before you do this.\r\nDo you still wish to proceed?\r\n\r\nTechnically this deletes all settings from CRM then adds all the settings back with the exception of " + strSettingToDelete + ".")) {
                 enableProgressDiv(true);
-                //submit the xml change from our clone which is not bound to the UI setting
-                //in the future updateOrgDbOrgSetting should sort this out by itself 
-                SDK.SOAP.updateOrgDbOrgSettingOnServer(
-                    "", //push through an empty string,
-                    SDK.Settings.OrganizationId,
-                    success = function () {
-                        try {
-                            var finalXmlUpdate = "";
-                            //try to store all the settings off 
-                            o$.each(SDK.Settings.OrganizationSettings.getAllSettings(), function (index, setting) {
-                                ///<param name="setting" type="orgSetting"/>
-                                ///<param name="index" type="int"/> 
-                                if (setting != null && setting.value != null && setting.name != strSettingToDelete) {
-                                    finalXmlUpdate += setting.toRawXmlSetting(false);
-                                }
-                            });
-                            if (finalXmlUpdate.length > 0) {
-                                finalXmlUpdate = '<orgSettings>' + finalXmlUpdate + '</orgSettings>';
 
-                                SDK.SOAP.updateOrgDbOrgSettingOnServer(
-                                    finalXmlUpdate, //push through an empty string,
-                                    SDK.Settings.OrganizationId,
-                                    success = function () {
-                                    },
-                                    error = function (error) {
-                                        dumpErrorInBanner(error);
-                                    },
-                                    complete = function () {
-                                        SDK.Settings.OrganizationSettings.clear(); //clear currently stored settings
-                                        onPageLoad();//refresh the entire page
-                                    });
+                var settingToDelete = SDK.Settings.OrganizationSettings.getSetting(strSettingToDelete);
+                if (settingToDelete.isOrganizationAttribute) {
+                    SDK.SOAP.setOrganizationAttributeValue(settingToDelete.name, settingToDelete.defaultValue, SDK.Settings.OrganizationId)
+                        .done(function (results, textStatus, XmlHttpRequest) {
+                            SDK.Settings.OrganizationSettings.clear(); //clear currently stored settings
+                            onPageLoad();//refresh the entire page
+                        })
+                        .fail(function (jqXHR, textStatus, errorThrown) {
+                            dumpErrorInBanner(errorThrown);
+                        });
+                }
+                else {
+                    //submit the xml change from our clone which is not bound to the UI setting
+                    //in the future updateOrgDbOrgSetting should sort this out by itself 
+                    SDK.SOAP.updateOrgDbOrgSettingOnServer(
+                        "", //push through an empty string,
+                        SDK.Settings.OrganizationId,
+                        success = function () {
+                            try {
+                                var finalXmlUpdate = "";
+                                //try to store all the settings off 
+                                o$.each(SDK.Settings.OrganizationSettings.getAllSettings(), function (index, setting) {
+                                    ///<param name="setting" type="orgSetting"/>
+                                    ///<param name="index" type="int"/> 
+                                    if (setting != null && setting.value != null && setting.name != strSettingToDelete && !setting.isOrganizationAttribute) {
+                                        finalXmlUpdate += setting.toRawXmlSetting(false);
+                                    }
+                                });
+                                if (finalXmlUpdate.length > 0) {
+                                    finalXmlUpdate = '<orgSettings>' + finalXmlUpdate + '</orgSettings>';
+
+                                    SDK.SOAP.updateOrgDbOrgSettingOnServer(
+                                        finalXmlUpdate, //push through an empty string,
+                                        SDK.Settings.OrganizationId,
+                                        success = function () {
+                                        },
+                                        error = function (error) {
+                                            dumpErrorInBanner(error);
+                                        },
+                                        complete = function () {
+                                            SDK.Settings.OrganizationSettings.clear(); //clear currently stored settings
+                                            onPageLoad();//refresh the entire page
+                                        });
+                                }
+                                else {
+                                    SDK.Settings.OrganizationSettings.clear(); //clear currently stored settings
+                                    onPageLoad();//refresh the entire page
+                                }
                             }
-                            else {
-                                SDK.Settings.OrganizationSettings.clear(); //clear currently stored settings
-                                onPageLoad();//refresh the entire page
+                            catch (e) {
+                                dumpErrorInBanner(e);
+                                SDK.Settings.OrganizationSettings.clear();
+                                onPageLoad();//todo ... this creates a ton of duplicate settings 
                             }
-                        }
-                        catch (e) {
-                            dumpErrorInBanner(e);
-                            SDK.Settings.OrganizationSettings.clear();
-                            onPageLoad();//todo ... this creates a ton of duplicate settings 
-                        }
-                    },
-                    error = function (error) {
-                        dumpErrorInBanner(error);
-                        enableProgressDiv(false);
-                    },
-                    complete = function () {
-                    });
+                        },
+                        error = function (error) {
+                            dumpErrorInBanner(error);
+                            enableProgressDiv(false);
+                        },
+                        complete = function () {
+                        });
+                }
             }
         };
         function launchDivEditor(settingName) {
@@ -1012,7 +1044,13 @@
                 var hasCurrentValue = (setting.value == null ? false : true);
                 var currentValueTD = '<td>not set</td>';
                 //changes background of settings that differ from the default 
-                if (hasCurrentValue && setting.value.toString() !== setting.defaultValue.toString()) {
+                if (setting.isOrganizationAttribute && setting.value.toString() !== setting.defaultValue.toString()) {
+                    currentValueTD = '<td style="background-color:RGB(240,240,240);"><b>' + setting.value + '</b></td>';
+                }
+                else if (setting.isOrganizationAttribute && setting.value.toString() === setting.defaultValue.toString()) {
+                    currentValueTD = '<td><b>' + setting.value + '<b></td>';
+                }
+                else if (hasCurrentValue && (setting.value.toString() !== setting.defaultValue.toString() || setting.isOrganizationAttribute)) {
                     currentValueTD = '<td style="background-color:RGB(240,240,240);"><b>' + setting.value + '</b></td>';
                 }
                 else if (hasCurrentValue && setting.value.toString() === setting.defaultValue.toString()) {
@@ -1025,6 +1063,8 @@
             //show prompt for changes: 
             o$('#chkPromptBeforeChange').css('visibility', 'visible');
             o$('#lblPromptLabel').css('visibility', 'visible');
+
+
         };
         function setupHelpers() {
             //try to load AzureMobile, if we fail we'll do it silently - problem here is that we cannot catch the error message from AzureMobile :(
@@ -1082,12 +1122,7 @@
         function resetBanner() {
             updateBanner("", true);
         };
-        function setJavascriptGlobals(orgSettingsCollection, organizationId) {
-            ///<param name="orgSettingsCollection" type="OrgSettingsCollection">Collection of the current CRM orgs settings</param>
-            ///<param name="organizationId" type="Guid">Guid of the CRM Organization</param>
-            SDK.Settings.OrganizationSettings = orgSettingsCollection;
-            SDK.Settings.OrganizationId = organizationId;
-        };
+
         function onPageLoad() {
             /*
              - Do some setup
@@ -1098,63 +1133,81 @@
              - then paint the grid? 
              */
             //alert user of other settings if OnPrem
-            if (!(Xrm.Page.context.getServerUrl().toLowerCase().indexOf(".dynamics.com") !== -1)) {
+            var urlFunction = Xrm.Page.context.getClientUrl() || Xrm.Page.context.getServerUrl();
+            if (!(urlFunction.toLowerCase().indexOf(".dynamics.com") !== -1)) {
                 updateBanner("Your environment is OnPremise, these settings may need to be checked against the ConfigDB(PowerShell) and Registry settings.", false, "onpremmsg");
             }
-            enableProgressDiv(true);
             setupHelpers();//sets up the page and object helpers necessary to do our work 
             try {
-                SDK.SOAP.getCrmServerVersion(
-                    function (serverBuildVersion) {
-                        ///<param name='serverBuildVersion' type='BuildVersion'></param>
-                        //fire another 'thread' off to check solution and versions - then compare them
-                        getLatestCrmSolutionVersion(false);
-                        //on success - print build version 
-                        o$('#ServerVersionDiv')
-                            .html("<i>Server version (from about page): " +
-                                serverBuildVersion.toBuildNumberString() +
-                                "</i>")
-                            .css('visibility', 'visible');
-                        //proceed to retrieving settings xml 
-                        SDK.SOAP.getSettingsXmlFromUrl(
-                            "settings.xml",
-                            success = function (responseXML) {
-                                var baseOrgSettings = new OrgSettingsCollection();
-                                //success - parse XML into settings 
-                                var xmlDoc = o$.parseXML(responseXML);
-                                o$(xmlDoc).find('defaultorgSettings').children().each(function (i) {
-                                    //each child looks like this
-                                    //<orgSetting minSupportedVersion="5.0.9688.583" name="ActivityConvertDlgCampaignUnchecked" min="null" max="null" defaultValue="true" settingType="Boolean" supportUrl="http://url" description="stuff" />
-                                    var curNode = o$(this)[0]; //current XML node 
-                                    var minVer = curNode.attributes.getNamedItem("minSupportedVersion").value;
-                                    var maxVer = curNode.attributes.getNamedItem("maxSupportedVersion").value;
-                                    if (serverBuildVersion.isGreaterThanOrEq(BuildVersion.parseBuildNumber(minVer)) && serverBuildVersion.isLessThanOrEq(BuildVersion.parseBuildNumber(maxVer))) {
-                                        baseOrgSettings.addSetting(new orgSetting(
-                                            curNode.attributes.getNamedItem("name").value,
-                                            null,
-                                            curNode.attributes.getNamedItem("settingType").value,
-                                            curNode.attributes.getNamedItem("min").value,
-                                            curNode.attributes.getNamedItem("max").value,
-                                            curNode.attributes.getNamedItem("defaultValue").value,
-                                            curNode.attributes.getNamedItem("supportUrl").value,
-                                            curNode.attributes.getNamedItem("description").value,
-                                            curNode.attributes.getNamedItem("minSupportedVersion").value,
-                                            curNode.attributes.getNamedItem("urlTitle").value),
-                                            curNode.attributes.getNamedItem("minSupportedVersion").value
-                                        );
-                                    }
-                                });
-                                //all default settings are now in baseOrgSettings 
-                                //now process the orgdborgsettings from the CRM Server and update the baseOrgSettings
-                                SDK.SOAP.getOrgDbOrgSettingsFromCRM(
-                                    success = function (results) {
+                enableProgressDiv(true);
+
+                //load the entire Organization entity 
+                SDK.SOAP.getOrganizationEntityFromCrm()
+                    .done(function (results, textStatus, XmlHttpRequest) {
+                        //Setup our global values from the results 
+                        SDK.Settings.CRMOrganizationResults = results.d.results[0];
+                        SDK.Settings.OrganizationId = SDK.Settings.CRMOrganizationResults.OrganizationId;
+                        SDK.SOAP.getCrmServerVersion(
+                            function (serverBuildVersion) {
+                                ///<param name='serverBuildVersion' type='BuildVersion'></param>
+                                //fire another 'thread' off to check solution and versions - then compare them
+                                getLatestCrmSolutionVersion(false);
+                                SDK.Settings.crmServerDBVersion = serverBuildVersion;
+                                //on success - print build version 
+                                o$('#ServerVersionDiv')
+                                    .html("<i>Server version (from about page): " + serverBuildVersion.toBuildNumberString() + "</i>")
+                                    .css('visibility', 'visible');
+                                //proceed to retrieving settings xml 
+                                SDK.SOAP.getSettingsXmlFromUrl("settings.xml")
+                                    .done(function (response, textStatus, XmlHttpRequest) {
+                                        var baseOrgSettings = new OrgSettingsCollection();
+                                        //success - parse XML into settings 
+                                        var xmlDoc = o$.parseXML(XmlHttpRequest.responseText);
+                                        o$(xmlDoc).find('defaultorgSettings').children().each(function (i) {
+                                            //each child looks like this
+                                            //<orgSetting minSupportedVersion="5.0.9688.583" name="ActivityConvertDlgCampaignUnchecked" min="null" max="null" defaultValue="true" settingType="Boolean" supportUrl="http://url" description="stuff" />
+                                            var curNode = o$(this)[0]; //current XML node 
+                                            var minVer = curNode.attributes.getNamedItem("minSupportedVersion").value;
+                                            var maxVer = curNode.attributes.getNamedItem("maxSupportedVersion").value;
+                                            if (serverBuildVersion.isGreaterThanOrEq(BuildVersion.parseBuildNumber(minVer)) && serverBuildVersion.isLessThanOrEq(BuildVersion.parseBuildNumber(maxVer))) {
+
+                                                var isOrganizationAttribute = false;
+                                                var currentSettingValue = null;
+
+                                                //check if it is an Organization Entity Attribute - if so, get the value as we already have it 
+                                                if (null != curNode.attributes.getNamedItem("isOrganizationAttribute")) {
+                                                    isOrganizationAttribute = parseValueFromTypeName("boolean", curNode.attributes.getNamedItem("isOrganizationAttribute").value);
+                                                    currentSettingValue = SDK.Settings.CRMOrganizationResults[curNode.attributes.getNamedItem("name").value];
+                                                }
+
+                                                baseOrgSettings.addSetting(
+                                                    new orgSetting(
+                                                        curNode.attributes.getNamedItem("name").value,
+                                                        currentSettingValue,
+                                                        curNode.attributes.getNamedItem("settingType").value,
+                                                        curNode.attributes.getNamedItem("min").value,
+                                                        curNode.attributes.getNamedItem("max").value,
+                                                        curNode.attributes.getNamedItem("defaultValue").value,
+                                                        curNode.attributes.getNamedItem("supportUrl").value,
+                                                        curNode.attributes.getNamedItem("description").value,
+                                                        minVer,
+                                                        curNode.attributes.getNamedItem("urlTitle").value,
+                                                        maxVer,
+                                                        isOrganizationAttribute
+                                                    )
+                                                );
+                                            }
+                                        });
+                                        //all default settings are now loaded - set them globally 
+                                        SDK.Settings.OrganizationSettings = baseOrgSettings;
+
                                         //parse XML document and loop through settings to populate the array with default values and types retrieved from the deafult data array
-                                        var xmlDoc = o$.parseXML(results.d.results[0].OrgDbOrgSettings);
+                                        var xmlDoc = o$.parseXML(SDK.Settings.CRMOrganizationResults.OrgDbOrgSettings);
                                         o$(xmlDoc).find('OrgSettings').children().each(function (index) {
                                             var settingName = o$(this)[0].tagName;
                                             var settingValue = o$(this)[0].text || o$(this)[0].textContent || "";
                                             //update the settign value if it exists in our default collection 
-                                            var settingObj = baseOrgSettings.getSetting(settingName);
+                                            var settingObj = SDK.Settings.OrganizationSettings.getSetting(settingName);
                                             if (settingObj) //if we have the setting in our collection
                                             {
                                                 try {
@@ -1164,36 +1217,24 @@
                                                     dumpErrorInBanner(new Error("Error setting: " + settingName + " with value: " + settingValue + " - " + e.message));
                                                 }
                                             }
-                                        });
-
-                                        //set our globals from here 
-                                        setJavascriptGlobals(baseOrgSettings, results.d.results[0].OrganizationId);
-
+                                        })
                                         printSettingsToDiv();
-
-                                        var DisableIECompatModeSetting = baseOrgSettings.getSetting("DisableIECompatMode");
-
-                                        if (!supportedBrowser || (DisableIECompatModeSetting && DisableIECompatModeSetting.value == false)) {
-                                            updateBanner("<b>This may not operate in compatability or a non standards mode</b>: For details please read <a href='" + SDK.Settings.projectIECompatDocUrl + "' target='_blank'>this FAQ</a>, manually check <a href='" + SDK.Settings.projectUrl + "' target='_blank'>here</a> for updates.", false, "IENotSupported");
-                                        }
-
-                                        //instruct user on how this works
-                                        updateBanner("Click a setting row for more details at the bottom of the page. NOTE: you should not change any setting without having a specific reason to do so.", false, "howtomessage");
-                                        enableProgressDiv(false); //done free up the UI 
-                                    },
-                                    errorOnGetOrgDbOrgSettings = function (error) {
-                                        dumpErrorInBanner(error);
-                                        enableProgressDiv(false); //we had an error free up the UI 
+                                        printUserInstructions();
+                                    })
+                                    .fail(function (jqXHR, textStatus, errorThrown) {
+                                        alert("There was an error retrieving the Organization Entity: " + errorThrown);
+                                        dumpErrorInBanner(errorThrown);
                                     });
                             },
-                            error = function (errorObject) {
-                                dumpErrorInBanner(errorObject);
-                                enableProgressDiv(false); //we had an error free up the UI 
-                            }
-                        );
-                    },
-                    function (errorMessage) {
-                        dumpErrorInBanner(errorMessage);
+                            function (errorMessage) {
+                                dumpErrorInBanner(errorMessage);
+                            });
+                    })
+                    .fail(function (jqXHR, textStatus, errorThrown) {
+                        alert("There was an error retrieving the Organization Entity: " + errorThrown);
+                    })
+                    .always(function (XMLHttpRequest, status) {
+                        enableProgressDiv(false);
                     });
             }
             catch (e) {
@@ -1204,6 +1245,14 @@
                     , true, "massiveerrormsg");
             }
         };
+        function printUserInstructions() {
+            var DisableIECompatModeSetting = SDK.Settings.OrganizationSettings.getSetting("DisableIECompatMode");
+            if (!supportedBrowser || (DisableIECompatModeSetting && DisableIECompatModeSetting.value == false)) {
+                updateBanner("<b>This may not operate in compatability or a non standards mode</b>: For details please read <a href='" + SDK.Settings.projectIECompatDocUrl + "' target='_blank'>this FAQ</a>, manually check <a href='" + SDK.Settings.projectUrl + "' target='_blank'>here</a> for updates.", false, "IENotSupported");
+            }
+            //instruct user on how this works
+            updateBanner("Click a setting row for more details at the bottom of the page. NOTE: you should not change any setting without having a specific reason to do so.", false, "howtomessage");
+        }
         function dumpErrorInBanner(e) {
             ///<param name='e' type='Error'></param>
             updateBanner("We've handled an error, for reference the error info is:" +
