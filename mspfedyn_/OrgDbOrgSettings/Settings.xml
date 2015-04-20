@@ -670,9 +670,48 @@
               supportUrl="http://support.microsoft.com/kb/2691237"
               urlTitle="KB 2691237"
               description="Setting min row count in &lt;b&gt;referenced&lt;/b&gt; table for ForeignKey index creation" />
+  <!--7.0.1.129 2015 Update Zero Point One (0.1)-->
+  <orgSetting
+    minSupportedVersion="7.0.1.121"
+    maxSupportedVersion="7.0.9.999"
+    name="GrantFullAccessForMergeToMasterOwner"
+    isOrganizationAttribute="false"
+    min=""
+    max=""
+    defaultValue="true"
+    settingType="Boolean"
+    supportUrl="http://support.microsoft.com/kb/2691237"
+    urlTitle="KB 2691237"
+    description="Previous less desirable behavior will default to &lt;b&gt;true&lt;/b&gt;, to preserve existing functionality.  The more desirable behavior is achieved with the setting of: &lt;b&gt;false&lt;/b&gt;.  Details: When two records owned by the same team are merged, the final record is shared with the owner of the record it was merged from. This creates redundant POA records, as a result, if the owner of the record is changed in the future it will be visible to team members of the previously owning team. " />
+  <orgSetting
+    minSupportedVersion="7.0.1.121"
+    maxSupportedVersion="7.0.9.999"
+    name="EnableAppointmentBroadcastingForOutlookSync"
+    isOrganizationAttribute="false"
+    min="0"
+    max="1"
+    defaultValue="0"
+    settingType="Number"
+    supportUrl="http://support.microsoft.com/kb/2691237"
+    urlTitle="KB 2691237"
+    description="Setting for Appointment broadcasting for Outlook Synchronization" />
+  <orgSetting
+      minSupportedVersion="7.0.1.121"
+      maxSupportedVersion="7.0.9.999"
+      name="OutlookClientEmailTaggerEnabled"
+      isOrganizationAttribute="false"
+      min=""
+      max=""
+      defaultValue="False"
+      settingType="Boolean"
+      supportUrl="http://support.microsoft.com/kb/2691237"
+      urlTitle="KB 2691237"
+      description="WARNING!!! - read this carefully as there are &lt;b&gt;3&lt;/b&gt; values for this Boolean setting - true, false, and NULL (which is the value when NOT set).  &lt;b&gt;TRUE&lt;/b&gt;: Will override any and all client registry setting to True.  &lt;b&gt;FALSE&lt;/b&gt;: Will override any and all client registry setting to False. &lt;b&gt;NULL&lt;/b&gt;: If the setting is NULL the outlook clients will use whatever is in the registry of the client.  TO SET THIS VALUE TO NULL YOU WILL NEED TO CLICK EDIT, THEN REMOVE THE VALUE TO HAVE IT DEFAULT TO NULL." />
+  
   <!--
  CRM 2015: 
-  7.0.0000.3027 2015 RTM
+  7.0.0.3027 2015 RTM
+  7.0.1.129 Update Zero Point One (0.1) and 121 is .1 for online
  
  CRM 2013: 
   6.0.0.809 is RTM 
