@@ -772,6 +772,7 @@
               supportUrl="http://support.microsoft.com/kb/2691237"
               urlTitle="KB 2691237"
               description="Setting min row count in &lt;b&gt;referenced&lt;/b&gt; table for ForeignKey index creation" />
+  
   <!--7.0.1.129 2015 Update Zero Point One (0.1)-->
   <orgSetting
     minSupportedVersion="7.0.1.121"
@@ -822,7 +823,7 @@
     settingType="Number"
     supportUrl="http://support.microsoft.com/kb/2691237"
     urlTitle="KB 2691237"
-    description="Carina TBD: The number of days to temporarily store Office Document Records. 30 days max was selected arbitrarily as this is only a cache." />
+    description="7.1: The number of days to temporarily store Office Document Records. 30 days max was selected arbitrarily as this is only a cache." />
   <orgSetting
     minSupportedVersion="7.1.0.1059"
     maxSupportedVersion="7.9.9999.9999"
@@ -834,7 +835,7 @@
     settingType="Number"
     supportUrl="http://support.microsoft.com/kb/2691237"
     urlTitle="KB 2691237"
-    description="Carina TBD: The number of days to temporarily store Excel exported Office Document Records. 30 days max was selected arbitrarily as this is only a cache. Must be at least 2." />
+    description="7.1: The number of days to temporarily store Excel exported Office Document Records. 30 days max was selected arbitrarily as this is only a cache. Must be at least 2." />
   <orgSetting
     minSupportedVersion="7.1.0.1059"
     maxSupportedVersion="7.9.9999.9999"
@@ -846,29 +847,70 @@
     settingType="Number"
     supportUrl="http://support.microsoft.com/kb/2691237"
     urlTitle="KB 2691237"
-    description="Carina TBD: This setting is used to determine how many record changes (deletes, inserts, and updates) to send back to a syncing client for each request." />
+    description="7.1: This setting is used to determine how many record changes (deletes, inserts, and updates) to send back to a syncing client for each request." />
 
   <!--ORGANIZTION ATTRIBUTE Settings - these are NOT OrgDbOrgSettings but Organization.Attribute(s) -->
-  <orgSetting minSupportedVersion="5.0.9690.583"
-            maxSupportedVersion="7.9.9999.9999"
-            name="MaxRecordsForExportToExcel"
-            isOrganizationAttribute="true"
-            min="5000"
-            max="50000"
-            defaultValue="10000"
-            settingType="Number"
-            supportUrl="http://msdn.microsoft.com/en-us/library/gg328408.aspx"
-            urlTitle="Organization entity attributes"
-            description="Max number of records to export to Excel, the larger the number the longer the exports will take (generally)." />
-  <orgSetting minSupportedVersion="6.0.0.809"
-              maxSupportedVersion="7.9.9999.9999"
-              name="MaximumActiveBusinessProcessFlowsAllowedPerEntity"
-              isOrganizationAttribute="true"
-              min="1"
-              max="100"
-              defaultValue="10"
-              settingType="Number"
-              supportUrl="https://msdn.microsoft.com/en-us/library/dn481586.aspx"
-              urlTitle="Model business process flows"
-              description="Max number of business process flows per entity allowed. &lt;b&gt;WARNING&lt;/b&gt;: if the value is greater than 10, you may see a decrease in your system’s performance when you switch processes or open a record that has an assigned business process flow. This may be especially noticeable if processes span multiple entities." />
+  <orgSetting 
+    minSupportedVersion="5.0.9690.583"
+    maxSupportedVersion="7.9.9999.9999"
+    name="MaxRecordsForExportToExcel"
+    isOrganizationAttribute="true"
+    min="5000"
+    max="500000"
+    defaultValue="10000"
+    settingType="Number"
+    supportUrl="http://msdn.microsoft.com/en-us/library/gg328408.aspx"
+    urlTitle="Organization entity attributes"
+    description="Max number of records to export to Excel, the larger the number the longer the exports will take (generally)." />
+  <orgSetting 
+    minSupportedVersion="6.0.0.809"
+    maxSupportedVersion="7.9.9999.9999"
+    name="MaximumActiveBusinessProcessFlowsAllowedPerEntity"
+    isOrganizationAttribute="true"
+    min="1"
+    max="100"
+    defaultValue="10"
+    settingType="Number"
+    supportUrl="https://msdn.microsoft.com/en-us/library/dn481586.aspx"
+    urlTitle="Model business process flows"
+    description="Max number of business process flows per entity allowed. &lt;b&gt;WARNING&lt;/b&gt;: if the value is greater than 10, you may see a decrease in your system’s performance when you switch processes or open a record that has an assigned business process flow. This may be especially noticeable if processes span multiple entities." />
+  <orgSetting 
+    minSupportedVersion="6.0.0.809"
+    maxSupportedVersion="7.9.9999.9999"
+    name="YammerGroupId"
+    isOrganizationAttribute="true"
+    isNullable ="true"
+    min="1"
+    max="999999999"
+    defaultValue="null"
+    settingType="Number"
+    supportUrl="https://www.bing.com"
+    urlTitle="Support only please"
+    description="YammerGroupId. &lt;b&gt;WARNING&lt;/b&gt;: Experimental, know what you're setting out to do before touching this field, please! :)" />
+  <orgSetting 
+    minSupportedVersion="6.0.0.809"
+    maxSupportedVersion="7.9.9999.9999"
+    name="YammerNetworkPermalink"
+    isOrganizationAttribute="true"
+    isNullable ="true"
+    min="null"
+    max="null"
+    defaultValue="null"
+    settingType="String"
+    supportUrl="https://www.bing.com"
+    urlTitle="Support only please"
+    description="YammerNetworkPermalink &lt;b&gt;WARNING&lt;/b&gt;: Experimental, know what you're setting out to do before touching this field, please! :)" />
+  <orgSetting 
+    minSupportedVersion="6.0.0.809"
+    maxSupportedVersion="7.9.9999.9999"
+    name="YammerOAuthAccessTokenExpired"
+    isOrganizationAttribute="true"
+    isNullable ="true"
+    min="null"
+    max="null"
+    defaultValue="null"
+    settingType="Boolean"
+    supportUrl="https://www.bing.com"
+    urlTitle="Support only please"
+    description="YammerOAuthAccessTokenExpired &lt;b&gt;WARNING&lt;/b&gt;: Experimental, know what you're setting out to do before touching this field, please! :)" />
 </defaultorgSettings>

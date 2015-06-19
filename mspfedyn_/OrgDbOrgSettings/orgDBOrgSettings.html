@@ -29,7 +29,7 @@
                 ///Should accept a single parameter which will accept an argument of type BuildVersion</param>
                 ///<param name="errorCallback" Type="Function">The function to perform when an error is returned.</param>
 
-                //try to get the parent doc app version - we can't necessarly rely on this, so we'll try to safely check.
+                //try to get the parent doc app version - we can't necessarly rely on this, and it's *not supported*, so we'll try to safely check it and have a fall back plan. 
                 //added 1.0.1.7. 
                 var gotParentVersion = false;
                 try {
@@ -489,7 +489,7 @@
                                         var latestAzureSln = BuildVersion.parseBuildNumber(results[0].VersionNumber);
                                         if (latestAzureSln.isGreaterThan(slnBuildVersion)) {
                                             alert("You are not running the latest available version!\rSee the yellow ribbon for a download URL for the latest solution.");
-                                            var openerCmd = 'javascript:openStdWindow(SDK.SOAP.getOrgRootUrl()+"/tools/solution/import/solutionimportwizard.aspx", null, 615, 400);';
+                                            var openerCmd = 'javascript:try{openStdWindow(SDK.SOAP.getOrgRootUrl()+"/tools/solution/import/solutionimportwizard.aspx", null, 615, 400);';
                                             var message = "<b>Version " +
                                                     latestAzureSln.toBuildNumberString() +
                                                     " is now available! <a target='_blank' href='" +
@@ -539,10 +539,6 @@
         function shouldCheckAzureForUpdates(minDaysInCache) {
             ///<param name='minDaysInCache' type='Number'>Minimum days between checking azure</param>
             ///<returns type='Boolean'>indicates if azure should be checked</returns>
-            //if (window.navigator.userAgent.indexOf("MSIE 7.0") > -1) {
-            //    updateBanner("<span style='font-weight:bold;'><span style='color:red;'>IE 8 is only supported in IE8 Standards Mode.</span> We are unable to check for updates because of this, please use IE9, IE10 or another supported modern browser to allow for update checking. In the meantime check <a href='http://orgdborgsettings.codeplex.com/releases'>here</a> for updates.</span>", false, "IE7ModeNotSupported");
-            //    return false; 
-            //}
             if (orgLocalStorage.supports_html5_storage()) {
                 var lastUpdateDateString = localStorage.getItem(orgLocalStorage.cacheKey);
                 if (lastUpdateDateString) {
@@ -706,7 +702,7 @@
             },
             _settings: new Array()
         };
-        function orgSetting(name, value, type, min, max, defaultValue, supportUrl, description, minSupportedVersion, urlTitle, maxSupportedVersion, isOrganizationAttribute) {
+        function orgSetting(name, value, type, min, max, defaultValue, supportUrl, description, minSupportedVersion, urlTitle, maxSupportedVersion, isOrganizationAttribute, isNullable, isReadonly) {
             /// <summary>Object defention of orgSetting</summary> 
             /// <param name='name' type='String'>Setting name</param>
             /// <param name='value' type='Object'>Setting value</param>
@@ -714,6 +710,7 @@
             /// <param name='min' type='Number'>Minimum Int value</param>
             /// <param name='max' type='Number'>Maximum Int value</param>
             /// <param name='isOrganizationAttribute' type='Boolean'>Does this setting exist in the OrganizationEntity? (Not orgDbOrgSettings)</param>
+            /// <param name='isNullable' type='Boolean'>Does this setting allow for null?</param>
             /// <returns type="orgSetting">An instance of an orgSetting()</returns>
             this.name = name;
             this.value = value
@@ -727,8 +724,16 @@
             this.maxSupportedVersion = maxSupportedVersion;
             this.urlTitle = urlTitle || "No URL";
             this.isOrganizationAttribute = isOrganizationAttribute || false; //default to false
+            this.isNullable = isNullable || false; //default to false
+            this.isReadonly = isReadonly || false; //default to false
         };
         orgSetting.prototype = {
+            isNullValue: function () {
+                if (this.value == null) {
+                    return true;
+                }
+                return false;
+            },
             parseStringToValue: function (value) {
                 ///<summary>Parses a value and returns the type.</summary>
                 ///<param name='value' type='String'>String representation of the value</param>
@@ -759,10 +764,16 @@
                 return '';
             },
             resetToDefault: function () {
-                this.value = this.defaultValue;
-                if (!this.isValid()) {
-                    throw "Default value is not valid!";
+                if (this.isNullable && this.defaultValue == "null") {
+                    this.value = null;
                 }
+                else {
+                    this.value = this.defaultValue;
+                    if (!this.isValid()) {
+                        throw "Default value is not valid!";
+                    }
+                }
+
             },
             defaultValue: function () {
                 return this.defaultValue;
@@ -782,6 +793,11 @@
                 ///<summary>checks the orgsetting value for validity.</summary>
                 ///<returns type='Boolean'>Value vailidity true/false.</summary>
                 //DataType Sensative
+
+                //if nullable and it's null - then it's a valid value 
+                if (this.isNullValue() && this.isNullable) { return true; }
+
+                //otherwise check the values 
                 switch ((this.type).toLowerCase()) {
                     case "number":
                         if (parseInt(this.value) != null && !isNaN(parseInt(this.value)) && this.value >= this.minNumber && this.value <= this.maxNumber) {
@@ -804,11 +820,6 @@
                             return true;
                         }
                         break;
-                    case "boolean?":
-                        if ((this.value !== null) && (this.value.toString().toLowerCase() == "false" || (this.value.toString().toLowerCase() == "true") || (this.value.toString().toLowerCase() == ""))) {
-                            return true;
-                        }
-                        break;
                     case "string":
                         if (this.value != null && this.value != "null")
                             return true;
@@ -823,7 +834,13 @@
                 /// <summary>Updates the current value of a given setting by name</summary>
                 /// <param name='stringValue' type='string'>Value of the setting as a string</param>
                 var currentValue = this.value;
-                var newValue = this.parseStringToValue(stringValue);
+                var newValue;
+                if (this.isNullable && (stringValue == null || stringValue == "null")) {
+                    newValue = null;
+                }
+                else {
+                    newValue = this.parseStringToValue(stringValue);
+                }
                 this.value = newValue;
                 if (!this.isValid()) {
                     this.value = currentValue; //reset value back to what it was
@@ -831,7 +848,13 @@
                 }
             },
             isSet: function () {
-                return (this.value == null ? false : true)
+                if (this.isNullValue() && this.isNullable) {
+                    return true;
+                }
+                else if (!this.isNullValue()) {
+                    return true;
+                }
+                return false;
             }
         };
 
@@ -857,14 +880,6 @@
                         parseFailure = true;
                     }
                     break;
-                case "boolean?":
-                    if ((Value || "null").toLowerCase() === "null") {
-                        retval = "";
-                    }
-                    else if ((Value || "null").toLowerCase() === "") {
-                        retval = "";
-                    }
-                    break;
                 case "number":
                     var num = parseInt(Value);
                     num === NaN ? parseFailure = true : retval = parseInt(Value);
@@ -878,7 +893,7 @@
                     break;
             }
             if (parseFailure) {
-                throw Error("Cannot parse the value of: " + Value + " with the type of: " + this.type.toString());
+                throw Error('Cannot parse the value of: "' + Value + '" for the setting type of: ' + TypeName);
             }
             return retval;
         };
@@ -893,11 +908,15 @@
                     enableProgressDiv(true);
                     //get setting from UI 
                     var setting = SDK.Settings.OrganizationSettings.getSetting(settingName);
+
+                    if (setting.isNullable && settingValue == "null") {
+                        settingValue = null;
+                    }
+
                     //deep clone the object and we'll use the clone to sort out our changes first 
                     var cloneSetting = o$.extend(true, {}, setting);
                     if (!resetToDefault) {
                         ///<var name='tempSetting' type='orgSetting'/>
-                        //setting.update(settingValue);
                         cloneSetting.update(settingValue);
                     }
                     else {
@@ -918,7 +937,7 @@
                             printSettingsToDiv();
                             enableProgressDiv(false);
                         }).fail(function (jqXHR, textStatus, errorThrown) {
-                            dumpErrorInBanner(error);
+                            dumpErrorInBanner(errorThrown);
                             enableProgressDiv(false);
                         });
                     }
@@ -958,7 +977,7 @@
             }
         };
         function deleteSetting(strSettingToDelete) {
-            if (confirm("Are you absolutely sure you want to remove: " + strSettingToDelete + "?") && confirm("This functionality is still experimental, be sure to take a screenshot of your settings before you do this.\r\nDo you still wish to proceed?\r\n\r\nTechnically this deletes all settings from CRM then adds all the settings back with the exception of " + strSettingToDelete + ".")) {
+            if (confirm("Are you absolutely sure you want to remove: " + strSettingToDelete + "?") && confirm("As a backup, take a screenshot of your settings before you do this.\r\nDo you still wish to proceed?\r\n\r\nTechnically this deletes all settings from CRM then adds all the settings back with the exception of " + strSettingToDelete + ".")) {
                 enableProgressDiv(true);
 
                 var settingToDelete = SDK.Settings.OrganizationSettings.getSetting(strSettingToDelete);
@@ -1027,7 +1046,7 @@
         };
         function launchDivEditor(settingName) {
             var setting = SDK.Settings.OrganizationSettings.getSetting(settingName);
-            if (setting.isSet()) {
+            if (setting.isSet() && !setting.isReadonly) {
                 o$('#addBox').css('visibility', 'visible');
                 o$('#editInfoRow').html(setting.description);
                 o$('#currentSetting').val(setting.name);
@@ -1035,6 +1054,12 @@
                 o$('#txtSettingValue').val((setting.value === null ? "null" : setting.value).toString())
                     .focus()
                     .select();
+                if (setting.isOrganizationAttribute) {
+                    o$('#removeButton').attr('disabled', 'disabled');
+                }
+                else {
+                    o$('#removeButton').removeAttr("disabled");
+                }
             }
         };
         function rowClick(settingName) {
@@ -1048,13 +1073,18 @@
             o$('#mainContent').empty();
             var divHtmlOut = '<table class="main"><tr><th>Name</th><th>Default Value</th><th>Current Value</th><th>Type</th><th>Min</th><th>Max</th><th>Action</th><th>Support Url</th></tr>';
             o$.each(SDK.Settings.OrganizationSettings.getAllSettings(), function (index, setting) {
-                var hasCurrentValue = (setting.value == null ? false : true);
+
+                var hasCurrentValue = (setting.value == null && !setting.isNullable ? false : true);
+
                 var currentValueTD = '<td>not set</td>';
                 //changes background of settings that differ from the default 
-                if (setting.isOrganizationAttribute && setting.value.toString() !== setting.defaultValue.toString()) {
+                if (setting.isNullValue() && setting.isNullable) {
+                    currentValueTD = '<td style="background-color:RGB(240,240,240);">null</td>';
+                }
+                else if (setting.isOrganizationAttribute && !setting.isNullValue() && setting.value.toString() !== setting.defaultValue.toString()) {
                     currentValueTD = '<td style="background-color:RGB(240,240,240);"><b>' + setting.value + '</b></td>';
                 }
-                else if (setting.isOrganizationAttribute && setting.value.toString() === setting.defaultValue.toString()) {
+                else if (setting.isOrganizationAttribute && !setting.isNullValue() && setting.value.toString() === setting.defaultValue.toString()) {
                     currentValueTD = '<td><b>' + setting.value + '<b></td>';
                 }
                 else if (hasCurrentValue && (setting.value.toString() !== setting.defaultValue.toString() || setting.isOrganizationAttribute)) {
@@ -1063,15 +1093,44 @@
                 else if (hasCurrentValue && setting.value.toString() === setting.defaultValue.toString()) {
                     currentValueTD = '<td><b>' + setting.value + '</b></td>';
                 }
-                divHtmlOut += '<tr onmouseover="this.className=\'mouseoverrow\';" onmouseout="this.className=\'\';" onclick="rowClick(\'' + setting.name + '\');" ondblclick="rowDblClick(\'' + setting.name + '\');"><td>' + setting.name + '</td><td>' + setting.defaultValue + '</td>' + (currentValueTD) + '<td>' + (setting.type.__typeName || setting.type) + '</td><td>' + (setting.minNumber == null ? '-' : setting.minNumber) + '</td><td>' + (setting.maxNumber || '-') + '</td><td>' + (hasCurrentValue ? ('<a href=# onclick="launchDivEditor(\'' + setting.name + '\');">Edit</a></td>') : ('<a href=# onclick="upsertSetting(\'' + setting.name + '\',null,true);">Add</a></td>')) + '<td>' + (setting.supportUrl == null ? 'N/a' : '<a target="_blank" href="' + setting.supportUrl + '">' + setting.urlTitle + '</a>') + '</td></tr>';
+
+                var editButtonHtml = "";
+                if (setting.isReadonly) {
+                    editButtonHtml = "&nbsp;";
+                }
+                else if (hasCurrentValue) {
+                    editButtonHtml = ('<a href=# onclick="launchDivEditor(\'' + setting.name + '\');">Edit</a></td>');
+                }
+                else if (!hasCurrentValue) {
+                    editButtonHtml = ('<a href=# onclick="upsertSetting(\'' + setting.name + '\',null,true);">Add</a></td>');
+                }
+
+                divHtmlOut += '<tr onmouseover="this.className=\'mouseoverrow\';" onmouseout="this.className=\'\';" onclick="rowClick(\''
+                    + setting.name
+                    + '\');" ondblclick="rowDblClick(\''
+                    + setting.name
+                    + '\');"><td>'
+                    + setting.name
+                    + '</td><td>'
+                    + setting.defaultValue
+                    + '</td>'
+                    + (currentValueTD)
+                    + '<td>'
+                    + (setting.type.__typeName || setting.type)
+                    + '</td><td>'
+                    + (setting.minNumber == null ? '-' : setting.minNumber)
+                    + '</td><td>'
+                    + (setting.maxNumber || '-')
+                    + '</td><td>'
+                    + editButtonHtml
+                    + '<td>'
+                    + (setting.supportUrl == null ? 'N/a' : '<a target="_blank" href="' + setting.supportUrl + '">' + setting.urlTitle + '</a>') + '</td></tr>';
             });
             divHtmlOut += '<tr><td colspan="8" style="width:800px;height:2px; background-color:darkgray; vertical-align:top;"></td></tr></table>'
             o$("#mainContent").append(divHtmlOut);
             //show prompt for changes: 
             o$('#chkPromptBeforeChange').css('visibility', 'visible');
             o$('#lblPromptLabel').css('visibility', 'visible');
-
-
         };
         function setupHelpers() {
             //try to load AzureMobile, if we fail we'll do it silently - problem here is that we cannot catch the error message from AzureMobile :(
@@ -1178,6 +1237,7 @@
                             SDK.SOAP.getSettingsXmlFromUrl("settings.xml")
                                 .done(function (response, textStatus, XmlHttpRequest) {
                                     var baseOrgSettings = new OrgSettingsCollection();
+
                                     //success - parse XML into settings 
                                     var xmlDoc = o$.parseXML(XmlHttpRequest.responseText);
                                     o$(xmlDoc).find('defaultorgSettings').children().each(function (i) {
@@ -1187,7 +1247,8 @@
                                         var minVer = curNode.attributes.getNamedItem("minSupportedVersion").value;
                                         var maxVer = curNode.attributes.getNamedItem("maxSupportedVersion").value;
                                         if (serverBuildVersion.isGreaterThanOrEq(BuildVersion.parseBuildNumber(minVer)) && serverBuildVersion.isLessThanOrEq(BuildVersion.parseBuildNumber(maxVer))) {
-
+                                            var isNullable = false;
+                                            var isReadonly = false;
                                             var isOrganizationAttribute = false;
                                             var currentSettingValue = null;
 
@@ -1196,7 +1257,12 @@
                                                 isOrganizationAttribute = parseValueFromTypeName("boolean", curNode.attributes.getNamedItem("isOrganizationAttribute").value);
                                                 currentSettingValue = SDK.Settings.CRMOrganizationResults[curNode.attributes.getNamedItem("name").value];
                                             }
-
+                                            if (null != curNode.attributes.getNamedItem("isNullable")) {
+                                                isNullable = parseValueFromTypeName("boolean", curNode.attributes.getNamedItem("isNullable").value);
+                                            }
+                                            if (null != curNode.attributes.getNamedItem("isReadonly")) {
+                                                isReadonly = parseValueFromTypeName("boolean", curNode.attributes.getNamedItem("isReadonly").value);
+                                            }
                                             baseOrgSettings.addSetting(
                                                 new orgSetting(
                                                     curNode.attributes.getNamedItem("name").value,
@@ -1210,7 +1276,9 @@
                                                     minVer,
                                                     curNode.attributes.getNamedItem("urlTitle").value,
                                                     maxVer,
-                                                    isOrganizationAttribute
+                                                    isOrganizationAttribute,
+                                                    isNullable,
+                                                    isReadonly
                                                 )
                                             );
                                         }
@@ -1451,10 +1519,10 @@
             </tr>
             <tr>
                 <td colspan="3">
-                    <button onclick="editSettingFromUIDiv(false, false);">Update</button>
-                    <button onclick="editSettingFromUIDiv(true, false);">Reset Default</button>
-                    <button onclick="editSettingFromUIDiv(false, true);">Remove Setting</button>
-                    <button onclick="o$('#addBox').css('visibility','hidden');o$('#currentSetting').val('');o$('#txtSettingValue').val('');">Cancel</button>
+                    <button id="updateButton" onclick="editSettingFromUIDiv(false, false);">Update</button>
+                    <button id="resetButton" onclick="editSettingFromUIDiv(true, false);">Reset Default</button>
+                    <button id="removeButton" onclick="editSettingFromUIDiv(false, true);">Remove Setting</button>
+                    <button id="cancelButton" onclick="o$('#addBox').css('visibility','hidden');o$('#currentSetting').val('');o$('#txtSettingValue').val('');">Cancel</button>
                 </td>
             </tr>
             <tr>
