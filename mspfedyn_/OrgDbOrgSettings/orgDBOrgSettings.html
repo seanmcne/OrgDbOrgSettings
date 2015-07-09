@@ -195,6 +195,34 @@
                     },
                 });
             },
+            resetYammerAttributes: function (organizationId) {
+                ///<summary>Async updates organizationbase attribute value</summary>
+                ///<param name='attributeName' type='String'>attribute name to update</param>
+                ///<param name="attributeValue" Type="Object">the value of the attribute to set</param>
+                ///<param name="organizationId" type="String">Org ID Guid to update in CRM</param> 
+                ///<returns type='jqXHR'>Returns ajax query</returns> 
+                var rootUrl = this.getOrgRootUrl();  //IE8 required
+
+                //create blank object and dynamically add the dynamic value
+                var update = {};
+                update["YammerGroupId"] = null;
+                update["YammerOAuthAccessTokenExpired"] = null;
+                update["YammerNetworkPermalink"] = null;
+                update["YammerPostMethod"] = null;
+
+                return o$.ajax({
+                    timeout: SDK.Settings.ajaxTimeout,
+                    type: "POST",
+                    contentType: "application/json; charset=utf-8",
+                    datatype: "json",
+                    url: rootUrl + "/XRMServices/2011/OrganizationData.svc/OrganizationSet" + "(guid'" + organizationId + "')",
+                    data: oJSON.stringify(update),
+                    beforeSend: function (XMLHttpRequest) {
+                        XMLHttpRequest.setRequestHeader("Accept", "application/json");
+                        XMLHttpRequest.setRequestHeader("X-HTTP-Method", "MERGE");
+                    },
+                });
+            },
             //follows better pattern to impliment success/fail/complete
             getCrmSolutionVersion: function () {
                 ///<returns type='jqXHR'>Returns ajax query</returns> 
@@ -375,6 +403,7 @@
             minWindowHeight: 825,
             OrganizationId: null,
             OrganizationName: Xrm.Page.context.getOrgUniqueName(),
+            isYammerConfigured: false,
             OrganizationSettings: function () {
                 if (!this._localSettingsCollection) {
                     this._localSettingsCollection = new OrgSettingsCollection();
@@ -897,6 +926,31 @@
             }
             return retval;
         };
+        function resetYammerAttributes() {
+            try { //double confirmation for this setting, just in case. 
+                var result = confirm("Proceed with removing your Yammer configuration from CRM? This should only be done when advised to do so or when required to fall back to using Activity Feeds.");
+                if (result) {
+                    result = confirm("Are you positive you want to do this? Removing the Yammer configuration will switch CRM back to using Activity Feeds, if you require the use of Yammer you should re-configure it through CRM's administration settings.");
+                    if (result) {
+                        enableProgressDiv(true);
+                        //reset the yammer settings to NULL
+                        SDK.SOAP.resetYammerAttributes(SDK.Settings.OrganizationId)
+                        .done(function (results, textStatus, XmlHttpRequest) {
+                            SDK.Settings.isYammerConfigured = false;
+                            onPageLoad(); //reset the whole page 
+                        }).fail(function (jqXHR, textStatus, errorThrown) {
+                            dumpErrorInBanner(errorThrown);
+                            enableProgressDiv(false);
+                        });
+                    }
+                }
+            }
+            catch (e) {
+                alert("Error editing setting in CRM - " + e.message);
+                printSettingsToDiv();
+                enableProgressDiv(false);
+            }
+        };
         function upsertSetting(settingName, settingValue, resetToDefault) {
             ///<summary>If setting exists it is updated, if it does not yet exist it's inserted with the default value</summary>
             try {
@@ -981,21 +1035,12 @@
                 enableProgressDiv(true);
 
                 var settingToDelete = SDK.Settings.OrganizationSettings.getSetting(strSettingToDelete);
-                if (settingToDelete.isOrganizationAttribute) {
-                    SDK.SOAP.setOrganizationAttributeValue(settingToDelete.name, settingToDelete.defaultValue, SDK.Settings.OrganizationId)
-                        .done(function (results, textStatus, XmlHttpRequest) {
-                            SDK.Settings.OrganizationSettings.clear(); //clear currently stored settings
-                            onPageLoad();//refresh the entire page
-                        })
-                        .fail(function (jqXHR, textStatus, errorThrown) {
-                            dumpErrorInBanner(errorThrown);
-                        });
-                }
-                else {
+
+                if (!settingToDelete.isOrganizationAttribute && !settingToDelete.isReadonly) {
                     //submit the xml change from our clone which is not bound to the UI setting
                     //in the future updateOrgDbOrgSetting should sort this out by itself 
                     SDK.SOAP.updateOrgDbOrgSettingOnServer(
-                        "", //push through an empty string,
+                        "", //push through an empty string - this is the first update we have to make which deletes everything 
                         SDK.Settings.OrganizationId,
                         success = function () {
                             try {
@@ -1004,12 +1049,14 @@
                                 o$.each(SDK.Settings.OrganizationSettings.getAllSettings(), function (index, setting) {
                                     ///<param name="setting" type="orgSetting"/>
                                     ///<param name="index" type="int"/> 
-                                    if (setting != null && setting.value != null && setting.name != strSettingToDelete && !setting.isOrganizationAttribute) {
+                                    if (setting != null && setting.value != null && setting.name != strSettingToDelete && !setting.isOrganizationAttribute && !setting.isReadonly) {
                                         finalXmlUpdate += setting.toRawXmlSetting(false);
                                     }
                                 });
                                 if (finalXmlUpdate.length > 0) {
                                     finalXmlUpdate = '<orgSettings>' + finalXmlUpdate + '</orgSettings>';
+
+                                    console.log("Final Xml Update: " + finalXmlUpdate);
 
                                     SDK.SOAP.updateOrgDbOrgSettingOnServer(
                                         finalXmlUpdate, //push through an empty string,
@@ -1018,6 +1065,7 @@
                                         },
                                         error = function (error) {
                                             dumpErrorInBanner(error);
+                                            alert("There was an error reseting the existing settings, you may need to refresh the page and update your settings to reflect what was configured before.");
                                         },
                                         complete = function () {
                                             SDK.Settings.OrganizationSettings.clear(); //clear currently stored settings
@@ -1032,7 +1080,7 @@
                             catch (e) {
                                 dumpErrorInBanner(e);
                                 SDK.Settings.OrganizationSettings.clear();
-                                onPageLoad();//todo ... this creates a ton of duplicate settings 
+                                onPageLoad();
                             }
                         },
                         error = function (error) {
@@ -1074,63 +1122,80 @@
             var divHtmlOut = '<table class="main"><tr><th>Name</th><th>Default Value</th><th>Current Value</th><th>Type</th><th>Min</th><th>Max</th><th>Action</th><th>Support Url</th></tr>';
             o$.each(SDK.Settings.OrganizationSettings.getAllSettings(), function (index, setting) {
 
-                var hasCurrentValue = (setting.value == null && !setting.isNullable ? false : true);
+                var settingName = setting.name || "name is null"; //default to name is null for logging 
 
-                var currentValueTD = '<td>not set</td>';
-                //changes background of settings that differ from the default 
-                if (setting.isNullValue() && setting.isNullable) {
-                    currentValueTD = '<td style="background-color:RGB(240,240,240);">null</td>';
-                }
-                else if (setting.isOrganizationAttribute && !setting.isNullValue() && setting.value.toString() !== setting.defaultValue.toString()) {
-                    currentValueTD = '<td style="background-color:RGB(240,240,240);"><b>' + setting.value + '</b></td>';
-                }
-                else if (setting.isOrganizationAttribute && !setting.isNullValue() && setting.value.toString() === setting.defaultValue.toString()) {
-                    currentValueTD = '<td><b>' + setting.value + '<b></td>';
-                }
-                else if (hasCurrentValue && (setting.value.toString() !== setting.defaultValue.toString() || setting.isOrganizationAttribute)) {
-                    currentValueTD = '<td style="background-color:RGB(240,240,240);"><b>' + setting.value + '</b></td>';
-                }
-                else if (hasCurrentValue && setting.value.toString() === setting.defaultValue.toString()) {
-                    currentValueTD = '<td><b>' + setting.value + '</b></td>';
-                }
+                try {
+                    var hasCurrentValue = (setting.value == null && !setting.isNullable ? false : true);
 
-                var editButtonHtml = "";
-                if (setting.isReadonly) {
-                    editButtonHtml = "&nbsp;";
-                }
-                else if (hasCurrentValue) {
-                    editButtonHtml = ('<a href=# onclick="launchDivEditor(\'' + setting.name + '\');">Edit</a></td>');
-                }
-                else if (!hasCurrentValue) {
-                    editButtonHtml = ('<a href=# onclick="upsertSetting(\'' + setting.name + '\',null,true);">Add</a></td>');
-                }
+                    console.log("Setting Name:" + (setting.name || "null") + " - Value: " + (setting.value || "null"));
 
-                divHtmlOut += '<tr onmouseover="this.className=\'mouseoverrow\';" onmouseout="this.className=\'\';" onclick="rowClick(\''
-                    + setting.name
-                    + '\');" ondblclick="rowDblClick(\''
-                    + setting.name
-                    + '\');"><td>'
-                    + setting.name
-                    + '</td><td>'
-                    + setting.defaultValue
-                    + '</td>'
-                    + (currentValueTD)
-                    + '<td>'
-                    + (setting.type.__typeName || setting.type)
-                    + '</td><td>'
-                    + (setting.minNumber == null ? '-' : setting.minNumber)
-                    + '</td><td>'
-                    + (setting.maxNumber || '-')
-                    + '</td><td>'
-                    + editButtonHtml
-                    + '<td>'
-                    + (setting.supportUrl == null ? 'N/a' : '<a target="_blank" href="' + setting.supportUrl + '">' + setting.urlTitle + '</a>') + '</td></tr>';
+                    var currentValueTD = '<td>not set</td>';
+                    //changes background of settings that differ from the default 
+                    if (setting.isNullValue() && setting.isNullable) {
+                        currentValueTD = '<td style="background-color:RGB(240,240,240);">null</td>';
+                    }
+                    else if (setting.isOrganizationAttribute && !setting.isNullValue() && setting.value.toString() !== setting.defaultValue.toString()) {
+                        currentValueTD = '<td style="background-color:RGB(240,240,240);"><b>' + setting.value + '</b></td>';
+                    }
+                    else if (setting.isOrganizationAttribute && !setting.isNullValue() && setting.value.toString() === setting.defaultValue.toString()) {
+                        currentValueTD = '<td><b>' + setting.value + '<b></td>';
+                    }
+                    else if (hasCurrentValue && (setting.value.toString() !== setting.defaultValue.toString() || setting.isOrganizationAttribute)) {
+                        currentValueTD = '<td style="background-color:RGB(240,240,240);"><b>' + setting.value + '</b></td>';
+                    }
+                    else if (hasCurrentValue && setting.value.toString() === setting.defaultValue.toString()) {
+                        currentValueTD = '<td><b>' + setting.value + '</b></td>';
+                    }
+
+                    var editButtonHtml = "";
+                    if (setting.isReadonly) {
+                        editButtonHtml = "&nbsp;";
+                    }
+                    else if (hasCurrentValue) {
+                        editButtonHtml = ('<a href=# onclick="launchDivEditor(\'' + setting.name + '\');">Edit</a></td>');
+                    }
+                    else if (!hasCurrentValue) {
+                        editButtonHtml = ('<a href=# onclick="upsertSetting(\'' + setting.name + '\',null,true);">Add</a></td>');
+                    }
+
+                    divHtmlOut += '<tr onmouseover="this.className=\'mouseoverrow\';" onmouseout="this.className=\'\';" onclick="rowClick(\''
+                        + setting.name
+                        + '\');" ondblclick="rowDblClick(\''
+                        + setting.name
+                        + '\');"><td>'
+                        + setting.name
+                        + '</td><td>'
+                        + setting.defaultValue
+                        + '</td>'
+                        + (currentValueTD)
+                        + '<td>'
+                        + (setting.type.__typeName || setting.type)
+                        + '</td><td>'
+                        + (setting.minNumber == null ? '-' : setting.minNumber)
+                        + '</td><td>'
+                        + (setting.maxNumber || '-')
+                        + '</td><td>'
+                        + editButtonHtml
+                        + '<td>'
+                        + (setting.supportUrl == null ? 'N/a' : '<a target="_blank" href="' + setting.supportUrl + '">' + setting.urlTitle + '</a>') + '</td></tr>';
+                }
+                catch (err) {
+                    console.log("Error retreiving setting.  Skipping setting: " + settingName);
+                    console.log("Error: " + err);
+                }
             });
             divHtmlOut += '<tr><td colspan="8" style="width:800px;height:2px; background-color:darkgray; vertical-align:top;"></td></tr></table>'
             o$("#mainContent").append(divHtmlOut);
             //show prompt for changes: 
             o$('#chkPromptBeforeChange').css('visibility', 'visible');
             o$('#lblPromptLabel').css('visibility', 'visible');
+
+            if (SDK.Settings.isYammerConfigured) {
+                o$('#ResetYammerButton').css('visibility', 'visible');
+            }
+            else {
+                o$('#ResetYammerButton').css('visibility', 'hidden');
+            }
         };
         function setupHelpers() {
             //try to load AzureMobile, if we fail we'll do it silently - problem here is that we cannot catch the error message from AzureMobile :(
@@ -1180,6 +1245,7 @@
                         //to limit issues - we're testing for the /solution/edit.aspx URL first and wrapping it in a try/catch.  
                         //additionally this will only be used by an admin and should always be in the managed solution editor page
                         //TODO: Future work here to add scrollbars and mathematics to the settings DIV to support any size and still show the setting info at the bottom
+                        //parent.window.resizeTo(1080, SDK.Settings.minWindowHeight);
                         parent.window.resizeTo(1080, SDK.Settings.minWindowHeight);
                     } catch (e) { };
                 }
@@ -1195,7 +1261,6 @@
                 .html("<i>Server version (from about page): " + SDK.Settings.crmServerDBVersion.toBuildNumberString() + "</i>")
                 .css('visibility', 'visible');
         }
-
         function onPageLoad() {
             /*
              - Do some setup
@@ -1251,6 +1316,7 @@
                                             var isReadonly = false;
                                             var isOrganizationAttribute = false;
                                             var currentSettingValue = null;
+                                            var currentSettingName = curNode.attributes.getNamedItem("name").value;
 
                                             //check if it is an Organization Entity Attribute - if so, get the value as we already have it 
                                             if (null != curNode.attributes.getNamedItem("isOrganizationAttribute")) {
@@ -1263,9 +1329,16 @@
                                             if (null != curNode.attributes.getNamedItem("isReadonly")) {
                                                 isReadonly = parseValueFromTypeName("boolean", curNode.attributes.getNamedItem("isReadonly").value);
                                             }
+                                            //yammer check 
+                                            if (!SDK.Settings.isYammerConfigured &&
+                                                currentSettingName.toLowerCase().indexOf("yammer") === 0 &&
+                                                currentSettingValue != null) {
+                                                SDK.Settings.isYammerConfigured = true;
+                                            }
+                                            //add the setting to the settings we want to display
                                             baseOrgSettings.addSetting(
                                                 new orgSetting(
-                                                    curNode.attributes.getNamedItem("name").value,
+                                                    currentSettingName,
                                                     currentSettingValue,
                                                     curNode.attributes.getNamedItem("settingType").value,
                                                     curNode.attributes.getNamedItem("min").value,
@@ -1520,7 +1593,7 @@
             <tr>
                 <td colspan="3">
                     <button id="updateButton" onclick="editSettingFromUIDiv(false, false);">Update</button>
-                    <button id="resetButton" onclick="editSettingFromUIDiv(true, false);">Reset Default</button>
+                    <button id="resetButton"  onclick="editSettingFromUIDiv(true, false);">Reset Default</button>
                     <button id="removeButton" onclick="editSettingFromUIDiv(false, true);">Remove Setting</button>
                     <button id="cancelButton" onclick="o$('#addBox').css('visibility','hidden');o$('#currentSetting').val('');o$('#txtSettingValue').val('');">Cancel</button>
                 </td>
@@ -1530,7 +1603,7 @@
             </tr>
         </table>
     </div>
-    <div id="mainContent" class="main" style="width:800px;height:500px;overflow:auto;">
+    <div id="mainContent" class="main" style="width:1024px;height:500px;overflow:auto;">
     </div>
     <div id="infoRow" style="width:800px;vertical-align:top;border:1px solid darkgrey;">
     </div>
@@ -1540,5 +1613,6 @@
         <label style="visibility: hidden;" id="lblPromptLabel" for="chkPromptBeforeChange">Prompt before making any changes in CRM</label>
     </div>
     <div style="visibility: hidden;" id="ServerVersionDiv"></div>
+    <div><button style="visibility: hidden;" id="ResetYammerButton" onclick="resetYammerAttributes();">Remove Yammer Configuration</button></div>
 </body>
 </html>
