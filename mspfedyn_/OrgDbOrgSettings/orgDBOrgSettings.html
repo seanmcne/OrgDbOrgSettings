@@ -300,6 +300,9 @@
                 if (stringInput) {
                     return stringInput.toString().toLowerCase();
                 }
+                else if(nameOfStringVariable == "Xrm.Page.context.getOrgUniqueName()"){
+                    return "";                    
+                }
                 throw new Error("ERROR: getSafeLowerCaseString(): variable " + nameOfStringVariable + " is null!");
             },
             getSoapError: function (faultXml) {
