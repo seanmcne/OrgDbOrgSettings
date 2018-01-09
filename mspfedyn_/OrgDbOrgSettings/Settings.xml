@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
   <defaultorgSettings>
-    <defaultOrgSettings>
       <orgSetting
         minSupportedVersion="6.0.0.809"
         maxSupportedVersion="9.999.9999.9999"
@@ -1122,7 +1121,6 @@
         supportUrl="http://support.microsoft.com/kb/2849744"
         urlTitle="KB 2849744"
         description="UR14: With a default value 0: CRM will use 8.25 inches (A4), any other double value will override the default of 8.25.  Some printers may reject printed reports if the height is any less than the height of the paper loaded in the tray, this setting will override the height used." />
-    </defaultOrgSettings>
     
   <!--ORGANIZTION ATTRIBUTE Settings - these are NOT OrgDbOrgSettings but Organization.Attribute(s) -->
   <orgSetting minSupportedVersion="5.0.9690.583"
@@ -1208,4 +1206,5 @@
               supportUrl="https://technet.microsoft.com/library/dn850385.aspx"
               urlTitle="Yammer &amp; CRM"
               description="&lt;b&gt;WARNING&lt;/b&gt;: This is used only to view your Yammer settings, you may remove the Yammer settings using the button below only if you need to fall back to using activity feeds, though this is recommended mostly for POC/Test CRM instances." />
+
 </defaultorgSettings>
