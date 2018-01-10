@@ -1106,8 +1106,20 @@
     urlTitle="KB 2691237"
     description="Default 5 seconds. Override time (in seconds) to wait for the office shell service to respond upon rendering the main UI." />
   <orgSetting
+    minSupportedVersion="8.2.2.840"
+    maxSupportedVersion="8.999.9999.9999"
+    name="DistinctPhysicalAndLogicalDeletesForExchangeSync"
+    isOrganizationAttribute="false"
+    min=""
+    max=""
+    defaultValue="False"
+    settingType="Boolean"
+    supportUrl="http://support.microsoft.com/kb/2691237"
+    urlTitle="KB 2691237"
+    description="Default False. Server-Side synchronization mechanism to distinguish between Logical and Physical deletes of records in CRM &lt;b&gt;False&lt;/b&gt;: *DEFAULT* No distinction between physical and logical deletes for exchange sync delete scenario. &lt;b&gt;True&lt;/b&gt;: Physical and logical deletes will be distinguished for exchange sync record deletions. &lt;br&gt;&lt;br&gt;Example: Jayne has Server-Side synchronization (SSS) enabled and tracked appointment 'bike repair' in CRM. If Jayne lost read access to 'bike repair' (logical delete of 'bike repair' for Jayne), then SSS with default behavior will delete 'bike repair' from Exchange. With DistinctPhysicalAndLogicalDeletesForExchangeSync==true, logical deletions of 'bike repair' for Jayne will NOT delete 'bike repair' from Exchange." />
+  <orgSetting
     minSupportedVersion="9.0.0.0"
-    maxSupportedVersion="9.0.0.0"
+    maxSupportedVersion="9.999.9999.9999"
     name="DefaultHeightForWizardReports"
     isOrganizationAttribute="false"
     min=""
