@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <defaultOrgSettings>
   <orgSetting
     minSupportedVersion="6.0.0.809"
@@ -1188,7 +1188,18 @@
             supportUrl="https://msdn.microsoft.com/en-us/library/gg328408.aspx"
             urlTitle="Organization entity attributes"
             description="Max number of days before deleting inactive Outlook client subscriptions.  We recommend you keep this to the default unelss you absolutely need to change it, be mindful of keeping the tracking info too long, or deleting it too soon." />
-  <orgSetting minSupportedVersion="6.0.0.809"
+  <orgSetting minSupportedVersion="7.1.0.0"
+              maxSupportedVersion="9.9.9999.9999"
+              name="ExpireChangeTrackingInDays"
+              isOrganizationAttribute="true"
+              min="0"
+              max="365"
+              defaultValue="30"
+              settingType="Number"
+              supportUrl="https://docs.microsoft.com/en-us/dynamics365/customer-engagement/developer/organization-entity-attributes"
+              urlTitle="Organization Attributes"
+              description="Maximum number of days to keep change tracking deleted record ID's - you want this value larger than the max# of days any change tracking dependant services sync with your system.  Default is 30 days. ." />
+<orgSetting minSupportedVersion="6.0.0.809"
               maxSupportedVersion="9.9.9999.9999"
               name="MaximumActiveBusinessProcessFlowsAllowedPerEntity"
               isOrganizationAttribute="true"
@@ -1200,7 +1211,7 @@
               urlTitle="Model business process flows"
               description="Max number of business process flows per entity allowed. &lt;b&gt;WARNING&lt;/b&gt;: if the value is greater than 10, you may see a decrease in your system’s performance when you switch processes or open a record that has an assigned business process flow. This may be especially noticeable if processes span multiple entities." />
   <orgSetting minSupportedVersion="6.0.0.809"
-              maxSupportedVersion="9.9.9999.9999"
+              maxSupportedVersion="9.1.9.9"
               name="YammerGroupId"
               isOrganizationAttribute="true"
               isReadonly ="true"
@@ -1213,7 +1224,7 @@
               urlTitle="Yammer &amp; CRM"
               description="&lt;b&gt;WARNING&lt;/b&gt;: This is used only to view your Yammer settings, you may remove the Yammer settings if you need to fall back to activity feeds, though this is recommended mostly for POC/Test CRM instances." />
   <orgSetting minSupportedVersion="6.0.0.809"
-              maxSupportedVersion="9.9.9999.9999"
+              maxSupportedVersion="9.1.9.9"
               name="YammerNetworkPermalink"
               isOrganizationAttribute="true"
               isReadonly ="true"
@@ -1226,7 +1237,7 @@
               urlTitle="Yammer &amp; CRM"
               description="&lt;b&gt;WARNING&lt;/b&gt;: This is used only to view your Yammer settings, you may remove the Yammer settings if you need to fall back to activity feeds, though this is recommended mostly for POC/Test CRM instances." />
   <orgSetting minSupportedVersion="6.0.0.809"
-              maxSupportedVersion="9.9.9999.9999"
+              maxSupportedVersion="9.1.9.9"
               name="YammerOAuthAccessTokenExpired"
               isOrganizationAttribute="true"
               isReadonly ="true"
@@ -1238,5 +1249,4 @@
               supportUrl="https://technet.microsoft.com/library/dn850385.aspx"
               urlTitle="Yammer &amp; CRM"
               description="&lt;b&gt;WARNING&lt;/b&gt;: This is used only to view your Yammer settings, you may remove the Yammer settings using the button below only if you need to fall back to using activity feeds, though this is recommended mostly for POC/Test CRM instances." />
-
 </defaultOrgSettings>
