@@ -1153,7 +1153,55 @@
     supportUrl="http://support.microsoft.com/kb/2849744"
     urlTitle="KB 2849744"
     description="UR14: With a default value 0: CRM will use 8.25 inches (A4), any other double value will override the default of 8.25.  Some printers may reject printed reports if the height is any less than the height of the paper loaded in the tray, this setting will override the height used." />
-  
+  <orgSetting
+    minSupportedVersion="8.2.2.840"
+    maxSupportedVersion="9.999.9999.9999"
+    name="RestrictIRMEmailItems"
+    isOrganizationAttribute="false"
+    min=""
+    max=""
+    defaultValue="false"
+    settingType="Boolean"
+    supportUrl="http://support.microsoft.com/kb/2849744"
+    urlTitle="KB 2849744"
+    description="Setting value to TRUE will result in Server Side Sync  NOT  synchronizing ALL emails that are marked as IRM emails.Default value is set to False to preserve the existing behavior. To enable this restriction on the organization RestrictIRMEmailItems should be set to True." />
+  <orgSetting
+    minSupportedVersion="8.2.2.840"
+    maxSupportedVersion="9.999.9999.9999"
+    name="AutoTrackSentFolderItems"
+    isOrganizationAttribute="false"
+    min=""
+    max=""
+    defaultValue="false"
+    settingType="Boolean"
+    supportUrl="http://support.microsoft.com/kb/2849744"
+    urlTitle="KB 2849744"
+    description="Setting value to TRUE will result in Server Side Sync  auto tracking of emails from Sent Items. Default value is set to False to preserve the existing behavior. To enable functionality on the organization AutoTrackSentFolderItems should be set to True." />
+  <orgSetting
+    minSupportedVersion="8.1.1.1020"
+    maxSupportedVersion="9.999.9999.9999"
+    name="ForceRetrievePublishedMetadataForRetrieveAllEntities"
+    isOrganizationAttribute="false"
+    min=""
+    max=""
+    defaultValue="false"
+    settingType="Boolean"
+    supportUrl="http://support.microsoft.com/kb/2691237"
+    urlTitle="KB 2691237"
+    description="Not available" />
+  <orgSetting
+    minSupportedVersion="8.2.2.840"
+    maxSupportedVersion="9.999.9999.9999"
+    name="DistinctPhysicalAndLogicalDeletesForExchangeSync"
+    isOrganizationAttribute="false"
+    min=""
+    max=""
+    defaultValue="false"
+    settingType="Boolean"
+    supportUrl="http://support.microsoft.com/kb/2849744"
+    urlTitle="KB 2849744"
+    description="Setting value to TRUE will result in Server Side Sync NOT deleting an appointment when system detects auto changes that result in change of ownership. Appointment will persists in soft delete scenario. Default value is set to False to preserve the existing behavior. To enable functionality on the organization DistinctPhysicalAndLogicalDeletesForExchangeSync should be set to True." />
+
   <!--ORGANIZTION ATTRIBUTE Settings - these are NOT OrgDbOrgSettings but Organization.Attribute(s) -->
   <orgSetting minSupportedVersion="5.0.9690.583"
               maxSupportedVersion="9.9.9999.9999"
