@@ -1178,6 +1178,18 @@
     urlTitle="KB 2849744"
     description="Setting value to TRUE will result in Server Side Sync  auto tracking of emails from Sent Items. Default value is set to False to preserve the existing behavior. To enable functionality on the organization AutoTrackSentFolderItems should be set to True." />
   <orgSetting
+    minSupportedVersion="8.2.2.840"
+    maxSupportedVersion="9.999.9999.9999"
+    name="TrackCategorizedItems"
+    isOrganizationAttribute="false"
+    min=""
+    max=""
+    defaultValue="false"
+    settingType="Boolean"
+    supportUrl="http://support.microsoft.com/kb/2849744"
+    urlTitle="KB 2849744"
+    description="Setting value to TRUE will result in Server Side Sync creating a track to Dynamics category to be used for Exchange items. Default value is set to False to preserve the existing behavior." />
+  <orgSetting
     minSupportedVersion="8.1.1.1020"
     maxSupportedVersion="9.999.9999.9999"
     name="ForceRetrievePublishedMetadataForRetrieveAllEntities"
