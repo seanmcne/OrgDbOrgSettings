@@ -1,3 +1,6 @@
+**Where to find the releases?**
+The link to the releases is somewhat hidden in plain sight - to help with this, you can just click this link to get to the releases page: https://github.com/seanmcne/OrgDbOrgSettings/releases 
+
 **Project Description**
 This is a utility allowing admins of Dynamics CRM Online & onPrem (2016) to edit  organization database settings otherwise known as OrgDBOrgSettings
 
