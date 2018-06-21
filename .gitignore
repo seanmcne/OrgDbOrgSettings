@@ -6,3 +6,4 @@
 /.vs/OrgDbOrgSettings/v15/.suo
 /.vs
 .vs/
+*.sqlite
