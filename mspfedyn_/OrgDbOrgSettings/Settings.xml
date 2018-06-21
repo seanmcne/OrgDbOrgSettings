@@ -431,7 +431,7 @@
     settingType="Number"
     supportUrl="http://support.microsoft.com/kb/2691237"
     urlTitle="None"
-    description="Default: &lt;b&gt;75&lt;/b&gt;.  Max mobile fields." />
+    description="Default: &lt;b&gt;75&lt;/b&gt;. Max mobile fields." />
   <orgSetting
     minSupportedVersion="6.0.0.809"
     maxSupportedVersion="9.999.9999.9999"
@@ -443,7 +443,7 @@
     settingType="Number"
     supportUrl="http://support.microsoft.com/kb/2691237"
     urlTitle="None"
-    description="Default: &lt;b&gt;10&lt;/b&gt;.  Max tablet lists." />
+    description="Default: &lt;b&gt;10&lt;/b&gt;. Max tablet lists." />
   <orgSetting
     minSupportedVersion="6.0.0.809"
     maxSupportedVersion="9.999.9999.9999"
@@ -455,7 +455,7 @@
     settingType="Number"
     supportUrl="http://support.microsoft.com/kb/2691237"
     urlTitle="None"
-    description="Default: &lt;b&gt;5&lt;/b&gt;.  Max tablet tabs." />
+    description="Default: &lt;b&gt;5&lt;/b&gt;. Max tablet tabs." />
   <orgSetting
     minSupportedVersion="6.0.0.809"
     maxSupportedVersion="9.999.9999.9999"
@@ -467,7 +467,7 @@
     settingType="Boolean"
     supportUrl="http://support.microsoft.com/kb/2691237"
     urlTitle="KB2691237"
-    description="Default: &lt;b&gt;False&lt;/b&gt;.  &lt;b&gt;True&lt;/b&gt;: Enabled exchange sync tracing." />
+    description="Default: &lt;b&gt;False&lt;/b&gt;. &lt;b&gt;True&lt;/b&gt;: Enabled exchange sync tracing." />
   <orgSetting
     minSupportedVersion="6.0.0.809"
     maxSupportedVersion="9.999.9999.9999"
