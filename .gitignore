@@ -5,3 +5,5 @@
 /.vs/config/applicationhost.config
 /.vs/OrgDbOrgSettings/v15/.suo
 /.vs
+.vs/
+*.sqlite
