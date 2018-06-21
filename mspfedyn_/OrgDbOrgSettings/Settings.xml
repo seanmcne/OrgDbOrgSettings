@@ -1107,7 +1107,7 @@
     description="Default 5 seconds. Override time (in seconds) to wait for the office shell service to respond upon rendering the main UI." />
   <orgSetting
     minSupportedVersion="8.2.2.840"
-    maxSupportedVersion="8.999.9999.9999"
+    maxSupportedVersion="9.999.9999.9999"
     name="DistinctPhysicalAndLogicalDeletesForExchangeSync"
     isOrganizationAttribute="false"
     min=""
@@ -1117,18 +1117,6 @@
     supportUrl="http://support.microsoft.com/kb/2691237"
     urlTitle="KB 2691237"
     description="Default False. Server-Side synchronization mechanism to distinguish between Logical and Physical deletes of records in CRM &lt;b&gt;False&lt;/b&gt;: *DEFAULT* No distinction between physical and logical deletes for exchange sync delete scenario. &lt;b&gt;True&lt;/b&gt;: Physical and logical deletes will be distinguished for exchange sync record deletions. &lt;br&gt;&lt;br&gt;Example: Jayne has Server-Side synchronization (SSS) enabled and tracked appointment 'bike repair' in CRM. If Jayne lost read access to 'bike repair' (logical delete of 'bike repair' for Jayne), then SSS with default behavior will delete 'bike repair' from Exchange. With DistinctPhysicalAndLogicalDeletesForExchangeSync==true, logical deletions of 'bike repair' for Jayne will NOT delete 'bike repair' from Exchange." />
-  <orgSetting
-    minSupportedVersion="9.0.0.0"
-    maxSupportedVersion="9.999.9999.9999"
-    name="DefaultHeightForWizardReports"
-    isOrganizationAttribute="false"
-    min=""
-    max=""
-    defaultValue="0"
-    settingType="Double"
-    supportUrl="http://support.microsoft.com/kb/2849744"
-    urlTitle="KB 2849744"
-    description="UR14: With a default value 0: CRM will use 8.25 inches (A4), any other double value will override the default of 8.25.  Some printers may reject printed reports if the height is any less than the height of the paper loaded in the tray, this setting will override the height used." />
   <orgSetting
     minSupportedVersion="9.0.0.0"
     maxSupportedVersion="9.999.9999.9999"
@@ -1165,7 +1153,7 @@
     supportUrl="http://support.microsoft.com/kb/2691237"
     urlTitle="KB 2691237"
     description="If you disable the &quot;Track e-mail sent between CRM users as two activities&quot; setting, e-mail messages from a CRM user to a queue are not delivered. Additionally, if a workflow rule sends an e-mail message to a queue, e-mail messages that are sent by the workflow rule are not delivered. &lt;b&gt;False&lt;/b&gt; - Internal e-mail messages to queues will not be delivered. &lt;b&gt;True&lt;/b&gt; - Internal e-mail messages to queues will be delivered." />
-<!--Below Added on 4/3/2018-->
+  <!--Below Added on 4/3/2018-->
   <orgSetting
     minSupportedVersion="8.2.2.840"
     maxSupportedVersion="9.999.9999.9999"
@@ -1238,8 +1226,7 @@
     supportUrl="http://support.microsoft.com/kb/2691237"
     urlTitle="KB 2691237"
     description="Not available - contact support." />
-  <!--Above Added on 4/3/2018-->
-  
+
   <!--ORGANIZTION ATTRIBUTE Settings - these are NOT OrgDbOrgSettings but Organization.Attribute(s) -->
   <orgSetting minSupportedVersion="5.0.9690.583"
               maxSupportedVersion="9.9.9999.9999"
