@@ -512,7 +512,7 @@
                                             var latestAzureSln = BuildVersion.parseBuildNumber(results[0].VersionNumber);
                                             if (latestAzureSln.isGreaterThan(slnBuildVersion)) {
                                                 alert("You are not running the latest available version!\rSee the yellow ribbon for a download URL for the latest solution.");
-                                                var openerCmd = 'javascript:try { openStdWindow(SDK.SOAP.getOrgRootUrl() + "/tools/solution/import/solutionimportwizard.aspx", "Import", 300,600); } catch ($exception) { console.log("An Error Occurred while trying to launch the import dialog, please import the solution via Settings|Customizations|Solutions instead.") }';
+                                                var openerCmd = 'javascript:try { openStdWindow(SDK.SOAP.getOrgRootUrl() + "/tools/solution/import/solutionimportwizard.aspx", "Import", 600,500); } catch ($exception) { console.log("An Error Occurred while trying to launch the import dialog, please import the solution via Settings|Customizations|Solutions instead.") }';
                                                 var message = "<b>Version " +
                                                         latestAzureSln.toBuildNumberString() +
                                                         " is now available! <a target='_blank' href='" +
