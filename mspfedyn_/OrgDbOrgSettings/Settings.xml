@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <defaultOrgSettings>
   <orgSetting
     minSupportedVersion="6.0.0.809"
@@ -431,7 +431,7 @@
     settingType="Number"
     supportUrl="http://support.microsoft.com/kb/2691237"
     urlTitle="None"
-    description="Default: &lt;b&gt;75&lt;/b&gt;. Max mobile fields." />
+    description="Default: &lt;b&gt;75&lt;/b&gt;.  Max mobile fields." />
   <orgSetting
     minSupportedVersion="6.0.0.809"
     maxSupportedVersion="9.999.9999.9999"
@@ -443,7 +443,7 @@
     settingType="Number"
     supportUrl="http://support.microsoft.com/kb/2691237"
     urlTitle="None"
-    description="Default: &lt;b&gt;10&lt;/b&gt;. Max tablet lists." />
+    description="Default: &lt;b&gt;10&lt;/b&gt;.  Max tablet lists." />
   <orgSetting
     minSupportedVersion="6.0.0.809"
     maxSupportedVersion="9.999.9999.9999"
@@ -455,7 +455,7 @@
     settingType="Number"
     supportUrl="http://support.microsoft.com/kb/2691237"
     urlTitle="None"
-    description="Default: &lt;b&gt;5&lt;/b&gt;. Max tablet tabs." />
+    description="Default: &lt;b&gt;5&lt;/b&gt;.  Max tablet tabs." />
   <orgSetting
     minSupportedVersion="6.0.0.809"
     maxSupportedVersion="9.999.9999.9999"
@@ -467,7 +467,7 @@
     settingType="Boolean"
     supportUrl="http://support.microsoft.com/kb/2691237"
     urlTitle="KB2691237"
-    description="Default: &lt;b&gt;False&lt;/b&gt;. &lt;b&gt;True&lt;/b&gt;: Enabled exchange sync tracing." />
+    description="Default: &lt;b&gt;False&lt;/b&gt;.  &lt;b&gt;True&lt;/b&gt;: Enabled exchange sync tracing." />
   <orgSetting
     minSupportedVersion="6.0.0.809"
     maxSupportedVersion="9.999.9999.9999"
@@ -926,30 +926,6 @@
     urlTitle="KB 2691237"
     description="When the Activities tab of the social pane is show, the data ordered by the 'modifiedon' date in descending order, toggling this setting to True will enable the social pane to sort emails by RecievedOn Desc instead of modifiedon." />
   <orgSetting
-    minSupportedVersion="8.0.1.79"
-    maxSupportedVersion="8.1.9999.9999"
-    name="TimeWindowForSyncSimilarRecordsWithOG"
-    isOrganizationAttribute="false"
-    min="MIN_NEEDS_POPULATING"
-    max="MAX_NEEDS_POPULATING"
-    defaultValue="45"
-    settingType="Number"
-    supportUrl="http://support.microsoft.com/kb/2691237"
-    urlTitle="KB 2691237"
-    description="DESCRIPTION_NEEDS_POPULATING" />
-  <orgSetting
-    minSupportedVersion="8.0.1.79"
-    maxSupportedVersion="8.1.9999.9999"
-    name="TotalSimilarRecordToSyncWithOG"
-    isOrganizationAttribute="false"
-    min="MIN_NEEDS_POPULATING"
-    max="MAX_NEEDS_POPULATING"
-    defaultValue="20"
-    settingType="Number"
-    supportUrl="http://support.microsoft.com/kb/2691237"
-    urlTitle="KB 2691237"
-    description="DESCRIPTION_NEEDS_POPULATING" />
-  <orgSetting
     minSupportedVersion="8.1.0.246"
     maxSupportedVersion="9.999.9999.9999"
     name="MailboxStatisticsPersistenceTimeInDays"
@@ -963,16 +939,16 @@
     description="If value is 0, dont store ANY MailboxStatistics Data, if the value is greater than zero then store that number of days statistics data. Max value arbitrarily chosen at 1 year, this generates at lot of data so 1 year should be plenty of time." />
   <orgSetting
     minSupportedVersion="8.1.0.246"
-    maxSupportedVersion="9.999.9999.9999"
+    maxSupportedVersion="9.9999.9999.9999"
     name="SecurityQueryHint"
     isOrganizationAttribute="false"
     min="0"
     max="2"
-    defaultValue="1"
+    defaultValue="2"
     settingType="Number"
     supportUrl="http://support.microsoft.com/kb/2691237"
     urlTitle="KB 2691237"
-    description="Used to hint the query within GetRightsFromPrincipalObjectAccess.  0=None; 1=Recompile (default); 2=OptimizeForUnkown" />
+    description="Used to hint the query within GetRightsFromPrincipalObjectAccess - in large environments optimize for unknown will have less CPU impact.  0=None; 1=Recompile; 2=OptimizeForUnkown (new default)" />
   <orgSetting
     minSupportedVersion="8.1.1.915"
     maxSupportedVersion="9.999.9999.9999"
@@ -1249,6 +1225,54 @@
     supportUrl="http://support.microsoft.com/kb/2691237"
     urlTitle="KB 2691237"
     description="Setting value to True will enable a new dashboard accessible by users and administrators called Server-Side Synchronization Failures. This dashboard allows the owner of a mailbox to have information about all non-synched incoming/outgoing emails and also appointment, contact, and task (ACT) items. Information is provided for the reason items are not synchronized. Default value is set to False to preserve the existing behavior." />
+  <orgSetting
+    minSupportedVersion="9.0.2.0761"
+    maxSupportedVersion="9.999.9999.9999"
+    name="AllowSaveAsDraftAppointment"
+    isOrganizationAttribute="false"
+    min=""
+    max=""
+    defaultValue="false"
+    settingType="Boolean"
+    supportUrl="http://support.microsoft.com/kb/2691237"
+    urlTitle="KB 2691237"
+    description="Setting value to True will allow saving draft appointments (isdraft property) using the DeliverIncoming api call. Default value is set to False."/>
+  <orgSetting
+    minSupportedVersion="9.0.2.0761"
+    maxSupportedVersion="9.999.9999.9999"
+    name="TrackAppointmentsFromNonOrganizer"
+    isOrganizationAttribute="false"
+    min=""
+    max=""
+    defaultValue="false"
+    settingType="Boolean"
+    supportUrl="http://support.microsoft.com/kb/2691237"
+    urlTitle="KB 2691237"
+    description="Allows CDS server side sync to track appointments where the syncing user mailbox was *NOT* the organizer of the appointment. Default value is set to false."/>
+  <orgSetting
+    minSupportedVersion="9.0.2.0761"
+    maxSupportedVersion="9.999.9999.9999"
+    name="ExchangeSyncIdMappingPersistenceTimeInDays"
+    isOrganizationAttribute="false"
+    min="0"
+    max="14"
+    defaultValue="3"
+    settingType="Number"
+    supportUrl="http://support.microsoft.com/kb/2691237"
+    urlTitle="KB 2691237"
+    description="The length of time for CDS to maintain ExchangeIDMapping FAILURE RECORDS - after this length of time the failures will be purged. Default value is set to  3"/>
+  <orgSetting
+    minSupportedVersion="9.0.2.1455"
+    maxSupportedVersion="9.999.9999.9999"
+    name="EnableViewSelectorForEmailTemplatesInPersonalOptionsDialog"
+    isOrganizationAttribute="false"
+    min=""
+    max=""
+    defaultValue="false"
+    settingType="Boolean"
+    supportUrl="http://support.microsoft.com/kb/2691237"
+    urlTitle="KB 2691237"
+    description="Setting to true Enables the View Selector For EmailTemplates in the personalOptions Dialog.  Default value is set to false."/>
 
   <!--ORGANIZTION ATTRIBUTE Settings - these are NOT OrgDbOrgSettings but Organization.Attribute(s) -->
   <orgSetting minSupportedVersion="5.0.9690.583"
