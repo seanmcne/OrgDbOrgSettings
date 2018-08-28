@@ -3,7 +3,15 @@
 ################################################################################
 
 /.vs/config/applicationhost.config
-/.vs/OrgDbOrgSettings/v15/.suo
+
 /.vs
 .vs/
 *.sqlite
+*.suo
+slnx.sqllite
+VSWorkspaceState.json
+*.sqlite
+.vs/VSWorkspaceState.json
+.vs/OrgDbOrgSettings/v15/.suo
+/.vs/OrgDbOrgSettings/v15/.suo
+.vs/slnx.sqlite
