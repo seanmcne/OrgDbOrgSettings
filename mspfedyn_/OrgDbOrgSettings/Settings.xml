@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <defaultOrgSettings>
   <orgSetting
     minSupportedVersion="6.0.0.809"
@@ -1250,7 +1250,7 @@
     urlTitle="KB 2691237"
     description="Allows CDS server side sync to track appointments where the syncing user mailbox was *NOT* the organizer of the appointment. Default value is set to false."/>
   <orgSetting
-    minSupportedVersion="9.0.2.0761"
+    minSupportedVersion="8.2.2.2059"
     maxSupportedVersion="9.999.9999.9999"
     name="ExchangeSyncIdMappingPersistenceTimeInDays"
     isOrganizationAttribute="false"
@@ -1285,6 +1285,18 @@
     supportUrl="http://support.microsoft.com/kb/2691237"
     urlTitle="KB 2691237"
     description="Setting to true allows service side sync to resolve contacts/recipients to inactive emailable entity records.  Setting it to False ensures inactive records are skipped when resolving. Default value is set to false."/>
+  <orgSetting
+    minSupportedVersion="9.0.2.2240"
+    maxSupportedVersion="9.999.9999.9999"
+    name="MaximumSubjectLengthOnMailServer"
+    isOrganizationAttribute="false"
+    min="255"
+    max="500"
+    defaultValue="255"
+    settingType="Number"
+    supportUrl="http://support.microsoft.com/kb/2691237"
+    urlTitle="KB 2691237"
+    description="Set the maximum subject length permissible for the ***mail*** server.  This will ensure server side sync concatinates the subject of emails sent from CDS/Dynamics."/>
 
   <!--ORGANIZTION ATTRIBUTE Settings - these are NOT OrgDbOrgSettings but Organization.Attribute(s) -->
   <orgSetting minSupportedVersion="5.0.9690.583"
