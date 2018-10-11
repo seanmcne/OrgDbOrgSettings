@@ -1250,6 +1250,18 @@
     urlTitle="KB 2691237"
     description="Allows CDS server side sync to track appointments where the syncing user mailbox was *NOT* the organizer of the appointment. Default value is set to false."/>
   <orgSetting
+    minSupportedVersion="8.2.2.2011"
+    maxSupportedVersion="8.999.9999.9999"
+    name="TrackAppointmentsFromNonOrganizer"
+    isOrganizationAttribute="false"
+    min=""
+    max=""
+    defaultValue="false"
+    settingType="Boolean"
+    supportUrl="http://support.microsoft.com/kb/2691237"
+    urlTitle="KB 2691237"
+    description="Allows CDS server side sync to track appointments where the syncing user mailbox was *NOT* the organizer of the appointment. Default value is set to false."/>
+  <orgSetting
     minSupportedVersion="8.2.2.2059"
     maxSupportedVersion="9.999.9999.9999"
     name="ExchangeSyncIdMappingPersistenceTimeInDays"
