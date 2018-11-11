@@ -506,18 +506,6 @@
     description="V6 Default: &lt;b&gt;False&lt;/b&gt;. Options are: &lt;b&gt;False&lt;/b&gt;: Does not allow for the promotion of duplicate records.   &lt;b&gt;True&lt;/b&gt;: Allows for the promotion of duplicate records. &lt;br/&gt;&lt;b&gt;NOTE:&lt;/b&gt; This setting is NOT SUPPORTED IN CRM2013 as of build 809." />
   <orgSetting
     minSupportedVersion="6.0.3.106"
-    maxSupportedVersion="6.0.9999.9999"
-    name="ClearSystemUserPrincipalsWhenDisable"
-    isOrganizationAttribute="false"
-    min=""
-    max=""
-    defaultValue="true"
-    settingType="Boolean"
-    supportUrl="http://support.microsoft.com/kb/2691237"
-    urlTitle="KB2691237"
-    description="Clear and/or populates SystemUserPrincipals values for systemUsers when they're disabled/enabled. Default: &lt;b&gt;True&lt;/b&gt;.  &lt;b&gt;False&lt;/b&gt;: " />
-  <orgSetting
-    minSupportedVersion="6.0.3.106"
     maxSupportedVersion="9.999.9999.9999"
     name="GrantSharedAccessForMergeToSubordinateOwner"
     isOrganizationAttribute="false"
@@ -566,30 +554,6 @@
     description="Added back in 6.1.0.581! Default: &lt;b&gt;true&lt;/b&gt;. Options are:&lt;br/&gt;true:Preserve existing behavior.&lt;br/&gt;false: Stop storing CRM Sync information in the PidTagSensitivity MAPI property which causes the error: error in the XML document on GetItem for IPM.MSCRMUserId on BlackerBerry Server Traces." />
   <orgSetting
     minSupportedVersion="6.0.3.119"
-    maxSupportedVersion="6.0.9999.9999"
-    name="DefaultHeightForWizardReports"
-    isOrganizationAttribute="false"
-    min=""
-    max=""
-    defaultValue="0"
-    settingType="Double"
-    supportUrl="http://support.microsoft.com/kb/2849744"
-    urlTitle="KB 2849744"
-    description="UR14: With a default value 0: CRM will use 8.25 inches (A4), any other double value will override the default of 8.25.  Some printers may reject printed reports if the height is any less than the height of the paper loaded in the tray, this setting will override the height used." />
-  <orgSetting
-    minSupportedVersion="6.0.3.119"
-    maxSupportedVersion="6.0.9999.9999"
-    name="DisableLookupMruOnOutlookOffline"
-    isOrganizationAttribute="false"
-    min=""
-    max=""
-    defaultValue="false"
-    settingType="Boolean"
-    supportUrl="http://support.microsoft.com/kb/2691237"
-    urlTitle="KB 2691237"
-    description="LookupMRUItems in UserEntityUISettings can cause a large data volume when going online, setting this to &lt;b&gt;true&lt;/b&gt; will stop MRU's from syncing back ONLINE.  The default of &lt;b&gt;false&lt;/b&gt; will have users OFFLINE outlook clients sync the MRU items back to the server after being offline.  To reduce the time taken to go back ONLINE for offline client users you can set this to &lt;b&gt;true&lt;/b&gt;." />
-  <orgSetting
-    minSupportedVersion="6.0.3.119"
     maxSupportedVersion="9.999.9999.9999"
     name="EnableCrmStatecodeOnOutlookCategory"
     isOrganizationAttribute="false"
@@ -600,42 +564,6 @@
     supportUrl="http://support.microsoft.com/kb/2691237"
     urlTitle="KB2691237"
     description="Enable Statecode data on contact sync. Default: &lt;b&gt;True&lt;/b&gt;.  &lt;b&gt;False&lt;/b&gt;: " />
-  <orgSetting
-    minSupportedVersion="6.0.3.119"
-    maxSupportedVersion="6.0.9999.9999"
-    name="GrantFullAccessForMergeToMasterOwner"
-    isOrganizationAttribute="false"
-    min=""
-    max=""
-    defaultValue="true"
-    settingType="Boolean"
-    supportUrl="http://support.microsoft.com/kb/2691237"
-    urlTitle="KB 2691237"
-    description="Previous less desirable behavior will default to &lt;b&gt;true&lt;/b&gt;, to preserve existing functionality.  The more desirable behavior is achieved with the setting of: &lt;b&gt;false&lt;/b&gt;.  Details: When two records owned by the same team are merged, the final record is shared with the owner of the record it was merged from. This creates redundant POA records, as a result, if the owner of the record is changed in the future it will be visible to team members of the previously owning team. " />
-  <orgSetting
-    minSupportedVersion="6.0.4.145"
-    maxSupportedVersion="6.0.9999.9999"
-    name="DisableNavTour"
-    isOrganizationAttribute="false"
-    min=""
-    max=""
-    defaultValue="false"
-    settingType="Boolean"
-    supportUrl="http://support.microsoft.com/kb/2691237"
-    urlTitle="KB 2691237"
-    description="Override the navigation tour setting for the entire Organization this allows you to permanently disable the welcome screen shown to users when they first login to CRM - if this is set to false, a user will be shown the navigation tour every time their browser cookies expire or are cleared and when they  login to CRM from an unkown browser (like on a shared PC or different computer)." />
-  <orgSetting
-    minSupportedVersion="6.0.4.145"
-    maxSupportedVersion="6.0.9999.9999"
-    name="MakeSocialPanePhoneCallCompleted"
-    isOrganizationAttribute="false"
-    min=""
-    max=""
-    defaultValue="true"
-    settingType="Boolean"
-    supportUrl="http://support.microsoft.com/kb/2691237"
-    urlTitle="KB 2691237"
-    description="By default (true) Phone calls created in the Social Pane are automatically marked in a completed state and cannot be edited. Changing this value to TRUE will create phone calls and will NOT mark them as completed." />
   <orgSetting
     minSupportedVersion="6.1.2.106"
     maxSupportedVersion="9.999.9999.9999"
@@ -648,30 +576,6 @@
     supportUrl="http://support.microsoft.com/kb/2691237"
     urlTitle="KB2691237"
     description="Clear and/or populates SystemUserPrincipals values for systemUsers when they're disabled/enabled. Default: &lt;b&gt;True&lt;/b&gt;.  &lt;b&gt;False&lt;/b&gt;: " />
-  <orgSetting
-    minSupportedVersion="6.1.2.106"
-    maxSupportedVersion="6.1.2.106"
-    name="DisableLookupMruOnOutlookOffline"
-    isOrganizationAttribute="false"
-    min=""
-    max=""
-    defaultValue="false"
-    settingType="Boolean"
-    supportUrl="http://support.microsoft.com/kb/2691237"
-    urlTitle="KB 2691237"
-    description="LookupMRUItems in UserEntityUISettings can cause a large data volume when going online, setting this to &lt;b&gt;true&lt;/b&gt; will stop MRU's from syncing back ONLINE.  The default of &lt;b&gt;false&lt;/b&gt; will have users OFFLINE outlook clients sync the MRU items back to the server after being offline.  To reduce the time taken to go back ONLINE for offline client users you can set this to &lt;b&gt;true&lt;/b&gt;." />
-  <orgSetting
-    minSupportedVersion="6.1.2.106"
-    maxSupportedVersion="6.1.2.106"
-    name="GrantFullAccessForMergeToMasterOwner"
-    isOrganizationAttribute="false"
-    min=""
-    max=""
-    defaultValue="true"
-    settingType="Boolean"
-    supportUrl="http://support.microsoft.com/kb/2691237"
-    urlTitle="KB 2691237"
-    description="Previous less desirable behavior will default to &lt;b&gt;true&lt;/b&gt;, to preserve existing functionality.  The more desirable behavior is achieved with the setting of: &lt;b&gt;false&lt;/b&gt;.  Details: When two records owned by the same team are merged, the final record is shared with the owner of the record it was merged from. This creates redundant POA records, as a result, if the owner of the record is changed in the future it will be visible to team members of the previously owning team. " />
   <orgSetting
     minSupportedVersion="7.0.0.3027"
     maxSupportedVersion="9.999.9999.9999"
@@ -793,30 +697,6 @@
     supportUrl="http://support.microsoft.com/kb/2691237"
     urlTitle="KB 2691237"
     description="WARNING!!! - read this carefully as there are &lt;b&gt;3&lt;/b&gt; values for this Boolean setting - true, false, and NULL (which is the value when NOT set - to get back to NULL, simply remove this settings by clicking Remove in the edit box).  &lt;b&gt;TRUE&lt;/b&gt;: Will override any and all client registry setting to True.  &lt;b&gt;FALSE&lt;/b&gt;: Will override any and all client registry setting to False. &lt;b&gt;NULL&lt;/b&gt;: If the setting is NULL the outlook clients will use whatever is in the registry of the client.  TO SET THIS VALUE TO NULL YOU WILL NEED TO CLICK EDIT, THEN REMOVE THE VALUE TO HAVE IT DEFAULT TO NULL." />
-  <orgSetting
-    minSupportedVersion="7.0.2.53"
-    maxSupportedVersion="7.0.9999.9999"
-    name="DefaultHeightForWizardReports"
-    isOrganizationAttribute="false"
-    min=""
-    max=""
-    defaultValue="0"
-    settingType="Double"
-    supportUrl="http://support.microsoft.com/kb/2849744"
-    urlTitle="KB 2849744"
-    description="UR14: With a default value 0: CRM will use 8.25 inches (A4), any other double value will override the default of 8.25.  Some printers may reject printed reports if the height is any less than the height of the paper loaded in the tray, this setting will override the height used." />
-  <orgSetting
-    minSupportedVersion="7.0.2.53"
-    maxSupportedVersion="7.0.9999.9999"
-    name="ReassignAllExtendedTimeout"
-    isOrganizationAttribute="false"
-    min="0"
-    max="2147483647"
-    defaultValue="0"
-    settingType="Number"
-    supportUrl="http://support.microsoft.com/kb/2691237"
-    urlTitle="KB 2691237"
-    description="Increase script timeout for reassigning all records of a user or team - this allows you to exceed the default extended timeout value.  Default extended timeout is 1000000 ms (roughly 15 minutes).  WARNING: Care should be taken when increasing this value above the default - always double check the number of minutes before setting this to a value higher than the default." />
   <orgSetting
     minSupportedVersion="7.1.0.1065"
     maxSupportedVersion="9.999.9999.9999"
@@ -1303,13 +1183,73 @@
     name="MaximumSubjectLengthOnMailServer"
     isOrganizationAttribute="false"
     min="255"
-    max="500"
+    max="400"
     defaultValue="255"
     settingType="Number"
     supportUrl="http://support.microsoft.com/kb/2691237"
     urlTitle="KB 2691237"
     description="Set the maximum subject length permissible for the ***mail*** server.  This will ensure server side sync concatinates the subject of emails sent from CDS/Dynamics."/>
-
+  <orgSetting
+    minSupportedVersion="9.0.2.1719"
+    maxSupportedVersion="9.999.9999.9999"
+    name="HideTrackAllOption"
+    isOrganizationAttribute="false"
+    min=""
+    max=""
+    defaultValue="false"
+    settingType="Boolean"
+    supportUrl="http://support.microsoft.com/kb/2691237"
+    urlTitle="KB 2691237"
+    description="Org setting to hide 'All email messages' track option from Personal Options (Email). Default: false"/>
+  <orgSetting
+    minSupportedVersion="9.0.2.1719"
+    maxSupportedVersion="9.999.9999.9999"
+    name="IgnoreConversationIndexAndInReplyToForCorrelation"
+    isOrganizationAttribute="false"
+    min=""
+    max=""
+    defaultValue="false"
+    settingType="Boolean"
+    supportUrl="http://support.microsoft.com/kb/2691237"
+    urlTitle="KB 2691237"
+    description="Org setting to ignore conversation index and in reply to during correlation. Default: false"/>
+  <orgSetting
+    minSupportedVersion="9.0.2.2622"
+    maxSupportedVersion="9.999.9999.9999"
+    name="UseFilteringMethodOfSyncingMailboxOnlyForCorrelation"
+    isOrganizationAttribute="false"
+    min=""
+    max=""
+    defaultValue="false"
+    settingType="Boolean"
+    supportUrl="http://support.microsoft.com/kb/2691237"
+    urlTitle="KB 2691237"
+    description="Org setting to use filtering method of syncing mailbox only for correlation and ignore other email recipients. Default: False "/>
+  <orgSetting
+    minSupportedVersion="9.1.0.0839"
+    maxSupportedVersion="9.999.9999.9999"
+    name="DelegateAccessEnabled"
+    isOrganizationAttribute="false"
+    min=""
+    max=""
+    defaultValue="false"
+    settingType="Boolean"
+    supportUrl="http://support.microsoft.com/kb/2691237"
+    urlTitle="KB 2691237"
+    description="Org setting to enable Delegate Access. Default: false"/>
+  <orgSetting
+    minSupportedVersion="9.1.0.0729"
+    maxSupportedVersion="9.999.9999.9999"
+    name="UseXAnchorMailboxInExchangeRequestHeader"
+    isOrganizationAttribute="false"
+    min=""
+    max=""
+    defaultValue="false"
+    settingType="Boolean"
+    supportUrl="http://support.microsoft.com/kb/2691237"
+    urlTitle="KB 2691237"
+    description="Org setting to add XAnchor mailbox to each request header to Exchange. Default: false"/>  
+  
   <!--ORGANIZTION ATTRIBUTE Settings - these are NOT OrgDbOrgSettings but Organization.Attribute(s) -->
   <orgSetting minSupportedVersion="5.0.9690.583"
             maxSupportedVersion="9.9.9999.9999"
