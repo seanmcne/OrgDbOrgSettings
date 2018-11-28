@@ -218,7 +218,7 @@
     description="V6 Default: &lt;b&gt;False&lt;/b&gt;.  &lt;b&gt;True&lt;/b&gt;: " />
   <orgSetting
     minSupportedVersion="6.0.0.809"
-    maxSupportedVersion="8.999.9999.9999"
+    maxSupportedVersion="9.999.9999.9999"
     name="EnableRetrieveMultipleOptimization"
     isOrganizationAttribute="false"
     min="0"
