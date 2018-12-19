@@ -175,7 +175,7 @@
     isOrganizationAttribute="false"
     min=""
     max=""
-    defaultValue="false"
+    defaultValue="true"
     settingType="Boolean"
     supportUrl="http://support.microsoft.com/kb/2691237"
     urlTitle="KB 2691237"
