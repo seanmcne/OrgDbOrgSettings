@@ -1249,6 +1249,18 @@
     supportUrl="http://support.microsoft.com/kb/2691237"
     urlTitle="KB 2691237"
     description="Org setting to add XAnchor mailbox to each request header to Exchange. Default: false"/>  
+  <orgSetting
+    minSupportedVersion="9.1.0.1639"
+    maxSupportedVersion="9.999.9999.9999"
+    name="HideEmailAutoTrackOptions"
+    isOrganizationAttribute="false"
+    min=""
+    max=""
+    defaultValue="false"
+    settingType="Boolean"
+    supportUrl="http://support.microsoft.com/kb/2691237"
+    urlTitle="KB 2691237"
+    description="Default value is false, if it's set to True: do not show the following track options in Personal Options (Email): 'All email messages', 'Email messages from D365 Leads, Contacts and Accounts', 'Email messages from D365 records that are email enabled'"/>  
   
   <!--ORGANIZTION ATTRIBUTE Settings - these are NOT OrgDbOrgSettings but Organization.Attribute(s) -->
   <orgSetting minSupportedVersion="5.0.9690.583"
