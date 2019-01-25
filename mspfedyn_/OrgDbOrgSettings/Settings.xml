@@ -1263,6 +1263,17 @@
     description="Default value is false, if it's set to True: do not show the following track options in Personal Options (Email): 'All email messages', 'Email messages from D365 Leads, Contacts and Accounts', 'Email messages from D365 records that are email enabled'"/>  
   
   <!--ORGANIZTION ATTRIBUTE Settings - these are NOT OrgDbOrgSettings but Organization.Attribute(s) -->
+  <orgSetting minSupportedVersion="8.0.0.0"
+            maxSupportedVersion="9.9.9999.9999"
+            name="IsSOPIntegrationEnabled"
+            isOrganizationAttribute="true"
+            min=""
+            max=""
+            defaultValue="false"
+            settingType="Boolean"
+            supportUrl="http://msdn.microsoft.com/en-us/library/gg328408.aspx"
+            urlTitle="Organization entity attributes"
+            description="Enables or disables the SOPIntegration, if this is set to disabled it disables sales order processing assuming an integration will handle it.  *DO NOT DISABLE THIS UNLESS YOU HAVE A SPECIFIC REASON TO DO SO*" />
   <orgSetting minSupportedVersion="5.0.9690.583"
             maxSupportedVersion="9.9.9999.9999"
             name="MaxRecordsForExportToExcel"
