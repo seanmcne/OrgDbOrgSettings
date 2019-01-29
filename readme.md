@@ -28,6 +28,6 @@ The importing of this managed solution will include the following components:
 **How do I install just the zip file from this site?**
 - Go to the releases page https://github.com/seanmcne/OrgDbOrgSettings/releases 
 - Download the zip release - *do not download the source, make sure to download the solution zip file* 
-![](Home_OrgDbOrgSettingsDownload1.png)
+![](Home_OrgDbOrgSettingsDownload1.png =474x156)
 - Once you download the zip file upload this solution into your CRM/CE/CDS instance by navigating to Settings | Solutions then click the Import button in the command bar. 
 - Once completed you now can use the editor to alter any settings that need to be changed or viewed
