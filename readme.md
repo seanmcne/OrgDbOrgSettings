@@ -16,7 +16,6 @@ Browser Supportability:
 - NOTE: Some browser configurations block XDR's (cross domain requests) and thus will not get the benefit of update warnings - if you're impacted by this you can disable any addins that block these requests, alternatively keep checking back on this site for updates. 
 - If you're using IE please read this article on [CRM Disable IE Compatibility Mode](CRM-Disable-IE-Compatibility-Mode)
 
-[View Image](http://download-codeplex.sec.s-msft.com/Download?ProjectName=orgdborgsettings&DownloadId=804138)
 ![](Home_OrgDbOrgSettings2013UR1.png)
 
 The importing of this managed solution will include the following components: 
@@ -25,3 +24,10 @@ The importing of this managed solution will include the following components:
 - OrgDBOrgSettings.html [How to use the editor](How-to-use-the-editor)
 - settings.xml [What is Settings.xml](What-is-Settings.xml)
 - AzureMobile [Azure Portal](http://manage.windowsazure.com), MSDN [AzureMobile Services](http://msdn.microsoft.com/en-us/library/windowsazure/jj554228.aspx), and [AzureMobile Preview Signup](http://manage.windowsazure.com/?WT.mc_id=IXT001_prelimtext2012preview_MSDNLibrary)
+
+**How do I install just the zip file from this site?**
+- Go to the releases page https://github.com/seanmcne/OrgDbOrgSettings/releases 
+- Download the zip release - *do not download the source, make sure to download the solution zip file* 
+![](Home_OrgDbOrgSettingsDownload1.png)
+- Once you download the zip file upload this solution into your CRM/CE/CDS instance by navigating to Settings | Solutions then click the Import button in the command bar. 
+- Once completed you now can use the editor to alter any settings that need to be changed or viewed
