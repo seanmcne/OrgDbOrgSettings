@@ -23,6 +23,26 @@
             SDK = { __namespace: true };
         };
         SDK.SOAP = {
+            getVersionSpecificWebApiUrl: function () {
+                var serverBuildVersion = new BuildVersion(8, 0, 0, 0);
+
+                //get the org version 
+                this.getCrmOrgDBVersion(
+                    onSuccess = function (serverVersion) {
+                        serverBuildVersion = serverVersion; 
+                    },
+                    onError = function (error) {});
+
+                if (serverBuildVersion.major >= 9 && serverBuildVersion.minor >= 1) {
+                    return "/api/data/v9.1";
+                }
+                if (serverBuildVersion.major == 9 && serverBuildVersion.minor == 0) {
+                    return "/api/data/v9.0";
+                }
+                else {
+                    return "/api/data/v8.0";
+                }
+            },
             getCrmOrgDBVersion: function (successCallback, errorCallback) {
                 ///<summary>Async retrieves the newest version from CRM's about.aspx page</summary>
                 ///<param name="successCallback" Type="Function(BuildVersion)">The function to perform when an successfult response is returned. 
@@ -105,7 +125,7 @@
                     type: "GET",
                     contentType: "application/json; charset=utf-8",
                     datatype: "json",
-                    url: rootUrl + "/api/data/v8.0/organizations",
+                    url: rootUrl + this.getVersionSpecificWebApiUrl() + "/organizations",
                     data: null,
                     beforeSend: function (XMLHttpRequest) {
                         //Specifying this header ensures that the results will be returned as JSON.
@@ -131,7 +151,7 @@
                     contentType: "application/json; charset=utf-8",
                     datatype: "json",
                     //method: "MERGE", //not working on some IE/JQUERY versions 
-                    url: rootUrl + "/api/data/v8.0/organizations" + "(" + organizationId + ")",
+                    url: rootUrl + this.getVersionSpecificWebApiUrl() + "/organizations" + "(" + organizationId + ")",
                     data: oJSON.stringify({ orgdborgsettings: orgDbOrgSettingXml }),
                     beforeSend: function (XMLHttpRequest) {
                         XMLHttpRequest.setRequestHeader("Accept", "application/json");
@@ -173,7 +193,7 @@
                     type: "PATCH",
                     contentType: "application/json; charset=utf-8",
                     datatype: "json",
-                    url: rootUrl + "/api/data/v8.0/organizations" + "(" + organizationId + ")",
+                    url: rootUrl + this.getVersionSpecificWebApiUrl() + "/organizations" + "(" + organizationId + ")",
                     data: oJSON.stringify(update),
                     beforeSend: function (XMLHttpRequest) {
                         XMLHttpRequest.setRequestHeader("Accept", "application/json");
@@ -203,7 +223,7 @@
                     type: "PATCH",
                     contentType: "application/json; charset=utf-8",
                     datatype: "json",
-                    url: rootUrl + "/api/data/v8.0/organizations" + "(" + organizationId + ")",
+                    url: rootUrl + this.getVersionSpecificWebApiUrl() + "/organizations" + "(" + organizationId + ")",
                     data: oJSON.stringify(update),
                     beforeSend: function (XMLHttpRequest) {
                         XMLHttpRequest.setRequestHeader("Accept", "application/json");
@@ -223,7 +243,7 @@
                     type: "GET",
                     contentType: "application/json; charset=utf-8",
                     datatype: "json",
-                    url: rootUrl + "/api/data/v8.0/solutions?$select=modifiedon,uniquename,organizationid,ismanaged,publisherid,version,versionnumber&$filter=uniquename eq 'OrganizationSettingsEditor'",
+                    url: rootUrl + this.getVersionSpecificWebApiUrl() +"/solutions?$select=modifiedon,uniquename,organizationid,ismanaged,publisherid,version,versionnumber&$filter=uniquename eq 'OrganizationSettingsEditor'",
                     data: null,
                     beforeSend: function (XMLHttpRequest) {
                         //Specifying this header ensures that the results will be returned as JSON.
