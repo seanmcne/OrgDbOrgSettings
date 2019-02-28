@@ -1261,6 +1261,18 @@
     supportUrl="http://support.microsoft.com/kb/2691237"
     urlTitle="KB 2691237"
     description="Default value is false, if it's set to True: do not show the following track options in Personal Options (Email): 'All email messages', 'Email messages from D365 Leads, Contacts and Accounts', 'Email messages from D365 records that are email enabled'"/>  
+  <orgSetting
+    minSupportedVersion="9.1.0.1459"
+    maxSupportedVersion="9.999.9999.9999"
+    name="BUIdsCountBeforeUsingSubqueryForPostsSecurity"
+    isOrganizationAttribute="false"
+    min="1"
+    max="2100"
+    defaultValue="1000"
+    settingType="Number"
+    supportUrl="http://support.microsoft.com/kb/2691237"
+    urlTitle="KB 2691237"
+    description="Limits the BUid's parameterized in the query and will fall back to using a subquery to avoid having too man sql parameters."/>
   
   <!--ORGANIZTION ATTRIBUTE Settings - these are NOT OrgDbOrgSettings but Organization.Attribute(s) -->
   <orgSetting minSupportedVersion="9.1.0.1100"
