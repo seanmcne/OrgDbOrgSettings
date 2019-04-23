@@ -1260,7 +1260,19 @@
     settingType="Boolean"
     supportUrl="http://support.microsoft.com/kb/2691237"
     urlTitle="KB 2691237"
-    description="Org setting to add XAnchor mailbox to each request header to Exchange. Default: false"/>  
+    description="Org setting to add XAnchor mailbox to each request header to Exchange. Default: false"/>
+  <orgSetting
+    minSupportedVersion="8.2.3.0006"
+    maxSupportedVersion="8.999.9999.9999"
+    name="UseXAnchorMailboxInExchangeRequestHeader"
+    isOrganizationAttribute="false"
+    min=""
+    max=""
+    defaultValue="false"
+    settingType="Boolean"
+    supportUrl="http://support.microsoft.com/kb/2691237"
+    urlTitle="KB 2691237"
+    description="Org setting to add XAnchor mailbox to each request header to Exchange. Default: false"/>
   <orgSetting
     minSupportedVersion="9.1.0.1639"
     maxSupportedVersion="9.999.9999.9999"
