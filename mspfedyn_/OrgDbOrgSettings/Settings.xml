@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <defaultOrgSettings>
   <orgSetting
     minSupportedVersion="6.0.0.809"
@@ -1071,7 +1071,7 @@
     description="Setting value to TRUE will result in Server Side Sync creating a track to Dynamics category to be used for Exchange items. Default value is set to False to preserve the existing behavior." />
   <orgSetting
     minSupportedVersion="9.0.2.100"
-    maxSupportedVersion="9.999.9999.9999"
+    maxSupportedVersion="9.1.2.3068"
     name="TrackCategorizedItems"
     isOrganizationAttribute="false"
     min=""
@@ -1081,6 +1081,18 @@
     supportUrl="http://support.microsoft.com/kb/2849744"
     urlTitle="KB 2849744"
     description="Setting value to TRUE will result in Server Side Sync creating a track to Dynamics category to be used for Exchange items. Default value is set to False to preserve the existing behavior." />
+  <orgSetting
+    minSupportedVersion="9.1.2.3069"
+    maxSupportedVersion="9.999.9999.9999"
+    name="TrackCategorizedItems"
+    isOrganizationAttribute="false"
+    min=""
+    max=""
+    defaultValue="true"
+    settingType="Boolean"
+    supportUrl="http://support.microsoft.com/kb/2849744"
+    urlTitle="KB 2849744"
+    description="Setting value to False will remove the category tracking flag and functionality. Default value is set to True (for Dynamics 365 Online) and will allow category tracking and tracking status visibility for users whom do not use Dynamics 365 for Outlook or Dynamics 365 App for Outlook." />
   <orgSetting
     minSupportedVersion="8.2.2.1661"
     maxSupportedVersion="8.999.9999.9999"
@@ -1117,18 +1129,18 @@
     supportUrl="http://support.microsoft.com/kb/2691237"
     urlTitle="KB 2691237"
     description="Setting value to True will allow saving draft appointments (isdraft property) using the DeliverIncoming api call. Default value is set to False."/>
-  <!--<orgSetting
+  <orgSetting
     minSupportedVersion="9.1.0.3648"
     maxSupportedVersion="9.999.9999.9999"
-    name="TrackAppointmentsFromNonOrganizer"
+    name="TrackAppointmentFromNonOrganizer"
     isOrganizationAttribute="true"
     min=""
     max=""
-    defaultValue="false"
+    defaultValue="true"
     settingType="Boolean"
     supportUrl="http://support.microsoft.com/kb/2691237"
     urlTitle="KB 2691237"
-    description="Allows CDS server side sync to track appointments where the syncing user mailbox was *NOT* the organizer of the appointment. Default value is set to false."/>-->
+    description="Allows CDS server side sync to track appointments where the syncing user mailbox was *NOT* the organizer of the appointment. Default value is set to true."/>
   <orgSetting
     minSupportedVersion="9.0.2.0761"
     maxSupportedVersion="9.1.0.3647"
@@ -1358,18 +1370,6 @@
     urlTitle="KB 2691237"
     description="Enables Team derived privileges when AADGroupTeamFeatures is enabled"/>
   <orgSetting
-    minSupportedVersion="9.1.0.4418"
-    maxSupportedVersion="9.999.9999.9999"
-    name="AuthorizationAppLockTimeOutInMilliSeconds"
-    isOrganizationAttribute="false"
-    min=""
-    max=""
-    defaultValue="300000"
-    settingType="Number"
-    supportUrl="http://support.microsoft.com/kb/2691237"
-    urlTitle="KB 2691237"
-    description="&lt;b&gt;Use With Caution&lt;/b&gt;:Max time to wait when acquiring app locks for provisioning users, default timeout is 300000 (5 minutes)."/>
-  <orgSetting
     minSupportedVersion="9.1.0.4036"
     maxSupportedVersion="9.999.9999.9999"
     name="HideStageAndUpgrade"
@@ -1417,6 +1417,30 @@
     supportUrl="http://support.microsoft.com/kb/2691237"
     urlTitle="KB 2691237"
     description="1 to enable, 0 to disable(preserve existing behavior)"/>
+  <orgSetting
+      minSupportedVersion="9.1.0.5420"
+      maxSupportedVersion="9.999.9999.9999"
+      name="SortURIQueryParameters"
+      isOrganizationAttribute="false"
+      min=""
+      max=""
+      defaultValue="true"
+      settingType="Boolean"
+      supportUrl="http://support.microsoft.com/kb/2691237"
+      urlTitle="KB 2691237"
+      description="False to disable, True to disable(preserve existing behavior).  If true, we are sorting the query URI parameters."/>
+  <orgSetting
+      minSupportedVersion="9.1.0.5420"
+      maxSupportedVersion="9.999.9999.9999"
+      name="AllowParamsNoEquals"
+      isOrganizationAttribute="false"
+      min=""
+      max=""
+      defaultValue="false"
+      settingType="Boolean"
+      supportUrl="http://support.microsoft.com/kb/2691237"
+      urlTitle="KB 2691237"
+      description="True to enable, False to disable(preserve existing behavior).  True will to skip the = in the query URI for empty string parameters"/>
 
   <!--ORGANIZTION ATTRIBUTE Settings - these are NOT OrgDbOrgSettings but Organization.Attribute(s) -->
   <orgSetting minSupportedVersion="9.1.0.1100"
