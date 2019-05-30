@@ -1132,7 +1132,7 @@
   <orgSetting
     minSupportedVersion="9.1.0.3648"
     maxSupportedVersion="9.999.9999.9999"
-    name="TrackAppointmentFromNonOrganizer"
+    name="TrackAppointmentsFromNonOrganizer"
     isOrganizationAttribute="true"
     min=""
     max=""
@@ -1345,6 +1345,7 @@
     supportUrl="http://support.microsoft.com/kb/2691237"
     urlTitle="KB 2691237"
     description="&lt;b&gt;Use With Caution&lt;/b&gt;:Disables the Sharepoint Sync connection KeepAlive property - this should only be used with specific guidance when using an OnPrem Sharepoint URL with Sharepoint Sync and when the onprem sharepoint server has too small of a TLS KeepAlive time configured on their Sharepoint IIS server or NLB"/>
+
   <orgSetting
     minSupportedVersion="9.1.0.2859"
     maxSupportedVersion="9.999.9999.9999"
@@ -1357,18 +1358,6 @@
     supportUrl="http://support.microsoft.com/kb/2691237"
     urlTitle="KB 2691237"
     description="Resolution to address the p tag issue in IE"/>
-  <orgSetting
-    minSupportedVersion="9.1.0.2859"
-    maxSupportedVersion="9.999.9999.9999"
-    name="InheritedRolePrivilegesFromTeamRoles"
-    isOrganizationAttribute="false"
-    min=""
-    max=""
-    defaultValue="false"
-    settingType="Boolean"
-    supportUrl="http://support.microsoft.com/kb/2691237"
-    urlTitle="KB 2691237"
-    description="Enables Team derived privileges when AADGroupTeamFeatures is enabled"/>
   <orgSetting
     minSupportedVersion="9.1.0.4036"
     maxSupportedVersion="9.999.9999.9999"
@@ -1441,7 +1430,43 @@
       supportUrl="http://support.microsoft.com/kb/2691237"
       urlTitle="KB 2691237"
       description="True to enable, False to disable(preserve existing behavior).  True will to skip the = in the query URI for empty string parameters"/>
-
+  <orgSetting
+    minSupportedVersion="9.1.0.4000"
+    maxSupportedVersion="9.999.9999.9999"
+    name="InheritedRolePrivilegesFromTeamRoles"
+    isOrganizationAttribute="false"
+    min=""
+    max=""
+    defaultValue="True"
+    settingType="Boolean"
+    supportUrl="http://support.microsoft.com/kb/2691237"
+    urlTitle="KB 2691237"
+    description="Disables the Azure AD Group team functionality of the organization in an event that there is a performance related issue. The Azure AD Group team feature is shipped enabled by default.&lt;br/&gt;&lt;b&gt;False&lt;/b&gt;- Disable Azure AD Group Team and members of group teams are required to have their own security role assigned to them directly.  Run-time calls to Azure AD to obtain the user&#8217;s AAD groups are stopped.&lt;br/&gt;&lt;b&gt;True&lt;/b&gt;&#8211; Azure AD GroupTeam is enabled and members of group teams shall inherit user\basic privileges directly and user privileges are derived at run-time.  Run-time calls to Azure AD to obtain user&#8217;s AAD groups are invoked."/>
+  <orgSetting
+    minSupportedVersion="9.1.0.5610"
+    maxSupportedVersion="9.999.9999.9999"
+    name="AllowRoleAssignmentOnDisabledUsers"
+    isOrganizationAttribute="false"
+    min=""
+    max=""
+    defaultValue="False"
+    settingType="Boolean"
+    supportUrl="http://support.microsoft.com/kb/2691237"
+    urlTitle="KB 2691237"
+    description="Enables the assignment of security role for users with a disabled status. This allows scenario where customers can create stub users and assign a different security role.  This is needed so that stub/disabled users can own records especially where these records are from custom entities where custom security roles are required. &lt;br/&gt;&lt;b&gt;False&lt;/b&gt; - By default, security role cannot be assigned to users with disabled status. &lt;br/&gt;This is shipped by default.&lt;b&gt;True&lt;/b&gt; &#8211; Allows security role to be assigned to users with disabled status."/>
+  <orgSetting
+    minSupportedVersion="9.1.0.5808"
+    maxSupportedVersion="9.999.9999.9999"
+    name="SkipAadGroupObjectIdValidation"
+    isOrganizationAttribute="false"
+    min=""
+    max=""
+    defaultValue="False"
+    settingType="Boolean"
+    supportUrl="http://support.microsoft.com/kb/2691237"
+    urlTitle="KB 2691237"
+    description="Disables the validation of Azure AD Group objectID and allows application to create Group team in CDS.  This is to mitigate the latency in the Azure AD distributed cache where a newly created Azure AD group cannot be validated if the subsequent Azure AD Group graph call goes to a distributed cache server that does not have the new Azure AD group yet.&lt;br/&gt;&lt;b&gt;False&lt;/b&gt; - do not skip Azure AD group objectID validation during Group Team creation.  This is shipped by default.&lt;br/&gt;&lt;b&gt;True&lt;/b&gt; &#8211; skip Azure AD group objectID validation to allow application to create Group team."/>
+ 
   <!--ORGANIZTION ATTRIBUTE Settings - these are NOT OrgDbOrgSettings but Organization.Attribute(s) -->
   <orgSetting minSupportedVersion="9.1.0.1100"
             maxSupportedVersion="9.9.9999.9999"
