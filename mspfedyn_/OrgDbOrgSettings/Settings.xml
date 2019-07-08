@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <defaultOrgSettings>
   <orgSetting
     minSupportedVersion="6.0.0.809"
@@ -1133,7 +1133,7 @@
     minSupportedVersion="9.1.0.3648"
     maxSupportedVersion="9.999.9999.9999"
     name="TrackAppointmentsFromNonOrganizer"
-    isOrganizationAttribute="true"
+    isOrganizationAttribute="false"
     min=""
     max=""
     defaultValue="true"
@@ -1345,7 +1345,6 @@
     supportUrl="http://support.microsoft.com/kb/2691237"
     urlTitle="KB 2691237"
     description="&lt;b&gt;Use With Caution&lt;/b&gt;:Disables the Sharepoint Sync connection KeepAlive property - this should only be used with specific guidance when using an OnPrem Sharepoint URL with Sharepoint Sync and when the onprem sharepoint server has too small of a TLS KeepAlive time configured on their Sharepoint IIS server or NLB"/>
-
   <orgSetting
     minSupportedVersion="9.1.0.2859"
     maxSupportedVersion="9.999.9999.9999"
@@ -1407,6 +1406,18 @@
     urlTitle="KB 2691237"
     description="1 to enable, 0 to disable(preserve existing behavior)"/>
   <orgSetting
+    minSupportedVersion="9.1.0.1639"
+    maxSupportedVersion="9.999.9999.9999"
+    name="EnableActivitiesFeatures"
+    isOrganizationAttribute="false"
+    min="0"
+    max="1"
+    defaultValue="0"
+    settingType="Number"
+    supportUrl="http://support.microsoft.com/kb/2691237"
+    urlTitle="KB 2691237"
+    description="Bitmask to Enable various activities feature in UCI; 1 to enable, 0 to disable(preserve existing behavior)"/>
+  <orgSetting
       minSupportedVersion="9.1.0.5420"
       maxSupportedVersion="9.999.9999.9999"
       name="SortURIQueryParameters"
@@ -1441,7 +1452,7 @@
     settingType="Boolean"
     supportUrl="http://support.microsoft.com/kb/2691237"
     urlTitle="KB 2691237"
-    description="Disables the Azure AD Group team functionality of the organization in an event that there is a performance related issue. The Azure AD Group team feature is shipped enabled by default.&lt;br/&gt;&lt;b&gt;False&lt;/b&gt;- Disable Azure AD Group Team and members of group teams are required to have their own security role assigned to them directly.  Run-time calls to Azure AD to obtain the user&#8217;s AAD groups are stopped.&lt;br/&gt;&lt;b&gt;True&lt;/b&gt;&#8211; Azure AD GroupTeam is enabled and members of group teams shall inherit user\basic privileges directly and user privileges are derived at run-time.  Run-time calls to Azure AD to obtain user&#8217;s AAD groups are invoked."/>
+    description="Disables inheritance of user/basic depth role privileges from team basic depth role privileges for all roles. .&lt;br/&gt;&lt;b&gt;False&lt;/b&gt;- members of group teams are required to have their own security role assigned to them directly.&lt;br/&gt;&lt;b&gt;True&lt;/b&gt;&#8211; By default members of group teams shall inherit user/basic privileges directly and user privileges are derived at run-time"/>
   <orgSetting
     minSupportedVersion="9.1.0.5610"
     maxSupportedVersion="9.999.9999.9999"
