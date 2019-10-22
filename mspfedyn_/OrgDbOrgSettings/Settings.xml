@@ -1479,6 +1479,17 @@
     description="Disables the validation of Azure AD Group objectID and allows application to create Group team in CDS.  This is to mitigate the latency in the Azure AD distributed cache where a newly created Azure AD group cannot be validated if the subsequent Azure AD Group graph call goes to a distributed cache server that does not have the new Azure AD group yet.&lt;br/&gt;&lt;b&gt;False&lt;/b&gt; - do not skip Azure AD group objectID validation during Group Team creation.  This is shipped by default.&lt;br/&gt;&lt;b&gt;True&lt;/b&gt; &#8211; skip Azure AD group objectID validation to allow application to create Group team."/>
  
   <!--ORGANIZTION ATTRIBUTE Settings - these are NOT OrgDbOrgSettings but Organization.Attribute(s) -->
+  <orgSetting minSupportedVersion="9.1.0.4437"
+            maxSupportedVersion="9.9.9999.9999"
+            name="appointmentricheditorexperience"
+            isOrganizationAttribute="true"
+            min=""
+            max=""
+            defaultValue="false"
+            settingType="Boolean"
+            supportUrl="https://docs.microsoft.com/en-us/power-platform/admin/enable-rich-text-experience"
+            urlTitle="Organization entity attributes"
+            description="When you enable the rich text experience, server-side synchronization and appointment activities support rich text. With the rich text editor, appointment descriptions can contain rich text. After enabling, if you choose to disable the setting, the appointment editor description field will reset to the plain-text field. Previously synchronized appointments' description will still contain rich-text HTML markup. Although the rich text editor can be used with appointment activities, it can’t be used with recurring appointments. When an appointment that contains rich text is converted to a recurring appointment, the description field for the activity is converted to a plain-text field containing rich text content." />
   <orgSetting minSupportedVersion="9.1.0.1100"
             maxSupportedVersion="9.9.9999.9999"
             name="EnableUnifiedInterfaceShellRefresh"
