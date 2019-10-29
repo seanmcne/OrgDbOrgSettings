@@ -11,10 +11,9 @@ The OrgDBSettings utility is installed as a managed CRM solution. As a result I 
 _Note: During beta testing I received feedback asking for the utility to have it's own place in the sitemap however, after discussing with some partners and developers they suggested leaving it out due to possible dependency conflicts._
 
 Browser Supportability: 
-- CRM 2016 and higher in IE11, Edge, Chrome, Firefox, and Safari on Mac. 
-- NOTE for IE: you must be running in non-compatability / standards mode.  
+- CRM v9.0 and higher in Edge (Chromium), Edge, Chrome, Firefox, and Safari on Mac.
 - NOTE: Some browser configurations block XDR's (cross domain requests) and thus will not get the benefit of update warnings - if you're impacted by this you can disable any addins that block these requests, alternatively keep checking back on this site for updates. 
-- If you're using IE please read this article on [CRM Disable IE Compatibility Mode](CRM-Disable-IE-Compatibility-Mode)
+- If you must use IE and are having issues, please read this article on [CRM Disable IE Compatibility Mode](CRM-Disable-IE-Compatibility-Mode)
 
 ![](Home_OrgDbOrgSettings2013UR1.png)
 
@@ -23,7 +22,7 @@ The importing of this managed solution will include the following components:
 - JSON2 [http://www.json.org/](http://www.json.org/)
 - OrgDBOrgSettings.html [How to use the editor](How-to-use-the-editor)
 - settings.xml [What is Settings.xml](What-is-Settings.xml)
-- AzureMobile [Azure Portal](http://manage.windowsazure.com), MSDN [AzureMobile Services](http://msdn.microsoft.com/en-us/library/windowsazure/jj554228.aspx), and [AzureMobile Preview Signup](http://manage.windowsazure.com/?WT.mc_id=IXT001_prelimtext2012preview_MSDNLibrary)
+- AzureMobile [Azure Portal](http://manage.windowsazure.com), MSDN [AzureMobile Services](http://msdn.microsoft.com/en-us/library/windowsazure/jj554228.aspx), and [AzureMobile Preview Signup](http://manage.windowsazure.com/?WT.mc_id=IXT001_prelimtext2012preview_MSDNLibrary) - this is used to phone back to check for any new updates of the solution. 
 
 **How do I install just the zip file from this site?**
 - Go to the releases page https://github.com/seanmcne/OrgDbOrgSettings/releases 
