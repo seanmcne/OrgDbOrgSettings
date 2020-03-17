@@ -13,7 +13,7 @@ _Note: During beta testing I received feedback asking for the utility to have it
 Browser Supportability: 
 - CRM v9.0 and higher in Edge (Chromium), Edge, Chrome, Firefox, and Safari on Mac.
 - NOTE: Some browser configurations block XDR's (cross domain requests) and thus will not get the benefit of update warnings - if you're impacted by this you can disable any addins that block these requests, alternatively keep checking back on this site for updates. 
-- If you must use IE and are having issues, please read this article on [CRM Disable IE Compatibility Mode](CRM-Disable-IE-Compatibility-Mode)
+- If you must use IE, please use another browser such as Edge https://aka.ms/GetEdge - for folks who are stuck with IE talk to your IT Department about using modern browsers, if you are absolutely stuck you can read this article on [CRM Disable IE Compatibility Mode](CRM-Disable-IE-Compatibility-Mode) however, I'm not planning on making changes to accomidate IE at this point in time given that most have moved on to modern browsers now. 
 
 ![](Home_OrgDbOrgSettings2013UR1.png)
 
