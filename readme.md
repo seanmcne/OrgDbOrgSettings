@@ -22,7 +22,7 @@ The importing of this managed solution will include the following components:
 - JSON2 [http://www.json.org/](http://www.json.org/)
 - OrgDBOrgSettings.html [How to use the editor](How-to-use-the-editor)
 - settings.xml [What is Settings.xml](What-is-Settings.xml)
-- AzureMobile [Azure Portal](http://manage.windowsazure.com), MSDN [AzureMobile Services](http://msdn.microsoft.com/en-us/library/windowsazure/jj554228.aspx), and [AzureMobile Preview Signup](http://manage.windowsazure.com/?WT.mc_id=IXT001_prelimtext2012preview_MSDNLibrary) - this is used to phone back to check for any new updates of the solution. 
+- Azure Mobile Apps [Azure Portal](http://portal.azure.com), MSDN [AzureMobile Services](https://azure.microsoft.com/en-us/services/app-service/mobile/) - this service is used for the browser to call back and check for any new updates of the editor solution (and prompt you to download an update, if one is available). 
 
 **How do I install just the zip file from this site?**
 - Go to the releases page https://github.com/seanmcne/OrgDbOrgSettings/releases 
