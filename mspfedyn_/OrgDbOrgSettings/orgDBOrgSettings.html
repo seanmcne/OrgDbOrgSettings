@@ -24,7 +24,7 @@
         };
         SDK.SOAP = {
             getVersionSpecificWebApiUrl: function () {
-                var serverBuildVersion = new BuildVersion(8, 0, 0, 0);
+                var serverBuildVersion = new BuildVersion(8, 1, 0, 0);
 
                 //get the org version 
                 this.getCrmOrgDBVersion(
@@ -166,7 +166,7 @@
                         ///<param name='error' type='Error'/>
                         var errorMessage = "Not parsable";
                         try {
-                            errorMessage = XrmlHttpRequest.responseJSON.error.message.value; 
+                            errorMessage = XrmlHttpRequest.responseJSON.error.message; 
                         } catch (e) { }
                         var retError = new Error("There was an error updating your orgDBOrgSettings: " + errorMessage); 
                         errorCallback(retError);
