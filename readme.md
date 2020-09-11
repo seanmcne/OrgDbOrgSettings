@@ -2,7 +2,7 @@
 The link to the releases is somewhat hidden in plain sight - to help with this, you can just click this link to get to the releases page: https://github.com/seanmcne/OrgDbOrgSettings/releases 
 
 **Project Description**
-This is a utility allowing admins of Dynamics CRM Online & onPrem (2016) to edit  organization database settings otherwise known as OrgDBOrgSettings
+This is a utility allowing admins of Common Data Service (CDS, fomerly CRM) which the Dynamics 365 Sales, Service, FS, PS apps are all hosted on as well as all Model apps, additionally onPrem editions are supported for editting organization database settings otherwise known as OrgDBOrgSettings as well as some selected Organization attributes.
 
 This utility allows you to edit your settings without the use of the command line utility in the KB article documenting "OrgDBOrgSettings."  The utility is written using the CRM SDK as a reference and currently all changes and retrieval of settings are done via the CRM's OData Endpoint.  The utility is provided as a managed webresource that can easily be installed and uninstalled from your CRM environment.  
 
