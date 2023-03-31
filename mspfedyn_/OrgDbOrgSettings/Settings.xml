@@ -183,18 +183,6 @@
   <orgSetting minSupportedVersion="9.2.21114.00136" maxSupportedVersion="9.999.9999.9999" name="AuthorizationAppLockTimeOutInMilliSeconds" isOrganizationAttribute="false" min="1" max="999999" defaultValue="300000" settingType="Number" supportUrl="http://support.microsoft.com/kb/2691237" urlTitle="KB 2691237" description="the value in milli seconds to use as an app lock timeout for authorization stored procedures. The default value is 5 mins.)" />
   <orgSetting minSupportedVersion="9.2.21114.00136" maxSupportedVersion="9.999.9999.9999" name="AuthorizationLockUserTimeOutInSeconds" isOrganizationAttribute="false" min="1" max="999999" defaultValue="3" settingType="Number" supportUrl="http://support.microsoft.com/kb/2691237" urlTitle="KB 2691237" description="The value in seconds to use to lock user for authorization data recompute.)" />
   <orgSetting minSupportedVersion="9.2.22091.00030" maxSupportedVersion="9.999.9999.9999" name="IsArchivalEnabled" isOrganizationAttribute="false" min="" max="" defaultValue="false" settingType="Boolean" supportUrl="http://support.microsoft.com/kb/2691237" urlTitle="KB 2691237" description="Enabling/Disabling archival feature for an organization." />
-  <orgSetting 
-      minSupportedVersion="9.2.23040.0" 
-      maxSupportedVersion="9.999.9999.9999" 
-      name="AzureSynapseLinkIncrementalUpdateTimeInterval"
-      isOrganizationAttribute="false" 
-      min="15" 
-      max="999999" 
-      defaultValue="1440" 
-      settingType="Number" 
-      supportUrl="http://support.microsoft.com/kb/2691237" 
-      urlTitle="KB 2691237" 
-      description="Time (minutes) Interval for AzureSynapseLink IncrementalUpdate" />
   <orgSetting minSupportedVersion="9.2.22104.00104" maxSupportedVersion="9.999.9999.9999" name="EnableTDSArchival" isOrganizationAttribute="false" min="" max="" defaultValue="false" settingType="Boolean" supportUrl="http://support.microsoft.com/kb/2691237" urlTitle="KB 2691237" description="Enabling/Disabling TDS archival feature for an organization." />
   <orgSetting minSupportedVersion="9.2.22061.152" maxSupportedVersion="9.9999.9999.9999" name="SSSTaskDeletionSyncBehaviorFromExchange" isOrganizationAttribute="false" min="0" max="2" defaultValue="0" settingType="Number" urlTitle="KB 2691237" supportUrl="http://support.microsoft.com/kb/2691237" description="Specifies how task deletions in Exchange are synchronized to their linked Dynamics 365 activity record.&lt;br /&gt;0: Tasks deleted in Exchange are deleted in Dynamics (default).&lt;br /&gt;1: Tasks deleted in Exchange are deleted in Dynamics if they are not completed.&lt;br /&gt;2: Tasks deleted in Exchange are never deleted in Dynamics." />
   <orgSetting minSupportedVersion="9.2.22112.112" maxSupportedVersion="9.9999.9999.9999" name="EnableModernRoleEditor" isOrganizationAttribute="false" min="" max="" defaultValue="false" settingType="Boolean" urlTitle="KB 2691237" supportUrl="http://support.microsoft.com/kb/2691237" description="The setting is used to turn on/off security role editor UI in Power platform admin center." />
@@ -202,4 +190,5 @@
   <orgSetting minSupportedVersion="9.2.0.21032" maxSupportedVersion="9.9.9999.9999" name="SetCallerAsDefaultOwnerForNewEntities" isOrganizationAttribute="false" min="" max="" defaultValue="false" settingType="Boolean" supportUrl="http://support.microsoft.com/kb/2691237" urlTitle="KB 2691237" description="Adding this property determines if new entities created will set the caller as owner." />
   <orgSetting minSupportedVersion="9.2.22082.00007" maxSupportedVersion="9.9.9999.9999" name="IsAccessCheckerAllUsersEnabled" isOrganizationAttribute="false" min="" max="" defaultValue="false" settingType="Boolean" supportUrl="https://learn.microsoft.com/en-us/power-apps/user/access-checker#check-another-users-access-to-a-row" urlTitle="Learn: UserAccess" description="Allow Non-Admin users to see All User's access." />
   <orgSetting minSupportedVersion="9.2.22082.00007" maxSupportedVersion="9.9.9999.9999" name="IsAccessCheckerNonAdminAllUsersEnabled" isOrganizationAttribute="false" min="" max="" defaultValue="false" settingType="Boolean" supportUrl="https://learn.microsoft.com/en-us/power-apps/user/access-checker#check-another-users-access-to-a-row" urlTitle="Learn: UserAccess" description="Allow Non-Admin users to see All User's access." />
+  <orgSetting minSupportedVersion="9.2.23040.0" maxSupportedVersion="9.999.9999.9999" name="AzureSynapseLinkIncrementalUpdateTimeInterval" isOrganizationAttribute="false" min="15" max="999999" defaultValue="1440" settingType="Number" supportUrl="http://support.microsoft.com/kb/2691237" urlTitle="KB 2691237" description="Time (minutes) Interval for AzureSynapseLink IncrementalUpdate" />
 </defaultOrgSettings>
