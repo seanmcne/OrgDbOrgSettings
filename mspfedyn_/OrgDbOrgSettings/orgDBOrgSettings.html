@@ -750,7 +750,7 @@
             },
             _settings: new Array()
         };
-        function orgSetting(name, value, type, min, max, defaultValue, supportUrl, description, minSupportedVersion, urlTitle, maxSupportedVersion, isOrganizationAttribute, isNullable, isReadonly) {
+        function orgSetting(name, value, type, min, max, defaultValue, supportUrl, description, minSupportedVersion, urlTitle, maxSupportedVersion, isOrganizationAttribute, isNullable, isReadonly,isOptinSetting) {
             /// <summary>Object defention of orgSetting</summary> 
             /// <param name='name' type='String'>Setting name</param>
             /// <param name='value' type='Object'>Setting value</param>
@@ -759,6 +759,8 @@
             /// <param name='max' type='Number'>Maximum Int value</param>
             /// <param name='isOrganizationAttribute' type='Boolean'>Does this setting exist in the OrganizationEntity? (Not orgDbOrgSettings)</param>
             /// <param name='isNullable' type='Boolean'>Does this setting allow for null?</param>
+            /// <param name='isReadonly' type='Boolean'>Does this setting allow for updates</param>
+            /// <param name='isOptinSetting' type='Boolean'>Does this setting allow for reset</param>
             /// <returns type="orgSetting">An instance of an orgSetting()</returns>
             this.name = name;
             this.value = value
@@ -774,6 +776,7 @@
             this.isOrganizationAttribute = isOrganizationAttribute || false; //default to false
             this.isNullable = isNullable || false; //default to false
             this.isReadonly = isReadonly || false; //default to false
+            this.isOptInSetting = isOptInSetting || false; //default to false
         };
         orgSetting.prototype = {
             isNullValue: function () {
@@ -1051,6 +1054,21 @@
         };
         function deleteSetting(strSettingToDelete) {
             if (confirm("Are you absolutely sure you want to remove: " + strSettingToDelete + "?") && confirm("As a backup, take a screenshot of your settings before you do this.\r\nDo you still wish to proceed?\r\n\r\nTechnically this deletes all settings from CRM then adds all the settings back with the exception of " +strSettingToDelete +".")) {
+                // Validate there is no OptIn Settings.
+                var optedInSettings = "";
+                o$.each(SDK.Settings.OrganizationSettings.getAllSettings(), function (index, setting) {
+                    ///<param name="setting" type="orgSetting"/>
+                    ///<param name="index" type="int"/> 
+                    if (setting != null && setting.value != null && !setting.isOrganizationAttribute && setting.isOptInSetting && setting.value !== false) {
+                        optedInSettings += setting.name + ',';
+                    }
+                });
+
+                if (optedInSettings !== "")
+                {
+                    alert("There were optin settings enabled : " + optedInSettings + " Reseting these settings may lead to optout of existing features. Turn off the optin settings before trying to delete remove any setting.");
+                    return;
+                }                
                 enableProgressDiv(true);
 
                 var settingToDelete = SDK.Settings.OrganizationSettings.getSetting(strSettingToDelete);
@@ -1337,6 +1355,7 @@
                                         if (serverBuildVersion.isGreaterThanOrEq(BuildVersion.parseBuildNumber(minVer)) && serverBuildVersion.isLessThanOrEq(BuildVersion.parseBuildNumber(maxVer))) {
                                             var isNullable = false;
                                             var isReadonly = false;
+                                            var isOptinSetting = false;
                                             var isOrganizationAttribute = false;
                                             var currentSettingValue = null;
                                             var currentSettingName = curNode.attributes.getNamedItem("name").value;
@@ -1353,6 +1372,9 @@
                                             }
                                             if (null != curNode.attributes.getNamedItem("isReadonly")) {
                                                 isReadonly = parseValueFromTypeName("boolean", curNode.attributes.getNamedItem("isReadonly").value);
+                                            }
+                                            if (null != curNode.attributes.getNamedItem("isOptinSetting")) {
+                                                isOptinSetting = parseValueFromTypeName("boolean", curNode.attributes.getNamedItem("isOptinSetting").value);
                                             }
                                             //yammer check 
                                             if (!SDK.Settings.isYammerConfigured &&
@@ -1376,7 +1398,8 @@
                                                     maxVer,
                                                     isOrganizationAttribute,
                                                     isNullable,
-                                                    isReadonly
+                                                    isReadonly, 
+                                                    isOptinSetting
                                                 )
                                             );
                                         }
