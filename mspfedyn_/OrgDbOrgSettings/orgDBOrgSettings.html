@@ -750,7 +750,7 @@
             },
             _settings: new Array()
         };
-        function orgSetting(name, value, type, min, max, defaultValue, supportUrl, description, minSupportedVersion, urlTitle, maxSupportedVersion, isOrganizationAttribute, isNullable, isReadonly,isOptinSetting) {
+        function orgSetting(name, value, type, min, max, defaultValue, supportUrl, description, minSupportedVersion, urlTitle, maxSupportedVersion, isOrganizationAttribute, isNullable, isReadonly,isOptInSetting) {
             /// <summary>Object defention of orgSetting</summary> 
             /// <param name='name' type='String'>Setting name</param>
             /// <param name='value' type='Object'>Setting value</param>
@@ -760,7 +760,7 @@
             /// <param name='isOrganizationAttribute' type='Boolean'>Does this setting exist in the OrganizationEntity? (Not orgDbOrgSettings)</param>
             /// <param name='isNullable' type='Boolean'>Does this setting allow for null?</param>
             /// <param name='isReadonly' type='Boolean'>Does this setting allow for updates</param>
-            /// <param name='isOptinSetting' type='Boolean'>Does this setting allow for reset</param>
+            /// <param name='isOptInSetting' type='Boolean'>Does this setting allow for reset</param>
             /// <returns type="orgSetting">An instance of an orgSetting()</returns>
             this.name = name;
             this.value = value
@@ -1355,7 +1355,7 @@
                                         if (serverBuildVersion.isGreaterThanOrEq(BuildVersion.parseBuildNumber(minVer)) && serverBuildVersion.isLessThanOrEq(BuildVersion.parseBuildNumber(maxVer))) {
                                             var isNullable = false;
                                             var isReadonly = false;
-                                            var isOptinSetting = false;
+                                            var isOptInSetting = false;
                                             var isOrganizationAttribute = false;
                                             var currentSettingValue = null;
                                             var currentSettingName = curNode.attributes.getNamedItem("name").value;
@@ -1373,8 +1373,8 @@
                                             if (null != curNode.attributes.getNamedItem("isReadonly")) {
                                                 isReadonly = parseValueFromTypeName("boolean", curNode.attributes.getNamedItem("isReadonly").value);
                                             }
-                                            if (null != curNode.attributes.getNamedItem("isOptinSetting")) {
-                                                isOptinSetting = parseValueFromTypeName("boolean", curNode.attributes.getNamedItem("isOptinSetting").value);
+                                            if (null != curNode.attributes.getNamedItem("isOptInSetting")) {
+                                                isOptInSetting = parseValueFromTypeName("boolean", curNode.attributes.getNamedItem("isOptInSetting").value);
                                             }
                                             //yammer check 
                                             if (!SDK.Settings.isYammerConfigured &&
@@ -1399,7 +1399,7 @@
                                                     isOrganizationAttribute,
                                                     isNullable,
                                                     isReadonly, 
-                                                    isOptinSetting
+                                                    isOptInSetting
                                                 )
                                             );
                                         }
