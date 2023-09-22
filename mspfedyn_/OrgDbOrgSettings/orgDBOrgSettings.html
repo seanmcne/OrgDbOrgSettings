@@ -1066,7 +1066,7 @@
 
                 if (optedInSettings !== "")
                 {
-                    alert("There were optin settings enabled : " + optedInSettings + " Reseting these settings may lead to optout of existing features. Turn off the optin settings before trying to delete remove any setting.");
+                    updateBanner("The following opt-in settings are enabled: " + optedInSettings + ". Reseting these settings may lead to opting out of existing features. Set these opt-in settings to false *before* trying to delete remove any other settings.", false, "OptInSettingsAlert");
                     return;
                 }                
                 enableProgressDiv(true);
