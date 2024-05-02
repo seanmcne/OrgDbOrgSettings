@@ -20,7 +20,7 @@ jobs:
           dir ${{ env.ARTIFACT_DIR  }} -Recurse
       - name: List files in the repository dir we want to see
         run: |
-          $root = ${{ env.GITHUB_WORKSPACE  }}
+          $root = $env:GITHUB_WORKSPACE
           $path = "\mspfedyn_\WebEditor\Solutions\SolutionPackager\Solution"
           $fullpath = $root + $path
           dir $fullpath
