@@ -15,6 +15,12 @@ jobs:
       - name: List files in the repository
         run: |
           dir ${{ github.workspace }}
+      - name: List files in the repository dir we want to see
+        run: |
+          dir ${{ env.ARTIFACT_DIR  }}
+      - name: List files in the repository dir we want to see recurse
+        run: |
+          dir ${{ env.ARTIFACT_DIR  }} /s
       - run: echo "🍏 This job's status is ${{ job.status }}."
       - name: Install Power Platform Tools
         uses: microsoft/powerplatform-actions/actions-install@v1
