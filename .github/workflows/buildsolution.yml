@@ -17,7 +17,10 @@ jobs:
           dir ${{ github.workspace }}
       - name: List files in the repository dir we want to see
         run: |
-          dir $("{0} {1}" -f ${{ env.ARTIFACT_DIR }} , "\\mspfedyn_\\WebEditor\\Solutions\\SolutionPackager\\Solution")
+          $root = ${{ env.ARTIFACT_DIR }}
+          $path = "\mspfedyn_\WebEditor\Solutions\SolutionPackager\Solution"
+          $fullpath = $root + $path
+          dir $fullpath
       - name: List files in the repository dir we want to see recurse
         run: |
           dir ${{ env.ARTIFACT_DIR  }} -Recurse
