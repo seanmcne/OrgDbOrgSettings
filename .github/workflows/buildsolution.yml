@@ -17,7 +17,7 @@ jobs:
           dir ${{ github.workspace }}
       - name: List files in the repository dir we want to see
         run: |
-          dir ${{ env.ARTIFACT_DIR  }}
+          dir ${{ env.ARTIFACT_DIR }}"\\mspfedyn_\\WebEditor\\Solutions\\SolutionPackager\\Solution"
       - name: List files in the repository dir we want to see recurse
         run: |
           dir ${{ env.ARTIFACT_DIR  }} -Recurse
@@ -27,6 +27,6 @@ jobs:
       - name: Pack Solution
         uses: microsoft/powerplatform-actions/pack-solution@v1
         with:
-          solution-file: "WebEditor/Solutions/SolutionPackager/Solution"
+          solution-file: "WebEditor\\Solutions\\SolutionPackager\\Solution"
           solution-folder: ${{ env.ARTIFACT_DIR  }} 
           solution-type: "both"
