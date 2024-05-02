@@ -19,7 +19,7 @@ jobs:
       - name: Install Power Platform Tools
         uses: microsoft/powerplatform-actions/actions-install@v1
       - name: Pack Solution
-        uses: microsoft/powerplatform-actions/actions-pack-solution@v1
+        uses: microsoft/powerplatform-actions/pack-solution@v1
         with:
           solution-file: "WebEditor/Solutions/SolutionPackager/Solution"
           solution-folder: ${{ env.ARTIFACT_DIR  }} 
