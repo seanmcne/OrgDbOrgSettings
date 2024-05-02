@@ -20,7 +20,7 @@ jobs:
           dir ${{ env.ARTIFACT_DIR  }}
       - name: List files in the repository dir we want to see recurse
         run: |
-          dir ${{ env.ARTIFACT_DIR  }} /s
+          dir ${{ env.ARTIFACT_DIR  }} -Recurse
       - run: echo "🍏 This job's status is ${{ job.status }}."
       - name: Install Power Platform Tools
         uses: microsoft/powerplatform-actions/actions-install@v1
