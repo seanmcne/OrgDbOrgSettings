@@ -31,6 +31,6 @@ jobs:
       - name: Pack Solution
         uses: microsoft/powerplatform-actions/pack-solution@v1
         with:
-          solution-file: "\\mspfedyn_\\OrgDbOrgSettings\\Solution"
-          solution-folder: ${{ env.ARTIFACT_DIR  }} 
+          solution-file: ${{ env.ARTIFACT_DIR  }}
+          solution-folder: $fullpath
           solution-type: "both"
