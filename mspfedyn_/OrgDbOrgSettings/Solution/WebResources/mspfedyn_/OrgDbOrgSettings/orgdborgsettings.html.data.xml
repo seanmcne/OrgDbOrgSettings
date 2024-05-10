@@ -1,0 +1,13 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<WebResource>
+  <WebResourceId>{3f22606c-e9c2-e211-97c8-18a905f32500}</WebResourceId>
+  <Name>mspfedyn_/orgdborgsettings/orgdborgsettings.html</Name>
+  <DisplayName>orgdborgsettings.html</DisplayName>
+  <Description>This is the main page of the orgdbsettings utility.  </Description>
+  <WebResourceType>1</WebResourceType>
+  <IntroducedVersion>1.0.1.23</IntroducedVersion>
+  <IsCustomizable>1</IsCustomizable>
+  <CanBeDeleted>1</CanBeDeleted>
+  <IsHidden>0</IsHidden>
+  <FileName>/WebResources/mspfedyn_orgdborgsettingsorgdborgsettingshtml3F22606C-E9C2-E211-97C8-18A905F32500</FileName>
+</WebResource>

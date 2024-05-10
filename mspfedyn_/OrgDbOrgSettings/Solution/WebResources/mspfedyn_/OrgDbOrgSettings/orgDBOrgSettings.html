@@ -1,0 +1,1665 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="X-UA-Compatible" content="IE=8,IE=9,IE=10"/>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <title>Organization Settings Editor</title>
+    <script type="text/javascript" src="jquery1_11_0.js"></script>
+    <script type="text/javascript" src="json2.js"></script>
+    <script type="text/javascript" src="https://orgdborgsettings.azure-mobile.net/client/MobileServices.Web-1.0.0.min.js"></script>
+    <script type="text/javascript" src="../../ClientGlobalContext.js.aspx"></script>
+    <script type="text/javascript">
+        var supportedBrowser = true;
+        var a = navigator.userAgent; 
+        if ((a.indexOf("Trident/4.0") > -1 || a.indexOf("Trident/5.0") >-1 || a.indexOf("Trident/6.0") > -1) && a.indexOf("MSIE 7.0") > -1) {
+            supportedBrowser = false; //using useragent is not recommended but there isn't much of a choice in this case.
+        }
+    </script>
+    <script type="text/javascript">
+        //CRM Required
+        var o$ = {};
+        o$ = jQuery.noConflict(true);
+        if (typeof (SDK) == "undefined") {
+            SDK = { __namespace: true };
+        };
+        SDK.SOAP = {
+            getVersionSpecificWebApiUrl: function () {
+                var serverBuildVersion = new BuildVersion(8, 1, 0, 0);
+
+                //get the org version 
+                this.getCrmOrgDBVersion(
+                    onSuccess = function (serverVersion) {
+                        serverBuildVersion = serverVersion; 
+                    },
+                    onError = function (error) {});
+
+                if (serverBuildVersion.major >= 9 && serverBuildVersion.minor >= 1) {
+                    return "/api/data/v9.1";
+                }
+                if (serverBuildVersion.major == 9 && serverBuildVersion.minor == 0) {
+                    return "/api/data/v9.0";
+                }
+                else {
+                    return "/api/data/v8.0";
+                }
+            },
+            getCrmOrgDBVersion: function (successCallback, errorCallback) {
+                ///<summary>Async retrieves the newest version from CRM's about.aspx page</summary>
+                ///<param name="successCallback" Type="Function(BuildVersion)">The function to perform when an successfult response is returned. 
+                ///Should accept a single parameter which will accept an argument of type BuildVersion</param>
+                ///<param name="errorCallback" Type="Function">The function to perform when an error is returned.</param>
+                //try to get the parent doc app version - we can't necessarly rely on this, and it's *not supported*, so we'll try to safely check it and have a fall back plan. 
+                //added in version 1.0.1.7. 
+                var gotParentVersion = false;
+                try {
+                    if (window.parent != null && window.parent.APPLICATION_FULL_VERSION != null) {
+                        var parsedBV = BuildVersion.parseBuildNumber(window.parent.APPLICATION_FULL_VERSION);
+                        successCallback(parsedBV);
+                        gotParentVersion = true;
+                    }
+                }
+                catch (e) {}
+                if (!gotParentVersion) {
+                    var rootUrl = this.getOrgRootUrl(); //required IE8
+                    o$.ajax({
+                        timeout: SDK.Settings.ajaxTimeout,
+                        type: "GET",
+                        datatype: "html",
+                        url: rootUrl + "/about/default.aspx",
+                        data: null,
+                        beforeSend: function (XMLHttpRequest) { },
+                        success: function (results, textStatus, XmlHttpRequest) {
+                            try {
+                                var finalBv = new BuildVersion(0, 0, 0, 0);
+                                //\d{1,4} = find any set of 1 up to 4 digits in a row
+                                //then a dot between each 1-4 digit sequence
+                                var matches = results.match(/(\d{1,4})\.(\d{1,4})\.(\d{1,4})\.(\d{1,4})/gm);
+                                if (matches.length > 0) {
+                                    o$.each(matches, function (index, match) {
+                                        var curBv = BuildVersion.parseBuildNumber(match);
+                                        if (curBv.isGreaterThan(finalBv)) {
+                                            finalBv = curBv;
+                                        }
+                                    });
+                                }
+                                else {
+                                    errorCallback(new Error("getCrmOrgDBVersion.AboutPage.Success() - Cannot detect a version from: " + rootUrl || "rootURL IS NULL" + ")"));
+                                }
+                                successCallback(finalBv);
+                            }
+                            catch (e) {
+                                errorCallback(new Error("getCrmOrgDBVersion.AboutPage.Error() - Cannot detect a version number from: " + rootUrl || "rootURL IS NULL" + ")" + e.stack || ""));
+                            }
+                        },
+                        error: function (XMLHttpRequest, textStatus, errorThrown) {
+                            errorCallback(errorThrown);
+                        },
+                        complete: function (XMLHttpRequest, status) { }
+                    });
+                }
+            },
+            getSettingsXmlFromUrl: function (settingsXmlPath) {
+                ///<summary>Async retrieve settings xml from the server</summary>
+                ///<param name='settingsXmlPath' type='String'>Relative path of the settings.xml file</param>
+                ///<param name="successCallback" Type="Function">The function to perform when an successfult response is returned.
+                /// should accept a single parameter which will contain the XML results from the file.</param>
+                ///<param name="errorCallback" Type="Function">
+                /// The function to perform when an error is returned. 
+                /// This function accepts a JScript error returned by the _getError function</param>
+                ///<var name="req" Type="XMLHttpRequest">The XMLHttpRequest</var>
+                return o$.ajax({
+                    timeout: SDK.Settings.ajaxTimeout,
+                    type: "GET",
+                    datatype: "xml",
+                    url: settingsXmlPath,
+                    data: null,
+                    beforeSend: function (XMLHttpRequest) { }
+                });
+            },
+            getOrganizationEntityFromCrmWebApi: function () {
+                ///<summary>Async retrieves the current orgdborgsettings from Dynamics CRM</summary>
+                ///<returns type='jqXHR'>Ajax Query Object</returns>
+                var rootUrl = this.getOrgRootUrl(); //required IE8
+                return o$.ajax({
+                    timeout: SDK.Settings.ajaxTimeout,
+                    type: "GET",
+                    contentType: "application/json; charset=utf-8",
+                    datatype: "json",
+                    url: rootUrl + this.getVersionSpecificWebApiUrl() + "/organizations",
+                    data: null,
+                    beforeSend: function (XMLHttpRequest) {
+                        //Specifying this header ensures that the results will be returned as JSON.
+                        XMLHttpRequest.setRequestHeader("Accept", "application/json");
+                        XMLHttpRequest.setRequestHeader("Content-Type", "application/json; charset=utf-8");
+                        XMLHttpRequest.setRequestHeader("OData-MaxVersion", "4.0");
+                        XMLHttpRequest.setRequestHeader("OData-Version", "4.0");
+                    }
+                });
+            },
+            updateOrgDbOrgSettingOnServer: function (orgDbOrgSettingXml, organizationId, successCallback, errorCallback, completionCallback) {
+                ///<summary>Async updates orgdborgsetting XML in CRM </summary>
+                ///<param name="orgDbOrgSettingXml" type='String'>fragment of xml that represents an orgdborgsetting</param>
+                ///<param name="organizationId" type="String">Org ID Guid to update in CRM</param> 
+                ///<param name="successCallback" Type="Function">The function to perform when the update is a success. 
+                ///<param name="completionCallback" Type="Function">The function to perform when it completes no matter what. 
+                ///Should accept a single parameter which will accept an argument of type BuildVersion</param>
+                ///<param name="errorCallback" Type="Function">The function to perform when an error is returned.</param>
+                var rootUrl = this.getOrgRootUrl(); //required IE8
+                o$.ajax({
+                    timeout: SDK.Settings.ajaxTimeout,
+                    type: "PATCH",
+                    contentType: "application/json; charset=utf-8",
+                    datatype: "json",
+                    //method: "MERGE", //not working on some IE/JQUERY versions 
+                    url: rootUrl + this.getVersionSpecificWebApiUrl() + "/organizations" + "(" + organizationId + ")",
+                    data: oJSON.stringify({ orgdborgsettings: orgDbOrgSettingXml }),
+                    beforeSend: function (XMLHttpRequest) {
+                        XMLHttpRequest.setRequestHeader("Accept", "application/json");
+                        //XMLHttpRequest.setRequestHeader("X-HTTP-Method", "MERGE");
+                        XMLHttpRequest.setRequestHeader("OData-MaxVersion", "4.0");
+                        XMLHttpRequest.setRequestHeader("OData-Version", "4.0");
+                    },
+                    success: function (results) {
+                        successCallback();
+                    },
+                    error: function (XrmlHttpRequest, status, error) {
+                        ///<param name='error' type='Error'/>
+                        var errorMessage = "Not parsable";
+                        try {
+                            errorMessage = XrmlHttpRequest.responseJSON.error.message; 
+                        } catch (e) { }
+                        var retError = new Error("There was an error updating your orgDBOrgSettings: " + errorMessage); 
+                        errorCallback(retError);
+                    },
+                    complete: function (XMLHttpRequest, textStatus) {
+                        completionCallback();
+                    }
+                });
+            },
+            setOrganizationAttributeValue: function (attributeName, attributeValue, organizationId) {
+                ///<summary>Async updates organizationbase attribute value</summary>
+                ///<param name='attributeName' type='String'>attribute name to update</param>
+                ///<param name="attributeValue" Type="Object">the value of the attribute to set</param>
+                ///<param name="organizationId" type="String">Org ID Guid to update in CRM</param> 
+                ///<returns type='jqXHR'>Returns ajax query</returns> 
+                var rootUrl = this.getOrgRootUrl();  //IE8 required
+
+                //create blank object and dynamically add the dynamic value
+                var update = {};
+                update[attributeName] = attributeValue;
+
+                return o$.ajax({
+                    timeout: SDK.Settings.ajaxTimeout,
+                    type: "PATCH",
+                    contentType: "application/json; charset=utf-8",
+                    datatype: "json",
+                    url: rootUrl + this.getVersionSpecificWebApiUrl() + "/organizations" + "(" + organizationId + ")",
+                    data: oJSON.stringify(update),
+                    beforeSend: function (XMLHttpRequest) {
+                        XMLHttpRequest.setRequestHeader("Accept", "application/json");
+                        //XMLHttpRequest.setRequestHeader("X-HTTP-Method", "MERGE");
+                        XMLHttpRequest.setRequestHeader("OData-MaxVersion", "4.0");
+                        XMLHttpRequest.setRequestHeader("OData-Version", "4.0");
+                    },
+                });
+            },
+            resetYammerAttributes: function (organizationId) {
+                ///<summary>Async updates organizationbase attribute value</summary>
+                ///<param name='attributeName' type='String'>attribute name to update</param>
+                ///<param name="attributeValue" Type="Object">the value of the attribute to set</param>
+                ///<param name="organizationId" type="String">Org ID Guid to update in CRM</param> 
+                ///<returns type='jqXHR'>Returns ajax query</returns> 
+                var rootUrl = this.getOrgRootUrl();  //IE8 required
+
+                //create blank object and dynamically add the dynamic value
+                var update = {};
+                update["YammerGroupId".toLowerCase()] = null;
+                update["YammerOAuthAccessTokenExpired".toLowerCase()] = null;
+                update["YammerNetworkPermalink".toLowerCase()] = null;
+                update["YammerPostMethod".toLowerCase()] = null;
+
+                return o$.ajax({
+                    timeout: SDK.Settings.ajaxTimeout,
+                    type: "PATCH",
+                    contentType: "application/json; charset=utf-8",
+                    datatype: "json",
+                    url: rootUrl + this.getVersionSpecificWebApiUrl() + "/organizations" + "(" + organizationId + ")",
+                    data: oJSON.stringify(update),
+                    beforeSend: function (XMLHttpRequest) {
+                        XMLHttpRequest.setRequestHeader("Accept", "application/json");
+                        //XMLHttpRequest.setRequestHeader("X-HTTP-Method", "MERGE");
+                        XMLHttpRequest.setRequestHeader("OData-MaxVersion", "4.0");
+                        XMLHttpRequest.setRequestHeader("OData-Version", "4.0");
+                    },
+                });
+            },
+            getCrmSolutionVersion: function () {
+                ///<returns type='jqXHR'>Returns ajax query</returns> 
+                ///<returns type='jqXHR'>Returns ajax query</returns> 
+                var rootUrl = this.getOrgRootUrl();  //IE8 required
+
+                return o$.ajax({
+                    timeout: SDK.Settings.ajaxTimeout,
+                    type: "GET",
+                    contentType: "application/json; charset=utf-8",
+                    datatype: "json",
+                    url: rootUrl + this.getVersionSpecificWebApiUrl() +"/solutions?$select=modifiedon,uniquename,organizationid,ismanaged,publisherid,version,versionnumber&$filter=uniquename eq 'OrganizationSettingsEditor'",
+                    data: null,
+                    beforeSend: function (XMLHttpRequest) {
+                        //Specifying this header ensures that the results will be returned as JSON.
+                        XMLHttpRequest.setRequestHeader("Accept", "application/json");
+                        XMLHttpRequest.setRequestHeader("OData-MaxVersion", "4.0");
+                        XMLHttpRequest.setRequestHeader("OData-Version", "4.0");
+                    }
+                });
+            },
+            getOrgRootUrl: function () {
+                ///<summary>gets the root url with prepended or appended orgname given the environment and based on the browser.</summary> 
+                ///<returns type='String'>The root Url of the environment with orgName</returns> 
+                var retval = "";
+                var browserUrl = this.getSafeLowerCaseString(window.location.href, "window.location.href")
+                var orgName = this.getSafeLowerCaseString(Xrm.Page.context.getOrgUniqueName(), "Xrm.Page.context.getOrgUniqueName()");
+                var firstSlashIndex = browserUrl.replace('//', "--").indexOf('/');
+                //ex firstSlashIndex for 'https://test.test.com/orgName///main//.aspx/.aspx/' would be 21 
+                //and https://testorg.crm.dynamics.com/main.aspx# 32 
+                //now the url looks like http:--crmsql:5555/crm or http:--crm.domain.com/crm/ccccc
+                //now the url looks like http:--crm:5555/crm or http:--crm.domain.com/crm/main.aspx 
+                //now the url looks like https:--crm.domain.com:5555/crm or https:--crm.domain.com/main.aspx 
+                var tempUrlTest = browserUrl.replace("http://", "").replace("https://", "");
+                if (browserUrl.indexOf(orgName) == firstSlashIndex + 1 ||
+                    browserUrl.replace('//', "--").indexOf(orgName + '/', firstSlashIndex) == firstSlashIndex + 1) {
+                    //if the orgname is right after the first slash OR 
+                    //if the orgname is the only thing directly after the firstslashindex
+                    //now we know the org is after the slash (onPrem internal or Claims internal)
+                    //unless the servername starts or contains the name of the org! as in http://crmsql:5555/crm/main.aspx - etc... 
+                    retval = browserUrl.substr(0, firstSlashIndex) + "/" + orgName;
+                }
+                else {
+                    //now we know the org is before the first slash and it's online or claims IFD 
+                    retval = browserUrl.substr(0, firstSlashIndex);
+                }
+                return retval.toString();
+            },
+            getSafeLowerCaseString: function(stringInput, nameOfStringVariable)
+            {
+                if (stringInput) {
+                    return stringInput.toString().toLowerCase(); 
+                }
+                throw new Error("ERROR: getSafeLowerCaseString(): variable " + nameOfStringVariable + " is null!"); 
+            },
+            getSoapError: function (faultXml) {
+                ///<summary>
+                /// Parses the WCF fault returned in the event of an error.
+                ///</summary>
+                ///<param name="faultXml" Type="XML">
+                /// The responseXML property of the XMLHttpRequest response.
+                ///</param>
+                this._getError(faultXml); 
+            },
+            _getError: function (faultXml) {
+                ///<summary>
+                /// Parses the WCF fault returned in the event of an error.
+                ///</summary>
+                ///<param name="faultXml" Type="XML">
+                /// The responseXML property of the XMLHttpRequest response.
+                ///</param>
+                var errorMessage = "Unknown Error (Unable to parse the fault)";
+                if (typeof faultXml == "object") {
+                    try {
+                        var bodyNode = faultXml.firstChild.firstChild;
+                        //Retrieve the fault node
+                        for (var i = 0; i < bodyNode.childNodes.length; i++) {
+                            var node = bodyNode.childNodes[i];
+
+                            //NOTE: This comparison does not handle the case where the XML namespace changes
+                            if ("s:Fault" == node.nodeName) {
+                                for (var j = 0; j < node.childNodes.length; j++) {
+                                    var faultStringNode = node.childNodes[j];
+                                    if ("faultstring" == faultStringNode.nodeName) {
+                                        errorMessage = faultStringNode.text;
+                                        break;
+                                    }
+                                }
+                                break;
+                            }
+                        }
+                    }
+                    catch (e) { };
+                }
+                return new Error(errorMessage);
+            },
+            //following two functions are not used now
+            updateSolution: function (base64String) {
+                ///<param name='base64String' type='String'>A Base64 Encoded string of a CRM solution zip file</param>
+                ///<summary>Takes in a base64 string and updates the managed solution automatically</summary>
+                var request = [
+                  '<s:Envelope xmlns:s=\"http://schemas.xmlsoap.org/soap/envelope/\">',
+                   '<s:Body>',
+                    '<Execute xmlns="http://schemas.microsoft.com/xrm/2011/Contracts/Services" xmlns:i="http://www.w3.org/2001/XMLSchema-instance">',
+                     '<request i:type="b:ImportSolutionRequest" xmlns:a="http://schemas.microsoft.com/xrm/2011/Contracts" xmlns:b="http://schemas.microsoft.com/crm/2011/Contracts">',
+                       '<a:Parameters xmlns:c="http://schemas.datacontract.org/2004/07/System.Collections.Generic">',
+                            '<a:KeyValuePairOfstringanyType>',
+                              '<c:key>OverwriteUnmanagedCustomizations</c:key>',
+                              '<c:value i:type="d:boolean" xmlns:d="http://www.w3.org/2001/XMLSchema">false</c:value>',
+                            '</a:KeyValuePairOfstringanyType>',
+                            '<a:KeyValuePairOfstringanyType>',
+                              '<c:key>PublishWorkflows</c:key>',
+                              '<c:value i:type="d:boolean" xmlns:d="http://www.w3.org/2001/XMLSchema">false</c:value>',
+                            '</a:KeyValuePairOfstringanyType>',
+                            '<a:KeyValuePairOfstringanyType>',
+                              '<c:key>CustomizationFile</c:key>',
+                              '<c:value i:type="d:base64Binary" xmlns:d="http://www.w3.org/2001/XMLSchema">',
+                              base64String,
+                              '</c:value>',
+                            '</a:KeyValuePairOfstringanyType>',
+                            '<a:KeyValuePairOfstringanyType>',
+                              '<c:key>ImportJobId</c:key>',
+                              '<c:value i:type="d:guid" xmlns:d="http://schemas.microsoft.com/2003/10/Serialization/">00000000-0000-0000-0000-000000000000</c:value>',
+                            '</a:KeyValuePairOfstringanyType>',
+                       '</a:Parameters>',
+                       '<a:RequestId i:nil="true"/>',
+                       '<a:RequestName>ImportSolution</RequestName>',
+                     '</request>',
+                    '</Execute>',
+                   '</s:Body>',
+                  '</s:Envelope>'].join("");
+                var req = new XMLHttpRequest();
+                req.open("POST", (SDK.SOAP.getOrgRootUrl() + "/XRMServices/2011/Organization.svc/web"), true);
+                //try { req.responseType = 'msxml-document' } catch (e) { }
+                req.setRequestHeader("Accept", "application/xml, text/xml, */*");
+                req.setRequestHeader("Content-Type", "text/xml; charset=utf-8");
+                req.setRequestHeader("Content-Length", request.length);//experimental to increase soap message size. 
+                req.setRequestHeader("SOAPAction", "http://schemas.microsoft.com/xrm/2011/Contracts/Services/IOrganizationService/Execute");
+                req.onreadystatechange = function () {
+                    if (req.readyState == 4 /* complete */) {
+                        req.onreadystatechange = null; //Addresses potential memory leak issue with IE8
+                        if (req.status == 200) {
+                            //Success				
+                            var doc = req.responseXML;
+                            alert('we did it!');
+                        }
+                        else {
+                            alert('there was an error importing the solution update: ' + ((req.responseText) || "no error"));
+                        }
+                    }
+                };
+                req.send(request);
+            },
+            downloadAzureBlob: function (blobId) {
+                ///<param name='blobId' type='Number'>blobId</param>
+                //if (blobId) {
+                //    var query = client.getTable('applicationVersion').select('id', 'SolutionZip').where({
+                //        id:blobId
+                //    }).take(1).read().done(function (results) {
+                //        //32000 char limit :( -- SDK.SOAP.updateSolution(results[0].SolutionZip); 
+                //        //alert(JSON.stringify(results));
+                //        //var url = "data:application/octet-stream;base64," + results[0].SolutionZip;
+                //        URL.createObjectURL(
+                //        var url = "data:application/octet-stream;charset=utf-8;base64," + results[0].SolutionZip;
+                //        o$('#downloader').prop('href', url);
+                //        //document.location.href = url;
+                //        //return window.open(url);
+                //    }, function (err) {
+                //        alert("Error: " + err);
+                //    });
+                //}
+            },
+            __namespace: true
+        };
+        SDK.Settings = {
+            ajaxTimeout: 300000,
+            crmServerDBVersion: new BuildVersion(0,0,0,0), 
+            azureClient: null, 
+            daysOfCache: 7,
+            azureMobileUrl: "https://orgdborgsettings.azure-mobile.net/", 
+            azureMobileKey: "SJJAJKWgJGFTMkJmXsetIytXmxMxqM37",
+            minWindowHeight: 825,
+            OrganizationId: null,
+            OrganizationName: Xrm.Page.context.getOrgUniqueName(),
+            isYammerConfigured: false,
+            OrganizationSettings: function () {
+                if (!this._localSettingsCollection) {
+                    this._localSettingsCollection = new OrgSettingsCollection();
+                }
+                return this._localSettingsCollection; 
+            },
+            projectUrl: "https://github.com/seanmcne/OrgDbOrgSettings/releases", 
+            projectIEDocumentationUrl: "https://github.com/seanmcne/OrgDbOrgSettings/blob/master/IE8%20Settings.md",
+            projectIECompatDocUrl: "https://github.com/seanmcne/OrgDbOrgSettings/blob/master/IE%20compatibility%20modes.md",
+            _localSettingsCollection: {},
+            CRMOrganizationResults: {}, //the result of an odata call for all organization columns 
+            LocalStorage: {
+                supports_html5_storage: function () {
+                    try {
+                        return 'localStorage' in window && window['localStorage'] !== null;
+                    } catch (e) {
+                        return false;
+                    }
+                },
+                contains: function (keyName) {
+                    ///<returns type='Boolean'>Returns true if the item is in cache and false if it is not</returns>
+                    if (this.supports_html5_storage()) {
+                        if (localStorage.getItem(keyName)) {
+                            return true;
+                        }
+                    }
+                    return false;
+                },
+                localStorageValue: function (keyName) {
+                    ///<param name='keyName' type='string'>Key of localstorage value to retrieve</param>
+                    ///<returns type='String'>Returns the value of the localstorage key</returns>
+                    if (this.supports_html5_storage()) {
+                        return localStorage.getItem(keyName);
+                    }
+                    else {
+                        return null;
+                    }
+                },
+                newVersionAlertKey: 'orgdborgsettings_newVersionAlert',
+                cacheKey: 'orgdborgsettings_lastupdatecheck',
+                slnBuildVerKey: 'orgdborgsettings_lastSolutionBuildNumber',
+                __namespace: true
+            },
+            __namespace: true
+        };
+        var orgLocalStorage = SDK.Settings.LocalStorage;
+        function checkAzureMobileForUpdates(forceUpdateCheck) {
+            ///<summary>Checks the CRM Solution version, then fires off checks to azureMobile based on a cached date</summary>
+            ///<param name='forceUpdateCheck' type='Boolean'>Forces a check against AzureMobile</param>
+            if (forceUpdateCheck === null) {
+                forceUpdateCheck = false; //default to false if not passed
+            }
+            if (forceUpdateCheck) {
+                enableProgressDiv(true);
+            }
+
+            SDK.SOAP.getCrmSolutionVersion().done(function (results, textStatus, XmlHttpRequest) {
+                if (results && results.value.length > 0) {
+                    var isManaged = results.value[0].ismanaged;
+                    var version = results.value[0].version;
+                    var versionNumber = results.value[0].versionnumber;
+                    var slnBuildVersion = BuildVersion.parseBuildNumber(version);
+                    var slnModDate = new Date(parseInt(results.value[0].modifiedon.replace("/Date(", "").replace(")/", ""), 10));
+                    //compare the localStorage lastLoadedBuild# - if it's less than the current SLN version then force a check to make sure we're current
+                    try {
+                        if (orgLocalStorage.contains(orgLocalStorage.slnBuildVerKey)) {
+                            var lastLoadedBuildNum = orgLocalStorage.localStorageValue(orgLocalStorage.slnBuildVerKey);//get value from localstorage
+                            if (lastLoadedBuildNum != "") {
+                                var localStorageBuild = BuildVersion.parseBuildNumber(lastLoadedBuildNum);
+                                if (!localStorageBuild.equals(slnBuildVersion)) {
+                                    //if our tracked build# is less than our current build# - then force a check
+                                    forceUpdateCheck = true;
+                                    localStorage.setItem(orgLocalStorage.slnBuildVerKey, slnBuildVersion.toBuildNumberString());
+                                }
+                            }
+                        }
+                        else {
+                            //not set yet or doesn't have localstorage - let's check and set it 
+                            if (orgLocalStorage.supports_html5_storage()) {
+                                localStorage.setItem(orgLocalStorage.slnBuildVerKey, slnBuildVersion.toBuildNumberString());
+                            }
+                        }
+                    } catch (e) { };
+                    if (!isManaged) {
+                        updateBanner("Warning: You are not running the managed solution of the settings editor.\rPlease download and use the managed version.", false, "managedslnmsg");
+                    }
+                    try {
+                        //using azureMobile for xdr's to read newer versions if the enviornment has internet access: 
+                        if ((shouldCheckAzureForUpdates(SDK.Settings.daysOfCache) || forceUpdateCheck) && supportedBrowser && slnBuildVersion) {
+                            clearAutoUpdateCache(false); //dump the cache if we require a check for updates
+                            //we must get the org version *BEFORE* calling into AzureMobile
+                            SDK.SOAP.getCrmOrgDBVersion(
+                                onSuccess = function (serverBuildVersion) {
+                                    SDK.Settings.azureClient.getTable('applicationVersion')
+                                    .select('VersionNumber', 'DownloadUrl', 'PublishedDate')
+                                    .where(
+                                    function (dateCompare, majorVersion) {
+                                        return (this.PublishedDate <= dateCompare && (this.MinCrmVersion <= majorVersion && this.MaxCrmVersion >= majorVersion));
+                                    }, new Date().toISOString(), serverBuildVersion.major)
+                                    .take(1)
+                                    .orderByDescending('PublishedDate')
+                                    .read()
+                                    .done(
+                                        function (results) {
+                                            //on successful Azure check 
+                                            localStorage.setItem(orgLocalStorage.cacheKey, Date.now());
+                                            //no results return and wait until next time 
+                                            if (results.length == 0) {
+                                                //reset version alert then 
+                                                localStorage.removeItem(orgLocalStorage.newVersionAlertKey);
+                                                return;
+                                            }
+                                            var latestAzureSln = BuildVersion.parseBuildNumber(results[0].VersionNumber);
+                                            if (latestAzureSln.isGreaterThan(slnBuildVersion)) {
+                                                alert("You are not running the latest available version!\rSee the yellow ribbon for a download URL for the latest solution.");
+                                                var openerCmd = 'javascript:try { openStdWindow(SDK.SOAP.getOrgRootUrl() + "/tools/solution/import/solutionimportwizard.aspx", "Import", 600,500); } catch ($exception) { console.log("An Error Occurred while trying to launch the import dialog, please import the solution via Settings|Customizations|Solutions instead.") }';
+                                                var message = "<b>Version " +
+                                                        latestAzureSln.toBuildNumberString() +
+                                                        " is now available! <a target='_blank' href='" +
+                                                        (results[0].DownloadUrl || "https://github.com/seanmcne/OrgDbOrgSettings/releases") +
+                                                        "'>Download</a> and save the new solution package, then <a href='#' onclick='" + openerCmd + "'>Import</a> it into CRM. Once completed press F5 to reload this page.</b>" +
+                                                        "</br>If you believe you're reaching this message in error <a href='#' onclick='javascript:checkAzureMobileForUpdates(true);'>Click here</a> to force another update check.";
+                                                updateBanner(message, false, "azureNewVersionMsg"); //alert admin of new version 
+                                                localStorage.setItem(orgLocalStorage.newVersionAlertKey, message); //set new version in localStroage
+                                            }
+                                            else {
+                                                //we know that we've checked and there is NOT a newer version, if there was we wouldn't be here so time to clear out new version alert 
+                                                localStorage.removeItem(orgLocalStorage.newVersionAlertKey);
+                                                localStorage.setItem(orgLocalStorage.slnBuildVerKey, slnBuildVersion.toBuildNumberString());
+                                                SDK.Settings.OrganizationSettings.clear(); //clear currently stored settings
+                                                resetBanner(); //reset the banner
+                                                retrieveAndDisplaySettings(); 
+                                            }
+                                        },
+                                        function (error) {
+                                            updateBanner("Error in message response from AzureMobile: " + err, false, "azureResponseErrorMsg");
+                                            clearAutoUpdateCache(false);
+                                        });
+                                }, 
+                                onError = function (error) {
+                                    console.log("Failed to check AzureMobile!");
+                                    alert(error); 
+                                });
+                        }
+                        else if (orgLocalStorage.contains(orgLocalStorage.newVersionAlertKey)) {
+                            //if we already know we need a new version, then we should continue alerting the admin
+                            updateBanner(orgLocalStorage.localStorageValue(orgLocalStorage.newVersionAlertKey), false, "azureNewVersionMsg");
+                        }
+                    }
+                    catch (e) {
+                        /*this is somewhat experimental - if it fails we want to gracefully fail and queue up another update check*/
+                        updateBanner("An error was encountered when comparing solution build versions to AzureMobile.  Please manually check for updates at the <a href='" + SDK.Settings.projectUrl + "' target='_blank'>project site</a>.", false, "versionErrorMsg");
+                        //dumpErrorInBanner(e); 
+                        clearAutoUpdateCache(false);
+                    }
+                }
+                else {
+                    updateBanner("Unable to find the source OrgDbOrgSettings Solution in your CRM organization.", false, "orgDbOrgSettingsNotFoundMsg");
+                }
+            }).fail(function (jqXHR, textStatus, errorThrown) {
+                SDK.SOAP.getSoapError(errorThrown);
+            }).always(function (XMLHttpRequest, status) {
+                if (forceUpdateCheck) {
+                    enableProgressDiv(false);
+                }
+            })
+        };
+        function shouldCheckAzureForUpdates(minDaysInCache) {
+            ///<param name='minDaysInCache' type='Number'>Minimum days between checking azure</param>
+            ///<returns type='Boolean'>indicates if azure should be checked</returns>
+            if (orgLocalStorage.supports_html5_storage()) {
+                var lastUpdateDateString = localStorage.getItem(orgLocalStorage.cacheKey);
+                if (lastUpdateDateString) {
+                    var lastUpdateDate = parseInt(lastUpdateDateString);
+                    if ((Date.now() < (lastUpdateDate + (minDaysInCache * 86400000)))) {
+                        return false;
+                    }
+                    else {
+                        return true;
+                    }
+                }
+                else {
+                    //the value doesn't exist so we'll check for updates //localStorage.setItem(orgLocalStorage.cacheKey, Date.now()); 
+                    return true;
+                }
+            }
+            return false;
+        };
+
+        function BuildVersion(major, minor, build, revision) {
+            ///<summary>BuildVersion</summary>
+            ///<param name='major' type='Number'>Major Build Number</param>
+            ///<param name='minor' type='Number'>Minor Build Number</param>
+            ///<param name='build' type='Number'>Build Number</param>
+            ///<param name='revision' type='Number'>Revision Number</param>
+            this.major = major;
+            this.minor = minor;
+            this.build = build;
+            this.revision = revision;
+        };
+        BuildVersion.parseBuildNumber = function (strBuildNumber) {
+            ///<summary>Parses a four decimal build number ie: 5.0.9690.583</summary> 
+            ///<param name='strBuildNumber'>Build number in string format.</param>
+            ///<returns type='BuildVersion'>Parsed Build Version</returns>
+            var bNums = strBuildNumber.split('.', 4);
+            if (bNums.length == 4) {
+                return new BuildVersion(
+                    parseInt(bNums[0]),
+                    parseInt(bNums[1]),
+                    parseInt(bNums[2]),
+                    parseInt(bNums[3]));
+            }
+            else {
+                throw Error("Build version must have a format of x.x.xxxx.xxxx");
+            }
+        };
+        BuildVersion.prototype = {
+            toBuildNumberString: function () {
+                ///<summary>returns the build version in a string format of "5.0.9690.983"</summary>
+                ///<param name='BuildVersionObj' type='BuildVersion'>Build Version Object Instance</param>
+                ///<retuns type='String'>String format Build Version</returns>
+                return (this.major + '.' + this.minor + '.' + this.build + '.' + this.revision).toString();
+            },
+            equals: function (BuildVersionToCompare) {
+                ///<param type='BuildVersion' name='BuildVersionToCompare'>Build Version to Compare To</param>
+                return (this.major == BuildVersionToCompare.major && this.minor == BuildVersionToCompare.minor && this.build == BuildVersionToCompare.build && this.revision == BuildVersionToCompare.revision);
+            },
+            isGreaterThan: function (BuildVersionToCompare) {
+                ///<param type='BuildVersion' name='BuildVersionToCompare'>Build Version to Compare To</param>
+                if (this.major > BuildVersionToCompare.major) {
+                    return true;
+                }
+                else if (this.major == BuildVersionToCompare.major) {
+                    if (this.minor > BuildVersionToCompare.minor) {
+                        return true;
+                    }
+                    else if (this.minor == BuildVersionToCompare.minor) {
+                        if (this.build > BuildVersionToCompare.build) {
+                            return true;
+                        }
+                        else if (this.build == BuildVersionToCompare.build) {
+                            if (this.revision > BuildVersionToCompare.revision) {
+                                return true;
+                            }
+                        }
+                    }
+                }
+                return false; //if all else fails - then our BV is greater 
+            },
+            isGreaterThanOrEq: function (BuildVersionToCompare) {
+                ///<param type='BuildVersion' name='BuildVersionToCompare'>Build Version to Compare To</param>
+                return this.equals(BuildVersionToCompare) || this.isGreaterThan(BuildVersionToCompare)
+            },
+            isLessThan: function (BuildVersionToCompare) {
+                ///<param type='BuildVersion' name='BuildVersionToCompare'>Build Version to Compare To</param>
+                //if the BV passed greater than mine then current BV is less - etc
+                if (this.major < BuildVersionToCompare.major) {
+                    return true;
+                }
+                else if (this.major == BuildVersionToCompare.major) {
+                    if (this.minor < BuildVersionToCompare.minor) {
+                        return true;
+                    }
+                    else if (this.minor == BuildVersionToCompare.minor) {
+                        if (this.build < BuildVersionToCompare.build) {
+                            return true;
+                        }
+                        else if (this.build == BuildVersionToCompare.build) {
+                            if (this.revision < BuildVersionToCompare.revision) {
+                                return true;
+                            }
+                        }
+                    }
+                }
+                return false; //if all else fails - then our BV is greater 
+            },
+            isLessThanOrEq: function (BuildVersionToCompare) {
+                ///<param type='BuildVersion' name='BuildVersionToCompare'>Build Version to Compare To</param>
+                return this.equals(BuildVersionToCompare) || this.isLessThan(BuildVersionToCompare)
+            },
+        };
+        function OrgSettingsCollection() {
+            /// <summary>Object defention of orgSetting collection</summary> 
+            /// <returns type="OrgSettingsCollection">An instance of orgSettingsCollection structure to hold orgSetting[]</returns>
+            this._settings = new Array();
+        };
+        OrgSettingsCollection.prototype = {
+            getAllSettings: function () {
+                ///<returns type='OrgSettingsCollection'>Array of orgSetting</returns>
+                this._sortSettingsByName();
+                return this._settings;
+            },
+            getSettingObjectByName: function (settingName) {
+                ///<summary>Deprecated - use getSetting(name) instead;</summary>
+                ///<param type='String' name='settingName'>name of the setting to find</param>
+                ///<returns type='orgSetting'>organization setting object</returns>
+                return this.getSetting(settingName);
+            },
+            getSetting: function (name) {
+                ///<param type='String' name='name'>name of the setting to return</param>
+                ///<returns type='orgSetting'>organization setting object</returns>
+                ///<var name='retVal' type='orgSetting'>The desired org setting</var>
+                var retVal = null;
+                o$.each(this._settings, function (index, orgSetting) {
+                    ///<var type='orgSetting' name='retVal'>returned setting object</var>
+                    //each value is going to be an "orgSetting()"
+                    //if the name of the setting matches the name of the incoming setting then do something 
+                    if (orgSetting.name.toLowerCase() === name.toLowerCase()) {
+                        retVal = orgSetting;
+                        return false; //break
+                    }
+                });
+                return retVal;
+            },
+            addSetting: function (OrganizationSetting) {
+                ///<summary>Adds another orgSetting object to the OrgSettingsCollection instance array.</summary>
+                ///<param name='OrganizationSetting' type='orgSetting'>Organization Setting</param>
+                this._settings.push(OrganizationSetting);
+            },
+            clear: function () {
+                ///<summary>Clears out all the settings in the OrgSettingsCollection array</summary>
+                this._settings = new Array();
+            },
+            _sortSettingsByName: function () {
+                //sort results array... 
+                this._settings = this._settings.sort(function (a, b) {
+                    if (a.name.toLowerCase() < b.name.toLowerCase()) { return -1 };
+                    if (a.name.toLowerCase() > b.name.toLowerCase()) { return 1 };
+                    return 0;
+                });
+            },
+            _settings: new Array()
+        };
+        function orgSetting(name, value, type, min, max, defaultValue, supportUrl, description, minSupportedVersion, urlTitle, maxSupportedVersion, isOrganizationAttribute, isNullable, isReadonly,isOptInSetting) {
+            /// <summary>Object defention of orgSetting</summary> 
+            /// <param name='name' type='String'>Setting name</param>
+            /// <param name='value' type='Object'>Setting value</param>
+            /// <param name='type' type='Type'>Underlying object Type of the setting value</param>
+            /// <param name='min' type='Number'>Minimum Int value</param>
+            /// <param name='max' type='Number'>Maximum Int value</param>
+            /// <param name='isOrganizationAttribute' type='Boolean'>Does this setting exist in the OrganizationEntity? (Not orgDbOrgSettings)</param>
+            /// <param name='isNullable' type='Boolean'>Does this setting allow for null?</param>
+            /// <param name='isReadonly' type='Boolean'>Does this setting allow for updates</param>
+            /// <param name='isOptInSetting' type='Boolean'>Does this setting allow for reset</param>
+            /// <returns type="orgSetting">An instance of an orgSetting()</returns>
+            this.name = name;
+            this.value = value
+            this.type = type;
+            this.minNumber = parseFloat(min).toString() === "NaN" ? null : parseFloat(min);
+            this.maxNumber = parseFloat(max).toString() === "NaN" ? null : parseFloat(max);
+            this.defaultValue = defaultValue;
+            this.supportUrl = supportUrl || "#";
+            this.description = description;
+            this.minSupportedVersion = minSupportedVersion;
+            this.maxSupportedVersion = maxSupportedVersion;
+            this.urlTitle = urlTitle || "No URL";
+            this.isOrganizationAttribute = isOrganizationAttribute || false; //default to false
+            this.isNullable = isNullable || false; //default to false
+            this.isReadonly = isReadonly || false; //default to false
+            this.isOptInSetting = isOptInSetting || false; //default to false
+        };
+        orgSetting.prototype = {
+            isNullValue: function () {
+                if (this.value == null) {
+                    return true; 
+                }
+                return false;
+            },
+            parseStringToValue: function (value) {
+                ///<summary>Parses a value and returns the type.</summary>
+                ///<param name='value' type='String'>String representation of the value</param>
+                ///<returns type='Object'>typed value</returns>
+                return parseValueFromTypeName(this.type, value); 
+            },
+            toXmlForUpdate: function (useDefaultValue) {
+                /// <Summary>Returns the setting XML for an update to CRM</Summary>
+                /// <param type='Boolean'>Use the default value of the setting</param>
+                /// <returns type='String'>XML for an orgDbOrgSetting update to CRM</returns>
+                //return <OrgSettings><settingName></settingName></OrgSettings>
+                return '<OrgSettings>' + this.toRawXmlSetting(useDefaultValue) + '</OrgSettings>'
+            },
+            toRawXmlSetting: function(useDefaultValue){
+                /// <Summary>Returns the setting XML for an update to CRM</Summary>
+                /// <param type='Boolean'>Use the default value of the setting</param>
+                /// <returns type='String'>Raw setting xml</returns>
+                //return <settingName>settingValue</settingName>
+                if (this.isValid() && !useDefaultValue) {
+                    return '<' + this.name + '>' + this.value + '</' + this.name + '>'
+                }
+                else if (useDefaultValue) {
+                    return '<' + this.name + '>' + this.defaultValue + '</' + this.name + '>'
+                }
+                else {
+                    throw "Setting value of " + this.value + "is not a valid " + this.type.__typeName.toLowerCase() || this.type.toString();
+                }
+                return '';
+            },
+            resetToDefault: function () {
+                if (this.isNullable && this.defaultValue == "null") {
+                    this.value = null; 
+                }
+                else {
+                    this.value = this.defaultValue;
+                    if (!this.isValid()) {
+                        throw "Default value is not valid!";
+                    }
+                }
+                
+            },
+            defaultValue: function () {
+                return this.defaultValue; 
+            },
+            toXmlForDefaultValue: function () {
+                /// <Summary>returns the setting XML representation for an update</Summary>
+                /// <returns type'String'>XML for an orgDbOrgSetting update to CRM</returns>
+                //return <OrgSettings><settingName></settingName></OrgSettings>
+                if (this.isValid()) {
+                    return '<OrgSettings><' + this.name + '>' + this.defaultValue + '</' + this.name + '></OrgSettings>'
+                }
+                else {
+                    throw "Setting value of " + this.value + "is not a valid " + this.type.__typeName.toLowerCase() || this.type.toString();
+                }
+            },
+            isValid: function () {
+                ///<summary>checks the orgsetting value for validity.</summary>
+                ///<returns type='Boolean'>Value vailidity true/false.</summary>
+                //DataType Sensative
+
+                //if nullable and it's null - then it's a valid value 
+                if (this.isNullValue() && this.isNullable) { return true; }
+
+                //otherwise check the values 
+                switch ((this.type).toLowerCase()) {
+                    case "number":
+                        if (parseInt(this.value) != null && !isNaN(parseInt(this.value)) && this.value >= this.minNumber && this.value <= this.maxNumber) {
+                            return true;
+                        }
+                        else {
+                            return false;
+                        }
+                        break;
+                    case "double":
+                        if (parseFloat(this.value) != null && !isNaN(parseFloat(this.value)) && this.value >= this.minNumber && this.value <= this.maxNumber) {
+                            return true;
+                        }
+                        else {
+                            return false;
+                        }
+                        break;
+                    case "boolean":
+                        if ((this.value !== null) && (this.value.toString().toLowerCase() == "false" || (this.value.toString().toLowerCase() == "true"))) {
+                            return true;
+                        }
+                        break;
+                    case "string":
+                        if (this.value != null && this.value != "null")
+                            return true;
+                        break;
+                    default:
+                        return (typeof this.value).toLowerCase() === (this.type.__typeName || this.type.toString()).toLowerCase();
+                        break
+                };
+                return false; //default 
+            },
+            update: function (stringValue) {
+                /// <summary>Updates the current value of a given setting by name</summary>
+                /// <param name='stringValue' type='string'>Value of the setting as a string</param>
+                var currentValue = this.value;
+                var newValue;
+                if (this.isNullable && (stringValue == null || stringValue=="null") ) {
+                    newValue = null; 
+                }
+                else {
+                    newValue = this.parseStringToValue(stringValue);
+                }
+                this.value = newValue; 
+                if (!this.isValid()) {
+                    this.value = currentValue; //reset value back to what it was
+                    throw Error("Setting with name: " + this.name + " and value of: " + newValue + " is not valid. Setting did not change and still remains at: " + currentValue);
+                }
+            },
+            isSet: function () {
+                if (this.isNullValue() && this.isNullable) {
+                    return true;
+                }
+                else if (!this.isNullValue()) {
+                    return true; 
+                }
+                return false; 
+            }
+        };
+
+        function parseValueFromTypeName(TypeName, Value) {
+            ///<summary>Parses a value and returns the type.</summary>
+            ///<param name='TypeName' type='String'>A String defining which type of value to parse [string|boolean|number|double]</param>
+            ///<param name='Value' type='String'>String representation of the value</param>
+            ///<returns type='Object'>typed value</returns>
+            //DataType Sensative
+            var parseFailure = false, retval;
+            switch (TypeName.toString().toLowerCase()) {
+                case "string":
+                    retval = Value;
+                    break;
+                case "boolean": //parse text and convert
+                    if ((Value || "null").toLowerCase() === "true") {
+                        retval = true;
+                    }
+                    else if ((Value || "null").toLowerCase() === "false") {
+                        retval = false;
+                    }
+                    else {
+                        parseFailure = true;
+                    }
+                    break;
+                case "number":
+                    var num = parseInt(Value);
+                    num === NaN ? parseFailure = true : retval = parseInt(Value);
+                    break;
+                case "double":
+                    var num = parseFloat(Value);
+                    num === NaN ? parseFailure = true : retval = parseFloat(Value);
+                    break;
+                default:
+                    parseFailure = true;
+                    break;
+            }
+            if (parseFailure) {
+                throw Error('Cannot parse the value of: "' + Value + '" for the setting type of: ' + TypeName);
+            }
+            return retval;
+        };
+        function resetYammerAttributes() {
+            try { //double confirmation for this setting, just in case. 
+                var result = confirm("Proceed with removing your Yammer configuration from CRM? This should only be done when advised to do so or when required to fall back to using Activity Feeds.");
+                if (result){
+                    result = confirm("Are you positive you want to do this? Removing the Yammer configuration will switch CRM back to using Activity Feeds, if you require the use of Yammer you should re-configure it through CRM's administration settings.");
+                    if (result) {
+                        enableProgressDiv(true);
+                        //reset the yammer settings to NULL
+                        SDK.SOAP.resetYammerAttributes(SDK.Settings.OrganizationId)
+                        .done(function (results, textStatus, XmlHttpRequest) {
+                            SDK.Settings.isYammerConfigured = false;
+                            onPageLoad(); //reset the whole page 
+                        }).fail(function (jqXHR, textStatus, errorThrown) {
+                            dumpErrorInBanner(errorThrown);
+                            enableProgressDiv(false);
+                        });
+                    }
+                }
+            }
+            catch (e) {
+                alert("Error editing setting in CRM - " + e.message);
+                printSettingsToDiv();
+                enableProgressDiv(false);
+            }
+        };
+        function upsertSetting(settingName, settingValue, resetToDefault) {
+            ///<summary>If setting exists it is updated, if it does not yet exist it's inserted with the default value</summary>
+            try {
+                var result = false;
+                if (chkPromptBeforeChange.checked) {
+                    result = confirm("Proceed with pushing a change into CRM?");
+                }
+                if (result || !chkPromptBeforeChange.checked) {
+                    enableProgressDiv(true);
+                    //get setting from UI 
+                    var setting = SDK.Settings.OrganizationSettings.getSetting(settingName);
+                    
+                    if (setting.isNullable && settingValue == "null") {
+                        settingValue = null;
+                    }
+
+                    //deep clone the object and we'll use the clone to sort out our changes first 
+                    var cloneSetting = o$.extend(true, {}, setting);
+                    if (!resetToDefault) {
+                        ///<var name='tempSetting' type='orgSetting'/>
+                        cloneSetting.update(settingValue); 
+                    }
+                    else {
+                        //setting.resetToDefault();
+                        cloneSetting.resetToDefault();
+                        //update the current settingValue to the default
+                        settingValue = cloneSetting.value;
+                    }
+                    //submit the xml change from our clone which is not bound to the UI setting
+                    //in the future updateOrgDbOrgSetting should sort this out by itself 
+                    if (setting.isOrganizationAttribute) {
+                        SDK.SOAP.setOrganizationAttributeValue(
+                            setting.name.toLowerCase(), //lowercase version of the attribute/setting name
+                            settingValue,
+                            SDK.Settings.OrganizationId)
+                        .done(function (results, textStatus, XmlHttpRequest) {
+                            setting.update(settingValue); //update the underlying value in the UI
+                            printSettingsToDiv();
+                            enableProgressDiv(false);
+                        }).fail(function (jqXHR, textStatus, errorThrown) {
+                            dumpErrorInBanner(errorThrown);
+                            enableProgressDiv(false);
+                        });
+                    }
+                    else {
+                        SDK.SOAP.updateOrgDbOrgSettingOnServer(
+                            cloneSetting.toXmlForUpdate(), //setting.toXmlForUpdate(),
+                            SDK.Settings.OrganizationId,
+                            success = function () {
+                                setting.update(settingValue); //update the underlying value in the UI
+                                printSettingsToDiv();
+                            },
+                            error = function (error) {
+                                dumpErrorInBanner(error);
+                                enableProgressDiv(false);
+                            }, 
+                            complete = function () {
+                                enableProgressDiv(false);
+                            });
+                    }
+                }
+            }
+            catch (e) {
+                alert("Error editing setting in CRM - " + e.message);
+                printSettingsToDiv();
+                enableProgressDiv(false); 
+            }
+        };
+        function editSettingFromUIDiv(resetToDefault, removeSetting) {
+            o$('#addBox').css('visibility', 'hidden');
+            var settingName = o$('#currentSetting').val();
+            var settingValue = o$('#txtSettingValue').val();
+            if (removeSetting == false) {
+                upsertSetting(settingName, settingValue, resetToDefault);
+            }
+            else if (removeSetting == true) {
+                deleteSetting(settingName);
+            }
+        };
+        function deleteSetting(strSettingToDelete) {
+            if (confirm("Are you absolutely sure you want to remove: " + strSettingToDelete + "?") && confirm("As a backup, take a screenshot of your settings before you do this.\r\nDo you still wish to proceed?\r\n\r\nTechnically this deletes all settings from CRM then adds all the settings back with the exception of " +strSettingToDelete +".")) {
+                // Validate there is no OptIn Settings.
+                var optedInSettings = "";
+                o$.each(SDK.Settings.OrganizationSettings.getAllSettings(), function (index, setting) {
+                    ///<param name="setting" type="orgSetting"/>
+                    ///<param name="index" type="int"/> 
+                    if (setting != null && setting.value != null && !setting.isOrganizationAttribute && setting.isOptInSetting && setting.value !== false) {
+                        optedInSettings += setting.name + ',';
+                    }
+                });
+
+                if (optedInSettings !== "")
+                {
+                    updateBanner("The following opt-in settings are enabled: " + optedInSettings + ". Reseting these settings may lead to opting out of existing features. Set these opt-in settings to false *before* trying to delete remove any other settings.", false, "OptInSettingsAlert");
+                    return;
+                }                
+                enableProgressDiv(true);
+
+                var settingToDelete = SDK.Settings.OrganizationSettings.getSetting(strSettingToDelete);
+
+                if (!settingToDelete.isOrganizationAttribute && !settingToDelete.isReadonly) {
+                    //submit the xml change from our clone which is not bound to the UI setting
+                    //in the future updateOrgDbOrgSetting should sort this out by itself 
+                    SDK.SOAP.updateOrgDbOrgSettingOnServer(
+                        "", //push through an empty string - this is the first update we have to make which deletes everything 
+                        SDK.Settings.OrganizationId,
+                        success = function () {
+                            try {
+                                var finalXmlUpdate = "";
+                                //try to store all the settings off 
+                                o$.each(SDK.Settings.OrganizationSettings.getAllSettings(), function (index, setting) {
+                                    ///<param name="setting" type="orgSetting"/>
+                                    ///<param name="index" type="int"/> 
+                                    if (setting != null && setting.value != null && setting.name != strSettingToDelete && !setting.isOrganizationAttribute && !setting.isReadonly) {
+                                        finalXmlUpdate += setting.toRawXmlSetting(false);
+                                    }
+                                });
+                                if (finalXmlUpdate.length > 0) {
+                                    finalXmlUpdate = '<orgSettings>' + finalXmlUpdate + '</orgSettings>';
+
+                                    console.log("Final Xml Update: " + finalXmlUpdate);
+
+                                    SDK.SOAP.updateOrgDbOrgSettingOnServer(
+                                        finalXmlUpdate, //push through an empty string,
+                                        SDK.Settings.OrganizationId,
+                                        success = function () {
+                                        },
+                                        error = function (error) {
+                                            dumpErrorInBanner(error);
+                                            alert("There was an error reseting the existing settings, you may need to refresh the page and update your settings to reflect what was configured before.");
+                                        },
+                                        complete = function () {
+                                            SDK.Settings.OrganizationSettings.clear(); //clear currently stored settings
+                                            onPageLoad();//refresh the entire page
+                                        });
+                                }
+                                else {
+                                    SDK.Settings.OrganizationSettings.clear(); //clear currently stored settings
+                                    onPageLoad();//refresh the entire page
+                                }
+                            }
+                            catch (e) {
+                                dumpErrorInBanner(e);
+                                SDK.Settings.OrganizationSettings.clear();
+                                onPageLoad();
+                            }
+                        },
+                        error = function (error) {
+                            dumpErrorInBanner(error);
+                            enableProgressDiv(false);
+                        },
+                        complete = function () {
+                        });
+                }
+            }
+        };
+        function launchDivEditor(settingName) {
+            var setting = SDK.Settings.OrganizationSettings.getSetting(settingName);
+            if (setting.isSet() && !setting.isReadonly) {
+                o$('#addBox').css('visibility', 'visible');
+                o$('#editInfoRow').html(setting.description);
+                o$('#currentSetting').val(setting.name);
+                o$('#lblName').html(setting.name);
+                o$('#txtSettingValue').val((setting.value === null ? "null" : setting.value).toString())
+                    .focus()
+                    .select();
+                if (setting.isOrganizationAttribute) {
+                    o$('#removeButton').attr('disabled', 'disabled');
+                }
+                else {
+                    o$('#removeButton').removeAttr("disabled");
+                }
+            }
+        };
+        function rowClick(settingName) {
+            o$('#infoRow').html("<span><b>Setting Description:<br>" + settingName + ":</b> " + SDK.Settings.OrganizationSettings.getSetting(settingName).description + "</span>");
+        };
+        function rowDblClick(settingName) {
+            rowClick(settingName);
+            launchDivEditor(settingName);
+        };
+        function printSettingsToDiv() {
+            o$('#mainContent').empty();
+            if (SDK.Settings.OrganizationSettings.getAllSettings() && SDK.Settings.OrganizationSettings.getAllSettings().length == 0) {
+                updateBanner("No settings found for your version number of Dynamics CRM.  Please manually check for updates at <a href='" + SDK.Settings.projectUrl + "' target='_blank'>" + SDK.Settings.projectUrl + "</a>.")
+            }
+            var divHtmlOut = '<table class="main"><tr><th>Name</th><th>Default Value</th><th>Current Value</th><th>Type</th><th>Min</th><th>Max</th><th>Action</th><th>Support Url</th></tr>';
+            o$.each(SDK.Settings.OrganizationSettings.getAllSettings(), function (index, setting) {
+                
+                var settingName = setting.name || "name is null"; //default to name is null for logging 
+
+                try{
+                    var hasCurrentValue = (setting.value == null && !setting.isNullable ? false : true);
+
+                    console.log("Setting Name:" + (setting.name ||"null") + " - Value: " + (setting.value || "null"));
+
+                    var currentValueTD = '<td>not set</td>';
+                    //changes background of settings that differ from the default 
+                    if (setting.isNullValue() && setting.isNullable) {
+                        currentValueTD = '<td style="background-color:RGB(240,240,240);">null</td>';
+                    }
+                    else if (setting.isOrganizationAttribute && !setting.isNullValue() && setting.value.toString() !== setting.defaultValue.toString()) {
+                        currentValueTD = '<td style="background-color:RGB(240,240,240);"><b>' + setting.value + '</b></td>';
+                    }
+                    else if (setting.isOrganizationAttribute && !setting.isNullValue() && setting.value.toString() === setting.defaultValue.toString()) {
+                        currentValueTD = '<td><b>' + setting.value + '<b></td>';
+                    }
+                    else if (hasCurrentValue && (setting.value.toString() !== setting.defaultValue.toString() || setting.isOrganizationAttribute)) {
+                        currentValueTD = '<td style="background-color:RGB(240,240,240);"><b>' + setting.value + '</b></td>';
+                    }
+                    else if (hasCurrentValue && setting.value.toString() === setting.defaultValue.toString()) {
+                        currentValueTD = '<td><b>' + setting.value + '</b></td>';
+                    }
+
+                    var editButtonHtml = "";
+                    if (setting.isReadonly) {
+                        editButtonHtml = "&nbsp;"; 
+                    }
+                    else if (hasCurrentValue) {
+                        editButtonHtml = ('<a href=# onclick="launchDivEditor(\'' + setting.name + '\');">Edit</a></td>');
+                    }
+                    else if (!hasCurrentValue) {
+                        editButtonHtml = ('<a href=# onclick="upsertSetting(\'' + setting.name + '\',null,true);">Add</a></td>'); 
+                    }
+
+                    divHtmlOut += '<tr onmouseover="this.className=\'mouseoverrow\';" onmouseout="this.className=\'\';" onclick="rowClick(\''
+                        + setting.name
+                        + '\');" ondblclick="rowDblClick(\''
+                        + setting.name
+                        + '\');"><td>'
+                        + setting.name
+                        + '</td><td>'
+                        + setting.defaultValue
+                        + '</td>'
+                        + (currentValueTD)
+                        + '<td>'
+                        + (setting.type.__typeName || setting.type)
+                        + '</td><td>'
+                        + (setting.minNumber == null ? '-' : setting.minNumber)
+                        + '</td><td>'
+                        + (setting.maxNumber || '-')
+                        + '</td><td>'
+                        + editButtonHtml
+                        + '<td>'
+                        + (setting.supportUrl == null ? 'N/a' : '<a target="_blank" href="' + setting.supportUrl + '">' + setting.urlTitle + '</a>') + '</td></tr>';
+                }
+                catch(err)
+                {
+                    console.log("Error retreiving setting.  Skipping setting: " + settingName);
+                    console.log("Error: " + err);
+                }
+            });
+            divHtmlOut += '<tr><td colspan="8" style="width:800px;height:2px; background-color:darkgray; vertical-align:top;"></td></tr></table>'
+            o$("#mainContent").append(divHtmlOut);
+            //show prompt for changes: 
+            o$('#chkPromptBeforeChange').css('visibility', 'visible');
+            o$('#lblPromptLabel').css('visibility', 'visible');
+
+            if (SDK.Settings.isYammerConfigured) {
+                o$('#ResetYammerButton').css('visibility', 'visible');
+            }
+            else {
+                o$('#ResetYammerButton').css('visibility', 'hidden');
+            }
+        };
+        o$(document).ready(function () {
+            //functions to run only when the page loads and never again 
+            //try to load AzureMobile, if we fail we'll do it silently - problem here is that we cannot catch the error message from AzureMobile :(
+            try {
+                if (supportedBrowser) {
+                    SDK.Settings.azureClient = new WindowsAzure.MobileServiceClient(
+                        SDK.Settings.azureMobileUrl,
+                        SDK.Settings.azureMobileKey);
+                }
+            }
+            catch (e) {
+                dumpErrorInBanner(e);
+            }
+            //IE9 and earlier does not support toISOString - so we'll make our own if it doesn't exist
+            Date.prototype.toISOString = Date.prototype.toISOString || function () {
+                return this.getUTCFullYear() + "-"
+                  + ("0" + (this.getUTCMonth() + 1) + "-").slice(-3)
+                  + ("0" + this.getUTCDate() + "T").slice(-3)
+                  + ("0" + this.getUTCHours() + ":").slice(-3)
+                  + ("0" + this.getUTCMinutes() + ":").slice(-3)
+                  + ("0" + this.getUTCSeconds() + ".").slice(-3)
+                  + ("00" + this.getUTCMilliseconds() + "Z").slice(-4);
+            };
+            Date.now = Date.now || function () {
+                return this;
+            };
+            if (typeof String.prototype.endsWith !== 'function') {
+                String.prototype.endsWith = function (s) {
+                    return this.indexOf(s, this.length - s.length) !== -1;
+                };
+            }
+            o$(document).bind('keydown', 'ctrl+b', function (e) {
+                if (e.ctrlKey && (e.which == 66 || e.which == 98)) {
+                    e.preventDefault();
+                    if (orgLocalStorage.supports_html5_storage()) {
+                        clearAutoUpdateCache(true);
+                        try { checkAzureMobileForUpdates(true) } catch (e) { alert("The forced update check has failed with an error" + (e.message || "null")); };
+                    }
+                    return false;
+                }
+            });
+            //check Azure for newer solution versions 
+            checkAzureMobileForUpdates(false);
+        });
+
+        function resetBanner() {
+            updateBanner("", true);
+        };
+        function uiPrintDBVersion() {
+            //print and display the build version 
+            o$('#ServerVersionDiv')
+                .html("<i>Server version (from about page): " + SDK.Settings.crmServerDBVersion.toBuildNumberString() + "</i>")
+                .css('visibility', 'visible');
+        }
+        function onPageLoad() {
+            /*
+             - Do some setup
+             - do some checks, 
+             - call and get server build#, 
+             - populate settings from xml, 
+             - then get settings and override the values with the current value
+             - then paint the grid? 
+             */
+            //alert user of other settings if OnPrem
+            var urlFunction = Xrm.Page.context.getClientUrl() || Xrm.Page.context.getServerUrl(); 
+            if (!(urlFunction.toLowerCase().indexOf(".dynamics.com") !== -1)) {
+                updateBanner("Your environment is OnPremise, these settings may need to be checked against the ConfigDB(PowerShell) and Registry settings.", false, "onpremmsg");
+            }
+            window.setTimeout(function () {
+                var height = parent.window.outerHeight || parent.document.documentElement.clientHeight;
+                if ((parent.document && parent.document.URL.indexOf("/solution/edit.aspx") > -1) && height < SDK.Settings.minWindowHeight) {
+                    try {
+                        //Not a recommended or necessarily supported action however, the window defaults to a height too small to read the settings 
+                        //to limit issues - we're testing for the /solution/edit.aspx URL first and wrapping it in a try/catch.  
+                        //additionally this will only be used by an admin and should always be in the managed solution editor page
+                        //TODO: Future work here to add scrollbars and mathematics to the settings DIV to support any size and still show the setting info at the bottom
+                        parent.window.resizeTo(1080, SDK.Settings.minWindowHeight);
+                    } catch (e) { };
+                }
+            }, 1000);
+            retrieveAndDisplaySettings(); 
+        };
+        function retrieveAndDisplaySettings() {
+            try {
+                enableProgressDiv(true);
+                //load the entire Organization entity 
+                SDK.SOAP.getOrganizationEntityFromCrmWebApi()
+                .done(function (results, textStatus, XmlHttpRequest) {
+                    //Setup our global values from the results
+                    SDK.Settings.CRMOrganizationResults = results.value[0];
+                    SDK.Settings.OrganizationId = SDK.Settings.CRMOrganizationResults.organizationid;
+
+                    //find and store the CRM DB Version - required for below 
+                    SDK.SOAP.getCrmOrgDBVersion(
+                        onSuccess = function (serverBuildVersion) {
+                            ///<param name='serverBuildVersion' type='BuildVersion'></param>
+                            //store the DB Version 
+                            SDK.Settings.crmServerDBVersion = serverBuildVersion;
+                            //print the DB Version 
+                            uiPrintDBVersion();
+
+                            //proceed to retrieving settings xml 
+                            SDK.SOAP.getSettingsXmlFromUrl("settings.xml")
+                                .done(function (response, textStatus, XmlHttpRequest) {
+                                    var baseOrgSettings = new OrgSettingsCollection();
+                                    //success - parse XML into settings if it's an older version of jquery, in newer versions you can use the responsexml
+                                    var xmlDoc = o$.parseXML(XmlHttpRequest.responseText) || XmlHttpRequest.responseXML;
+
+                                    o$(xmlDoc).find('defaultOrgSettings').children().each(function (i) {
+                                        //each child looks like this
+                                        //<orgSetting minSupportedVersion="5.0.9688.583" name="ActivityConvertDlgCampaignUnchecked" min="null" max="null" defaultValue="true" settingType="Boolean" supportUrl="http://url" description="stuff" />
+                                        var curNode = o$(this)[0]; //current XML node 
+                                        var minVer = curNode.attributes.getNamedItem("minSupportedVersion").value;
+                                        var maxVer = curNode.attributes.getNamedItem("maxSupportedVersion").value;
+                                        if (serverBuildVersion.isGreaterThanOrEq(BuildVersion.parseBuildNumber(minVer)) && serverBuildVersion.isLessThanOrEq(BuildVersion.parseBuildNumber(maxVer))) {
+                                            var isNullable = false;
+                                            var isReadonly = false;
+                                            var isOptInSetting = false;
+                                            var isOrganizationAttribute = false;
+                                            var currentSettingValue = null;
+                                            var currentSettingName = curNode.attributes.getNamedItem("name").value;
+
+                                            console.log("Read setting name: " + currentSettingName);
+
+                                            //check if it is an Organization Entity Attribute - if so, get the value as we already have it 
+                                            if (null != curNode.attributes.getNamedItem("isOrganizationAttribute")) {
+                                                isOrganizationAttribute = parseValueFromTypeName("boolean", curNode.attributes.getNamedItem("isOrganizationAttribute").value);
+                                                currentSettingValue = SDK.Settings.CRMOrganizationResults[curNode.attributes.getNamedItem("name").value.toLowerCase()];
+                                            }
+                                            if (null != curNode.attributes.getNamedItem("isNullable")) {
+                                                isNullable = parseValueFromTypeName("boolean", curNode.attributes.getNamedItem("isNullable").value);
+                                            }
+                                            if (null != curNode.attributes.getNamedItem("isReadonly")) {
+                                                isReadonly = parseValueFromTypeName("boolean", curNode.attributes.getNamedItem("isReadonly").value);
+                                            }
+                                            if (null != curNode.attributes.getNamedItem("isOptInSetting")) {
+                                                isOptInSetting = parseValueFromTypeName("boolean", curNode.attributes.getNamedItem("isOptInSetting").value);
+                                            }
+                                            //yammer check 
+                                            if (!SDK.Settings.isYammerConfigured &&
+                                                currentSettingName.toLowerCase().indexOf("yammer") === 0 &&
+                                                currentSettingValue != null) {
+                                                SDK.Settings.isYammerConfigured = true;
+                                            }
+                                            //add the setting to the settings we want to display
+                                            baseOrgSettings.addSetting(
+                                                new orgSetting(
+                                                    currentSettingName,
+                                                    currentSettingValue,
+                                                    curNode.attributes.getNamedItem("settingType").value,
+                                                    curNode.attributes.getNamedItem("min").value,
+                                                    curNode.attributes.getNamedItem("max").value,
+                                                    curNode.attributes.getNamedItem("defaultValue").value,
+                                                    curNode.attributes.getNamedItem("supportUrl").value,
+                                                    curNode.attributes.getNamedItem("description").value,
+                                                    minVer,
+                                                    curNode.attributes.getNamedItem("urlTitle").value,
+                                                    maxVer,
+                                                    isOrganizationAttribute,
+                                                    isNullable,
+                                                    isReadonly, 
+                                                    isOptInSetting
+                                                )
+                                            );
+                                        }
+                                    });
+                                    //all default settings are now loaded - set them globally 
+                                    SDK.Settings.OrganizationSettings = baseOrgSettings;
+
+                                    //parse XML document and loop through settings to populate the array with default values and types retrieved from the deafult data array
+                                    var xmlDoc = o$.parseXML(SDK.Settings.CRMOrganizationResults.orgdborgsettings);
+                                    o$(xmlDoc).find('OrgSettings').children().each(function (index) {
+                                        var settingName = o$(this)[0].tagName;
+                                        var settingValue = o$(this)[0].text || o$(this)[0].textContent || "";
+                                        //update the settign value if it exists in our default collection 
+                                        var settingObj = SDK.Settings.OrganizationSettings.getSetting(settingName);
+                                        if (settingObj) //if we have the setting in our collection
+                                        {
+                                            try {
+                                                settingObj.update(settingValue);
+                                            }
+                                            catch (e) {
+                                                dumpErrorInBanner(new Error("Error setting: " + settingName + " with value: " + settingValue + " - " + e.message));
+                                            }
+                                        }
+                                    })
+                                    printSettingsToDiv();
+                                    printUserInstructions();
+                                })
+                                .fail(function (jqXHR, textStatus, errorThrown) {
+                                    alert("There was an error retrieving the Organization Entity: " + errorThrown);
+                                    dumpErrorInBanner(errorThrown);
+                                });
+                        },
+                        onError = function (errorMessage) {
+                            dumpErrorInBanner(errorMessage);
+                        });
+                })
+                .fail(function (jqXHR, textStatus, errorThrown) {
+                    alert("There was an error retrieving the Organization Entity: " + errorThrown);
+                })
+                .always(function (XMLHttpRequest, status) {
+                    enableProgressDiv(false);
+                });
+            }
+            catch (err) {
+                updateBanner("Something went very wrong when loading the page.  For reference the error info is:" +
+                        "</br>Name:" + (err.name || "Error Name Is Null") +
+                        "</br>Message:" + (err.message || "Error Message Is Null") +
+                        "</br>Description:" + (err.description || "Error Description Is Null") +
+                        "</br>stack:" + (err.stack || "Stack is Null")
+                    , true, "massiveerrormsg");
+            }
+        };
+        function printUserInstructions() {
+            var DisableIECompatModeSetting = SDK.Settings.OrganizationSettings.getSetting("DisableIECompatMode");
+            if (!supportedBrowser || (DisableIECompatModeSetting && DisableIECompatModeSetting.value == false)) {
+                updateBanner("<b>This may not operate in compatability or a non standards mode</b>: For details please read <a href='" + SDK.Settings.projectIECompatDocUrl + "' target='_blank'>this FAQ</a>, manually check <a href='" + SDK.Settings.projectUrl + "' target='_blank'>here</a> for updates.", false, "IENotSupported");
+            }
+            //instruct user on how this works
+            updateBanner("Click a setting row for more details at the bottom of the page. NOTE: you should not change any setting without having a specific reason to do so.", false, "howtomessage");
+        };
+        function dumpErrorInBanner(err) {
+            ///<param name='e' type='Error'></param>
+            updateBanner("We've handled an error, for reference the error info is:" +
+                        "</br>Name:" + (err.name || "Error Name Is Null") +
+                        "</br>Message:" + (err.message || "Error Message Is Null") +
+                        "</br>Description:" + (err.description || "Error Description Is Null") +
+                        "</br>stack:" + (err.stack || "Stack is Null")
+                    , true, "massiveerrormsg");
+        };
+        function enableProgressDiv(flag) {
+            ///<summar>Will toggle the visibility of the progress div</summary>
+            ///<param type='Boolean' name='flag'>true = visibile, false = hidden</param>
+            o$('#progressDiv').css('visibility', flag ? 'visible' : 'hidden');
+            //window.setTimeout(function () {
+            //    o$('#progressDiv').css('visibility', flag ? 'visible' : 'hidden');
+            //}, 1);
+        }
+        function updateBanner(text, shouldClearFirst, messageSpanId) {
+            ///<param name='text' type='String'>Text to append in banner</param>
+            ///<param name='shouldClearFirst' type='Boolean'>Clears the message box before appending text.</param>
+            ///<param name='messageSpanId' type='String'>MessageId used to prevent dups.</param>
+            if (shouldClearFirst) { o$('#messageBar').html(""); if (text == "") { return; } }
+            var spanText = "</br><span id='" + (messageSpanId || "") + "'>" + text + "</span>";
+            var bannerTxt = o$('#messageBar').html() + spanText;
+
+            //clear the first BR if it's there else write the message
+            if (bannerTxt.indexOf("</br>") == 0) {
+                o$('#messageBar').html(bannerTxt.substr(5, bannerTxt.length - 5));
+            }
+            else {
+                var spanToUpdate = o$('#messageBar').children(id = "#" + messageSpanId);
+                if (spanToUpdate.length == 1) {
+                    spanToUpdate[0].innerHTML = text; //append to just the span we want 
+                }
+                else {//append to entire message 
+                    o$('#messageBar').html(bannerTxt);
+                }
+            }
+            //if hidden then show 
+            if (o$('#messageBar').css('visibility') === 'hidden') {
+                o$('#messageBar').css("visibility", "visible");
+            }
+        };
+        function openStdWindow(url, name, width, height) {
+            ///<summary>open a standard window and returns the reference.</summary>
+            ///<param name='url' type='String'>Description</param>
+            ///<param name='name' type='String'>Description</param>
+            ///<param name='width' type='Number'>Description</param>
+            ///<param name='height' type='Number'>Description</param>
+            var windowOpened = window.open(url, name, "width=" + width + ",height=" + height + ",status=1,resizable=1");
+            return windowOpened;
+        };
+        function clearAutoUpdateCache(alertUser) {
+            ///<param name='alertUser' type='Boolean'>show user an alert?</param>
+            if (alertUser) {
+                alert('Clearing Azure cache date, this will force a check for updates back to AzureMobile.');
+            }
+            localStorage.removeItem(orgLocalStorage.cacheKey);
+            localStorage.removeItem(orgLocalStorage.newVersionAlertKey);
+            localStorage.removeItem(orgLocalStorage.slnBuildVerKey);
+        };
+    </script>
+    <style type="text/css">
+        Body
+        {
+            Font-family: 'Segoe UI', Tahoma, Arial;
+            color: black;
+            Font-size: 11px;
+            background-color: #e3e7ec;
+            /*Background-color:rgb(233, 237, 241);*/
+        }
+        H2
+        {
+            font-family: inherit;
+            font-size: 14px;
+            margin: 0 0 0 0;
+        }
+        .centerDiv
+        {
+            opacity: .5;
+            filter: alpha(opacity=50);
+            position: fixed;
+            top: 0%;
+            left: 0%;
+            width: 100%;
+            height: 100%;
+            background-color: #f3f3f3;
+            vertical-align: middle;
+        }
+        .crmAppMessageBar
+        {
+            margin: 0px;
+            top: 0px;
+            padding: 0px;
+            vertical-align: top;
+            overflow: hidden;
+            margin-right: 0px;
+            margin-left: 0px;
+            border-radius: 4px;
+            border-color: black;
+            border-width: 1px;
+            border-style: solid;
+            position: initial;
+            background-color: RGB(255,255,174); /*#FFF19D;background-color: rgb(255, 255, 174);rgb(255, 241, 157);*/
+            width: 100%;
+            font-weight: normal;
+            color: #262626;
+        }
+        .main
+        {
+            /*border:1px solid yellow; */
+            font-size: 11px;
+            /*background-color:lightgray;/*rgb(233, 237, 241)rgb(207, 212, 218)*/
+            border-collapse: collapse;
+        }
+        .main table, th, td, tr
+        {
+            padding: 0px 0px 0px 0px;
+            margin: 0px 0px 0px 0px;
+            border-collapse: collapse;
+            border: 1px solid darkgray; /*#a5acb5; */
+            align-content: center;
+        }
+        .holder
+        {
+            width: 100%;
+            display: block;
+        }
+        .divBanner
+        {
+            width: 100%;
+            height: 50px;
+        }
+        .mouseoverrow
+        {
+            background-color: white;
+        }
+        .popup
+        {
+            border-radius: 4px;
+            margin: 30px auto 0;
+            padding: 6px;
+            position: absolute;
+            background-color: darkgray;
+            width: 400px;
+            font-size: 11px;
+            top: 50%;
+            left: 50%;
+            margin-left: -200px; /* 1/2 width*/
+            margin-top: -40px; /*1/2 height*/
+        }
+    </style>
+</head>
+<body onload="onPageLoad();" style="font-family: 'Segoe UI', Tahoma, Arial; font-size: 11px; background-color: #e3e7ec; margin: 0px; padding: 0px; margin-left: 5px;">
+    <div class="centerDiv" id="progressDiv" style="text-align: center;">
+        <div style="text-align: center; position: absolute; top: 40%; opacity: 1; width: 100%; border-style: none;">
+            <table style="width: 100%; border-style: none;">
+                <tr style="width: 100%; border-style: none;">
+                    <td style="width: 100%; border-style: none;">
+                        <img style="opacity: 1; filter: alpha(opacity=100);" alt="Infinite Progress" src="progress.gif" /></td>
+                </tr>
+            </table>
+        </div>
+    </div>
+    <div class="crmAppMessageBar" id="messageBar" style="width:800px;"></div>
+    <div id="addBox" style="visibility: hidden;">
+        <div>
+        </div>
+        <table class="popup">
+            <tr>
+                <td>
+                    <label id="lblName"></label>
+                </td>
+                <td>&nbsp;</td>
+                <td>
+                    <input id="txtSettingValue" type="text" /><input type="hidden" id="currentSetting" /></td>
+            </tr>
+            <tr>
+                <td colspan="3">
+                    <button id="updateButton" onclick="editSettingFromUIDiv(false, false);">Update</button>
+                    <button id="resetButton"  onclick="editSettingFromUIDiv(true, false);">Reset Default</button>
+                    <button id="removeButton" onclick="editSettingFromUIDiv(false, true);">Remove Setting</button>
+                    <button id="cancelButton" onclick="o$('#addBox').css('visibility','hidden');o$('#currentSetting').val('');o$('#txtSettingValue').val('');">Cancel</button>
+                </td>
+            </tr>
+            <tr>
+                <td colspan="3" id="editInfoRow">&nbsp;</td>
+            </tr>
+        </table>
+    </div>
+    <div id="mainContent" class="main" style="width:1024px;height:500px;overflow:auto;">
+    </div>
+    <div id="infoRow" style="width:800px;vertical-align:top;border:1px solid darkgrey;">
+    </div>
+    <br>
+    <div>
+        <input style="visibility: hidden;" type="checkbox" id="chkPromptBeforeChange" value="" checked="checked" />
+        <label style="visibility: hidden;" id="lblPromptLabel" for="chkPromptBeforeChange">Prompt before making any changes in CRM</label>
+    </div>
+    <div style="visibility: hidden;" id="ServerVersionDiv"></div>
+    <div><button style="visibility: hidden;" id="ResetYammerButton" onclick="resetYammerAttributes();">Remove Yammer Configuration</button></div>
+</body>
+</html>
