@@ -31,6 +31,6 @@ jobs:
       - name: Pack Solution
         uses: microsoft/powerplatform-actions/pack-solution@v1
         with:
-          solution-file: ${{ env.ARTIFACT_DIR  }}
+          solution-file: "${{ env.ARTIFACT_DIR  }}\\something.zip"
           solution-folder: $fullpath
           solution-type: "both"
