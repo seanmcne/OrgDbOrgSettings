@@ -23,8 +23,9 @@ jobs:
           $root = $env:GITHUB_WORKSPACE
           #"\mspfedyn_\OrgDbOrgSettings\Solution\WebResources\mspfedyn_\OrgDbOrgSettings"
           $path = "\mspfedyn_\OrgDbOrgSettings\Solution"
-          $fullpath = $root + $path
+          $fullpath = Join-Path -Path $root -ChildPath $path
           dir $fullpath
+          echo "##[set-env name=VAR_FULLPAHT]$($fullpath)"
           $artifactdir = ${{ env.ARTIFACT_DIR  }}
       - run: echo "🍏 This job's status is ${{ job.status }}."
       - name: Install Power Platform Tools
@@ -33,6 +34,6 @@ jobs:
       - name: Pack Solution
         uses: microsoft/powerplatform-actions/pack-solution@v1
         with:
-          solution-file: "$artifactdir\\something.zip"
-          solution-folder: $fullpath
+          solution-file: "${{ env.ARTIFACT_DIR  }}\\something.zip"
+          solution-folder: ${{ env.VAR_FULLPAHT  }}
           solution-type: "both"
