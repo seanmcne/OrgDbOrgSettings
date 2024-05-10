@@ -29,7 +29,7 @@ jobs:
       - run: echo "🍏 This job's status is ${{ job.status }}."
       - name: Install Power Platform Tools
         uses: microsoft/powerplatform-actions/actions-install@v1
-      - run: echo "trying to pack to - $artifactdir\\something.zip"
+      - run: echo "trying to pack to - $fullpath"
       - name: Pack Solution
         uses: microsoft/powerplatform-actions/pack-solution@v1
         with:
