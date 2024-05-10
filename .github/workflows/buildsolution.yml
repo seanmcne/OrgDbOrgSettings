@@ -25,15 +25,14 @@ jobs:
           $path = "\mspfedyn_\OrgDbOrgSettings\Solution"
           $fullpath = Join-Path -Path $root -ChildPath $path
           dir $fullpath
-          echo "VAR_FULLPATH=$($fullpath)" >> $VAR_FULLPATH
-          $artifactdir = ${{ env.ARTIFACT_DIR  }}
+          echo "fullpath=$fullpath" >> $env:VAR_FULLPATH
       - run: echo "🍏 This job's status is ${{ job.status }}."
       - name: Install Power Platform Tools
         uses: microsoft/powerplatform-actions/actions-install@v1
-      - run: echo "trying to pack to - ${{  env.VAR_FULLPATH  }}"
+      - run: echo "trying to pack to - $env.VAR_FULLPATH"
       - name: Pack Solution
         uses: microsoft/powerplatform-actions/pack-solution@v1
         with:
-          solution-file: ${{ env.ARTIFACT_DIR  }}"\\something.zip"
-          solution-folder: ${{  env.VAR_FULLPATH  }}
+          solution-file: "$env:VAR_FULLPATH\\something.zip"
+          solution-folder: $env.VAR_FULLPATH
           solution-type: "both"
