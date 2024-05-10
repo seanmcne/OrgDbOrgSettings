@@ -21,7 +21,9 @@ jobs:
       - name: List files in the repository dir we want to see
         run: |
           $root = $env:GITHUB_WORKSPACE
+          write-host "START"
           write-host $root
+          write-host "END"
           $path = "\mspfedyn_\OrgDbOrgSettings\Solution"
           $fullpath = Join-Path -Path $root -ChildPath $path
           dir $fullpath
