@@ -26,10 +26,12 @@ jobs:
           $fullpath = Join-Path -Path $root -ChildPath $path
           dir $fullpath
           echo "fullpath=$fullpath" >> $env:VAR_FULLPATH
+          $currentPath = Get-Location
+          echo "CurrentPath=$currentPath" >> $env:GITHUB_ENV
       - run: echo "🍏 This job's status is ${{ job.status }}."
       - name: Install Power Platform Tools
         uses: microsoft/powerplatform-actions/actions-install@v1
-      - run: echo "trying to pack to - $env.VAR_FULLPATH"
+      - run: echo "Using CurrentPath: $env:CurrentPath"
       - name: Pack Solution
         uses: microsoft/powerplatform-actions/pack-solution@v1
         with:
