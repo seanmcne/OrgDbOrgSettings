@@ -21,7 +21,8 @@ jobs:
       - name: List files in the repository dir we want to see
         run: |
           $root = $env:GITHUB_WORKSPACE
-          $path = "\mspfedyn_\WebEditor\Solutions\SolutionPackager\Solution"
+          #"\mspfedyn_\OrgDbOrgSettings\Solution\WebResources\mspfedyn_\OrgDbOrgSettings"
+          $path = "\mspfedyn_\OrgDbOrgSettings\Solution"
           $fullpath = $root + $path
           dir $fullpath
       - run: echo "🍏 This job's status is ${{ job.status }}."
@@ -30,6 +31,6 @@ jobs:
       - name: Pack Solution
         uses: microsoft/powerplatform-actions/pack-solution@v1
         with:
-          solution-file: "WebEditor\\Solutions\\SolutionPackager\\Solution"
+          solution-file: "\\mspfedyn_\\OrgDbOrgSettings\\Solution"
           solution-folder: ${{ env.ARTIFACT_DIR  }} 
           solution-type: "both"
