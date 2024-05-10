@@ -21,15 +21,15 @@ jobs:
       - name: List files in the repository dir we want to see
         run: |
           $root = $env:GITHUB_WORKSPACE
-          write-host "START"
-          write-host $root
-          write-host "END"
           $path = "\mspfedyn_\OrgDbOrgSettings\Solution"
           $fullpath = Join-Path -Path $root -ChildPath $path
           dir $fullpath
           echo "fullpath=$fullpath" >> $env:VAR_FULLPATH
           $currentPath = Get-Location
           echo "CurrentPath=$currentPath" >> $env:GITHUB_ENV
+          write-host "START"
+          write-host ${{ env.CurrentPath  }}
+          write-host "END"
       - run: echo "🍏 This job's status is ${{ job.status }}."
       - name: Install Power Platform Tools
         uses: microsoft/powerplatform-actions/actions-install@v1
@@ -38,6 +38,6 @@ jobs:
       - name: Pack Solution
         uses: microsoft/powerplatform-actions/pack-solution@v1
         with:
-          solution-file: "$env:VAR_FULLPATH\\something.zip"
-          solution-folder: $env.VAR_FULLPATH
+          solution-file: ${{ env.CurrentPath  }}"\\something.zip"
+          solution-folder: ${{ env.CurrentPath  }}
           solution-type: "both"
