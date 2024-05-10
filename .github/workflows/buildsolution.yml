@@ -31,7 +31,8 @@ jobs:
       - run: echo "🍏 This job's status is ${{ job.status }}."
       - name: Install Power Platform Tools
         uses: microsoft/powerplatform-actions/actions-install@v1
-      - run: echo "Using CurrentPath: $env:CurrentPath"
+      - run: |
+          echo "Using CurrentPath: $env:CurrentPath"
       - name: Pack Solution
         uses: microsoft/powerplatform-actions/pack-solution@v1
         with:
