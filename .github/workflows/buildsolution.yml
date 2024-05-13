@@ -17,7 +17,7 @@ jobs:
           dir ${{ github.workspace }}
       - name: List files in the repository dir we want to see recurse
         run: |
-          dir ${{ env.ARTIFACT_DIR  }} -Recurse
+          dir "$(Get-Location)\mspfedyn_\OrgDbOrgSettings\Solution" -Recurse
       - name: List files in the repository dir we want to see
         run: |
           $root = $env:GITHUB_WORKSPACE
@@ -25,7 +25,7 @@ jobs:
           $fullpath = Join-Path -Path $root -ChildPath $path
           dir $fullpath
           echo "fullpath=$fullpath" >> $env:VAR_FULLPATH
-          $currentPath = "$(Get-Location)/mspfedyn_/OrgDbOrgSettings/Solution"
+          $currentPath = "$(Get-Location)\mspfedyn_\OrgDbOrgSettings\Solution"
           echo "CurrentPath=$currentPath" >> $env:GITHUB_ENV
           $ZipPath = Get-Location
           echo "ZipPath=$zipPath" >> $env:GITHUB_ENV
@@ -41,6 +41,6 @@ jobs:
       - name: Pack Solution
         uses: microsoft/powerplatform-actions/pack-solution@v1
         with:
-          solution-file: ${{ env.ZipPath  }}"\something.zip"
+          #solution-file: ${{ env.ZipPath  }}"\something.zip"
           solution-folder: ${{ env.CurrentPath  }}
           solution-type: "both"
