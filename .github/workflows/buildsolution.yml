@@ -25,7 +25,7 @@ jobs:
           $fullpath = Join-Path -Path $root -ChildPath $path
           dir $fullpath
           echo "fullpath=$fullpath" >> $env:VAR_FULLPATH
-          $currentPath = Get-Location
+          $currentPath = "$(Get-Location)/mspfedyn_/OrgDbOrgSettings/Solution"
           echo "CurrentPath=$currentPath" >> $env:GITHUB_ENV
           write-host "START"
           write-host ${{ env.CurrentPath  }}
