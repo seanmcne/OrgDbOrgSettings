@@ -27,8 +27,11 @@ jobs:
           echo "fullpath=$fullpath" >> $env:VAR_FULLPATH
           $currentPath = "$(Get-Location)/mspfedyn_/OrgDbOrgSettings/Solution"
           echo "CurrentPath=$currentPath" >> $env:GITHUB_ENV
+          $ZipPath = Get-Location
+          echo "ZipPath=$zipPath" >> $env:GITHUB_ENV
           write-host "START"
-          write-host ${{ env.CurrentPath  }}
+          write-host "ZipPath: $ZipPath"
+          write-host "currentPath: $currentPath"
           write-host "END"
       - run: echo "🍏 This job's status is ${{ job.status }}."
       - name: Install Power Platform Tools
@@ -38,6 +41,6 @@ jobs:
       - name: Pack Solution
         uses: microsoft/powerplatform-actions/pack-solution@v1
         with:
-          solution-file: ${{ env.CurrentPath  }}"\\something.zip"
+          solution-file: ${{ env.ZipPath  }}"\something.zip"
           solution-folder: ${{ env.CurrentPath  }}
           solution-type: "both"
