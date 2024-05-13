@@ -39,6 +39,6 @@ jobs:
       - name: Pack Solution
         uses: microsoft/powerplatform-actions/pack-solution@v1
         with:
-          solution-file: ${{ env.ZipPath  }}"\orgDbOrgSettings.zip"
+          solution-file: "orgDbOrgSettings.zip"
           solution-folder: ${{ env.CurrentPath  }}
           solution-type: "both"
