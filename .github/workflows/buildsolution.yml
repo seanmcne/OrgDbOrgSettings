@@ -64,14 +64,22 @@ jobs:
           solution-file: "OrganizationSettingsEditor_${{ env.NewVersion  }}.zip"
           solution-folder: ${{ env.CurrentPath  }}
           solution-type: "both"
+      - name: unpack solution so github can repack it
+        run: | 
+          Expand-Archive -path "OrganizationSettingsEditor_${{ env.NewVersion  }}_managed.zip" -destinationpath $(Get-Location)\OrganizationSettingsEditor_${{ env.NewVersion  }}_managed
       - name: Create Archive
         uses: actions/upload-artifact@v4
         with:
           name: BuildOutputFiles
           path: ${{ env.ZipPath  }}
+          retention-days: 5
       - name: 'Upload Artifact Managed Zip'
         uses: actions/upload-artifact@v4
         with:
           name: "OrganizationSettingsEditor_${{ env.NewVersion  }}.zip"
           path: "OrganizationSettingsEditor_${{ env.NewVersion  }}_managed.zip"
           retention-days: 5
+      - name: 'Upload Artifacts Managed ReZipped File'
+        uses: actions/upload-artifact@v4
+        with: 
+          name: $(Get-Location)\OrganizationSettingsEditor_${{ env.NewVersion  }}_managed
