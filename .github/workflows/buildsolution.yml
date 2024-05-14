@@ -12,12 +12,9 @@ jobs:
         uses: actions/checkout@v4
       - run: echo "💡 The ${{ github.repository }} repository has been cloned to the runner."
       - run: echo "🖥️ The workflow is now ready to test your code on the runner."
-      - name: List files in the github.workspace directory
-        run: |
-          dir ${{ github.workspace }}
       - name: List files in the repository dir we want to see recurse
         run: |
-          dir "$(Get-Location)\mspfedyn_\OrgDbOrgSettings\Solution" -Recurse
+          #dir "$(Get-Location)\mspfedyn_\OrgDbOrgSettings\Solution" -Recurse
       - name: Calculate paths and set several variables for packing the solution 
         run: |
           $root = $env:GITHUB_WORKSPACE
@@ -36,7 +33,7 @@ jobs:
       - name: apply updated version
         run: | 
           #edit settings.xml build number 
-          $settingsXmlPath = ""$(Get-Location)\mspfedyn_\OrgDbOrgSettings\Solution\WebResources\mspfedyn_\OrgDbOrgSettings\settings.xml"
+          $settingsXmlPath = "$(Get-Location)\mspfedyn_\OrgDbOrgSettings\Solution\WebResources\mspfedyn_\OrgDbOrgSettings\settings.xml"
           #get solution xml path 
           $path = "$(Get-Location)\mspfedyn_\OrgDbOrgSettings\Solution\Other\Solution.xml"
           Write-Host "Path: $path"
