@@ -42,3 +42,8 @@ jobs:
           solution-file: "orgDbOrgSettings.zip"
           solution-folder: ${{ env.CurrentPath  }}
           solution-type: "both"
+      - name: Create Archive
+        uses: actions/upload-artifact@v4
+        with:
+          name: code-coverage-report
+          path: ${{ env.ZipPath  }}
