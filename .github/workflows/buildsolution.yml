@@ -61,7 +61,7 @@ jobs:
       - name: Pack Solution
         uses: microsoft/powerplatform-actions/pack-solution@v1
         with:
-          solution-file: "orgDbOrgSettings${{ env.NewVersion  }}.zip"
+          solution-file: "OrganizationSettingsEditor_${{ env.NewVersion  }}.zip"
           solution-folder: ${{ env.CurrentPath  }}
           solution-type: "both"
       - name: Create Archive
@@ -69,3 +69,9 @@ jobs:
         with:
           name: BuildOutputFiles
           path: ${{ env.ZipPath  }}
+      - name: 'Upload Artifact Managed Zip'
+        uses: actions/upload-artifact@v4
+        with:
+          name: "OrganizationSettingsEditor_${{ env.NewVersion  }}.zip"
+          path: "OrganizationSettingsEditor_${{ env.NewVersion  }}_managed.zip"
+          retention-days: 5
