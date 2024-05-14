@@ -39,7 +39,7 @@ jobs:
           Write-Host "Path: $path"
           # Regular expression pattern to find the version in the build number 
           $VersionRegex = "\d+\.\d+\.\d+\.\d+"
-          $NewVersion = "1.0.$((get-date).ToString("yyMM")).${{ github.run_number }}"
+          $NewVersion = "1.0.$((get-date).ToString("yyMM.dd"))${{ github.run_number }}"
           write-host "Calculated version number is: $NewVersion"
           
           $xml = New-Object System.Xml.XmlDocument
@@ -67,5 +67,5 @@ jobs:
       - name: Create Archive
         uses: actions/upload-artifact@v4
         with:
-          name: code-coverage-report
+          name: BuildOutputFiles
           path: ${{ env.ZipPath  }}
