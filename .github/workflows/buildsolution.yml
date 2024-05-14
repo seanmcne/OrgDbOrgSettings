@@ -40,8 +40,8 @@ jobs:
           # Regular expression pattern to find the version in the build number 
           $VersionRegex = "\d+\.\d+\.\d+\.\d+"
           $NewVersion = "1.0.$((get-date).ToString("yyMM.dd"))${{ github.run_number }}"
+          echo "NewVersion=$NewVersion" >> $env:GITHUB_ENV
           write-host "Calculated version number is: $NewVersion"
-          
           $xml = New-Object System.Xml.XmlDocument
           $xml.Load($path)
           Write-Verbose "Writting XML: NewVersion $NewVersion"
@@ -61,7 +61,7 @@ jobs:
       - name: Pack Solution
         uses: microsoft/powerplatform-actions/pack-solution@v1
         with:
-          solution-file: "orgDbOrgSettings.zip"
+          solution-file: "orgDbOrgSettings${{ env.NewVersion  }}.zip"
           solution-folder: ${{ env.CurrentPath  }}
           solution-type: "both"
       - name: Create Archive
