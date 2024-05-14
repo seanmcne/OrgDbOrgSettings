@@ -36,9 +36,9 @@ jobs:
       - name: apply updated version
         run: | 
           #edit settings.xml build number 
-          $settingsXmlPath = ${{ env.CurrentPath  }}"\WebResources\mspfedyn_\OrgDbOrgSettings\settings.xml"
+          $settingsXmlPath = ""$(Get-Location)\mspfedyn_\OrgDbOrgSettings\Solution\WebResources\mspfedyn_\OrgDbOrgSettings\settings.xml"
           #get solution xml path 
-          $path = ${{ env.CurrentPath  }}"\Other\Solution.xml"
+          $path = "$(Get-Location)\mspfedyn_\OrgDbOrgSettings\Solution\Other\Solution.xml"
           Write-Host "Path: $path"
           # Regular expression pattern to find the version in the build number 
           $VersionRegex = "\d+\.\d+\.\d+\.\d+"
