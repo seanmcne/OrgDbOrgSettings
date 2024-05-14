@@ -35,13 +35,29 @@ jobs:
           write-host "END"
       - name: apply updated version
         run: | 
-          #edit settings.xml to strip comments 
+          #edit settings.xml build number 
           $settingsXmlPath = ${{ env.CurrentPath  }}"\WebResources\mspfedyn_\OrgDbOrgSettings\settings.xml"
+          #get solution xml path 
+          $path = ${{ env.CurrentPath  }}"\Other\Solution.xml"
+          Write-Host "Path: $path"
           # Regular expression pattern to find the version in the build number 
-          # and then apply it to the assemblies
           $VersionRegex = "\d+\.\d+\.\d+\.\d+"
-          $version = "1.0.$((get-date).ToString("yyMM")).$($GITHUB_RUN_NUMBER)"
-          write-host $version
+          $NewVersion = "1.0.$((get-date).ToString("yyMM")).${{ github.run_number }}"
+          write-host "Calculated version number is: $NewVersion"
+          
+          $xml = New-Object XML
+          $xml.Load($path)
+          Write-Verbose "Writting XML: NewVersion $NewVersion"
+          $xml.ImportExportXml.SolutionManifest.Version = $NewVersion
+          Write-Verbose "Writting XML: SolutionPackageVersion $($Env:SolutionPackageVersion)"
+          $xml.ImportExportXml.SolutionPackageVersion = $Env:SolutionPackageVersion
+          
+          Write-Verbose "Writting XML: ImportExportXmlVersion $($NewVersion)"
+          $xml.ImportExportXml.version = $NewVersion
+          
+          $xml.ImportExportXml
+          $xml.Save($path)
+          Write-Host "Version $NewVersion applied to Solution.xml"
       - run: echo "🍏 This job's status is ${{ job.status }}."
       - name: Install Power Platform Tools
         uses: microsoft/powerplatform-actions/actions-install@v1
