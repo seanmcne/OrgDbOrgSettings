@@ -33,6 +33,15 @@ jobs:
           write-host "ZipPath: $ZipPath"
           write-host "currentPath: $currentPath"
           write-host "END"
+      - name: apply updated version
+        run: | 
+          #edit settings.xml to strip comments 
+          $settingsXmlPath = ${{ env.CurrentPath  }}"\WebResources\mspfedyn_\OrgDbOrgSettings\settings.xml"
+          # Regular expression pattern to find the version in the build number 
+          # and then apply it to the assemblies
+          $VersionRegex = "\d+\.\d+\.\d+\.\d+"
+          $version = "1.0.$((get-date).ToString("yyMM")).$($GITHUB_RUN_NUMBER)"
+          write-host $version
       - run: echo "🍏 This job's status is ${{ job.status }}."
       - name: Install Power Platform Tools
         uses: microsoft/powerplatform-actions/actions-install@v1
