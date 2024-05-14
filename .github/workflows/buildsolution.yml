@@ -45,7 +45,7 @@ jobs:
           $NewVersion = "1.0.$((get-date).ToString("yyMM")).${{ github.run_number }}"
           write-host "Calculated version number is: $NewVersion"
           
-          $xml = New-Object XML
+          $xml = New-Object System.Xml.XmlDocument
           $xml.Load($path)
           Write-Verbose "Writting XML: NewVersion $NewVersion"
           $xml.ImportExportXml.SolutionManifest.Version = $NewVersion
