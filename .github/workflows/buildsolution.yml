@@ -1,0 +1,84 @@
+name: GitHub Actions OrgDbOrgSettings Build
+run-name: ${{ github.actor }} is building the OrgDbOrgSettings solution 🚀
+on: [push]
+jobs:
+  Build-OrgDbOrgSettings-GitHub-Actions:
+    runs-on: windows-latest
+    steps:
+      - run: echo "🎉 The job was automatically triggered by a ${{ github.event_name }} event."
+      - run: echo "🐧 This job is now running on a ${{ runner.os }} server hosted by GitHub!"
+      - run: echo "🔎 The name of your branch is ${{ github.ref }} and your repository is ${{ github.repository }}."
+      - name: Check out repository code
+        uses: actions/checkout@v4
+      - run: echo "💡 The ${{ github.repository }} repository has been cloned to the runner."
+      - run: echo "🖥️ The workflow is now ready to test your code on the runner."
+      - name: List files in the repository dir we want to see recurse
+        run: |
+          #dir "$(Get-Location)\mspfedyn_\OrgDbOrgSettings\Solution" -Recurse
+      - name: Calculate paths and set several variables for packing the solution 
+        run: |
+          $root = $env:GITHUB_WORKSPACE
+          $path = "\mspfedyn_\OrgDbOrgSettings\Solution"
+          $fullpath = Join-Path -Path $root -ChildPath $path
+          dir $fullpath
+          echo "fullpath=$fullpath" >> $env:VAR_FULLPATH
+          $currentPath = "$(Get-Location)\mspfedyn_\OrgDbOrgSettings\Solution"
+          echo "CurrentPath=$currentPath" >> $env:GITHUB_ENV
+          $ZipPath = Get-Location
+          echo "ZipPath=$zipPath" >> $env:GITHUB_ENV
+          write-host "ZipPath: $ZipPath"
+          write-host "currentPath: $currentPath"
+      - name: apply updated version
+        run: | 
+          #edit settings.xml build number 
+          $settingsXmlPath = "$(Get-Location)\mspfedyn_\OrgDbOrgSettings\Solution\WebResources\mspfedyn_\OrgDbOrgSettings\settings.xml"
+          #get solution xml path 
+          $path = "$(Get-Location)\mspfedyn_\OrgDbOrgSettings\Solution\Other\Solution.xml"
+          Write-Host "Path: $path"
+          # Regular expression pattern to find the version in the build number 
+          $VersionRegex = "\d+\.\d+\.\d+\.\d+"
+          $NewVersion = "1.0.$((get-date).ToString("yyMM.dd"))${{ github.run_number }}"
+          echo "NewVersion=$NewVersion" >> $env:GITHUB_ENV
+          write-host "Calculated version number is: $NewVersion"
+          $xml = New-Object System.Xml.XmlDocument
+          $xml.Load($path)
+          Write-Verbose "Writting XML: NewVersion $NewVersion"
+          $xml.ImportExportXml.SolutionManifest.Version = $NewVersion
+          Write-Verbose "Writting XML: SolutionPackageVersion $($Env:SolutionPackageVersion)"
+          $xml.ImportExportXml.SolutionPackageVersion = $Env:SolutionPackageVersion
+          Write-Verbose "Writting XML: ImportExportXmlVersion $($NewVersion)"
+          $xml.ImportExportXml.version = $NewVersion
+          $xml.ImportExportXml
+          $xml.Save($path)
+          Write-Host "Version $NewVersion applied to Solution.xml"
+      - name: Install Power Platform Tools
+        uses: microsoft/powerplatform-actions/actions-install@v1
+      - name: Pack Solution
+        uses: microsoft/powerplatform-actions/pack-solution@v1
+        with:
+          solution-file: "OrganizationSettingsEditor_${{ env.NewVersion  }}.zip"
+          solution-folder: ${{ env.CurrentPath  }}
+          solution-type: "both"
+      - name: unpack solution so github can repack it
+        run: | 
+          $managedZipDirectory = "$(Get-Location)\_managedDirectory"
+          Expand-Archive -path "OrganizationSettingsEditor_${{ env.NewVersion  }}_managed.zip" -DestinationPath $managedZipDirectory
+          #store path of the directory: 
+          echo "managedZipDirectory=$managedZipDirectory" >> $env:GITHUB_ENV
+#      - name: Create Archive of everything for diagnosis
+#        uses: actions/upload-artifact@v4
+#        with:
+#          name: BuildOutputFiles
+#          path: ${{ env.ZipPath  }}
+#          retention-days: 5
+      - name: 'Upload Artifact Managed Zip'
+        uses: actions/upload-artifact@v4
+        with:
+          name: "Solution_zip_of_zipfiles_v${{ env.NewVersion  }}"
+          path: "OrganizationSettingsEditor_${{ env.NewVersion  }}*.zip"
+          retention-days: 90
+      - name: 'Upload Artifact Managed re-zipped File'
+        uses: actions/upload-artifact@v4
+        with: 
+          name: OrganizationSettingsEditor_${{ env.NewVersion  }}
+          path: ${{  env.managedZipDirectory  }}
