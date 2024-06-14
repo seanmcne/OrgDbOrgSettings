@@ -79,11 +79,11 @@ jobs:
       - name: 'Upload Artifact Managed Zip'
         uses: actions/upload-artifact@v4
         with:
-          name: "OrganizationSettingsEditor_${{ env.NewVersion  }}.zip"
-          path: "OrganizationSettingsEditor_${{ env.NewVersion  }}_managed.zip"
+          name: "Solutions_v${{ env.NewVersion  }}.zip"
+          path: "OrganizationSettingsEditor_${{ env.NewVersion  }}*.zip"
           retention-days: 5
-      - name: 'Upload Artifacts Managed ReZipped File'
-        uses: actions/upload-artifact@v4
-        with: 
-          name: something.zip
-          path: ${{  env.managedZipDirectory  }}
+#      - name: 'Upload Artifacts Managed ReZipped File'
+#        uses: actions/upload-artifact@v4
+#        with: 
+#          name: something.zip
+#          path: ${{  env.managedZipDirectory  }}
