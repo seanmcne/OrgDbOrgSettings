@@ -1,4 +1,4 @@
-name: GitHub Actions Demo
+name: GitHub Actions OrgDbOrgSettings Build
 run-name: ${{ github.actor }} is testing out GitHub Actions 🚀
 on: [push]
 jobs:
@@ -46,14 +46,11 @@ jobs:
           $xml.ImportExportXml.SolutionManifest.Version = $NewVersion
           Write-Verbose "Writting XML: SolutionPackageVersion $($Env:SolutionPackageVersion)"
           $xml.ImportExportXml.SolutionPackageVersion = $Env:SolutionPackageVersion
-          
           Write-Verbose "Writting XML: ImportExportXmlVersion $($NewVersion)"
           $xml.ImportExportXml.version = $NewVersion
-          
           $xml.ImportExportXml
           $xml.Save($path)
           Write-Host "Version $NewVersion applied to Solution.xml"
-      - run: echo "🍏 This job's status is ${{ job.status }}."
       - name: Install Power Platform Tools
         uses: microsoft/powerplatform-actions/actions-install@v1
       - name: Pack Solution
@@ -68,23 +65,20 @@ jobs:
           Expand-Archive -path "OrganizationSettingsEditor_${{ env.NewVersion  }}_managed.zip" -DestinationPath $managedZipDirectory
           #store path of the directory: 
           echo "managedZipDirectory=$managedZipDirectory" >> $env:GITHUB_ENV
-      - name: extract solution to temp directory for re-archiving into build output 
-        run: |
-          
-      - name: Create Archive
-        uses: actions/upload-artifact@v4
-        with:
-          name: BuildOutputFiles
-          path: ${{ env.ZipPath  }}
-          retention-days: 5
+#      - name: Create Archive of everything for diagnosis
+#        uses: actions/upload-artifact@v4
+#        with:
+#          name: BuildOutputFiles
+#          path: ${{ env.ZipPath  }}
+#          retention-days: 5
       - name: 'Upload Artifact Managed Zip'
         uses: actions/upload-artifact@v4
         with:
           name: "Solution_zip_of_zipfiles_v${{ env.NewVersion  }}"
           path: "OrganizationSettingsEditor_${{ env.NewVersion  }}*.zip"
           retention-days: 90
-      - name: 'Upload Artifacts Managed ReZipped File'
+      - name: 'Upload Artifact Managed re-zipped File'
         uses: actions/upload-artifact@v4
         with: 
-          name: OrganizationSettingsEditor_${{ env.NewVersion  }}.zip
+          name: OrganizationSettingsEditor_${{ env.NewVersion  }}
           path: ${{  env.managedZipDirectory  }}
