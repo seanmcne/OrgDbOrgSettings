@@ -26,10 +26,8 @@ jobs:
           echo "CurrentPath=$currentPath" >> $env:GITHUB_ENV
           $ZipPath = Get-Location
           echo "ZipPath=$zipPath" >> $env:GITHUB_ENV
-          write-host "START"
           write-host "ZipPath: $ZipPath"
           write-host "currentPath: $currentPath"
-          write-host "END"
       - name: apply updated version
         run: | 
           #edit settings.xml build number 
@@ -79,9 +77,9 @@ jobs:
       - name: 'Upload Artifact Managed Zip'
         uses: actions/upload-artifact@v4
         with:
-          name: "Solutions_v${{ env.NewVersion  }}.zip"
+          name: "Solution_zip_of_zipfiles_v${{ env.NewVersion  }}"
           path: "OrganizationSettingsEditor_${{ env.NewVersion  }}*.zip"
-          retention-days: 5
+          retention-days: 90
 #      - name: 'Upload Artifacts Managed ReZipped File'
 #        uses: actions/upload-artifact@v4
 #        with: 
