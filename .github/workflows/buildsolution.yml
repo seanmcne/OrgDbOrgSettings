@@ -2,7 +2,7 @@ name: GitHub Actions OrgDbOrgSettings Build
 run-name: ${{ github.actor }} is building the OrgDbOrgSettings solution 🚀
 on: [push]
 jobs:
-  Explore-GitHub-Actions:
+  Build-OrgDbOrgSettings-GitHub-Actions:
     runs-on: windows-latest
     steps:
       - run: echo "🎉 The job was automatically triggered by a ${{ github.event_name }} event."
