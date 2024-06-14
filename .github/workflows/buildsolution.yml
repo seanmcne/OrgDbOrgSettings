@@ -68,6 +68,9 @@ jobs:
           Expand-Archive -path "OrganizationSettingsEditor_${{ env.NewVersion  }}_managed.zip" -DestinationPath $managedZipDirectory
           #store path of the directory: 
           echo "managedZipDirectory=$managedZipDirectory" >> $env:GITHUB_ENV
+      - name: extract solution to temp directory for re-archiving into build output 
+        run: |
+          
       - name: Create Archive
         uses: actions/upload-artifact@v4
         with:
@@ -80,8 +83,8 @@ jobs:
           name: "Solution_zip_of_zipfiles_v${{ env.NewVersion  }}"
           path: "OrganizationSettingsEditor_${{ env.NewVersion  }}*.zip"
           retention-days: 90
-#      - name: 'Upload Artifacts Managed ReZipped File'
-#        uses: actions/upload-artifact@v4
-#        with: 
-#          name: something.zip
-#          path: ${{  env.managedZipDirectory  }}
+      - name: 'Upload Artifacts Managed ReZipped File'
+        uses: actions/upload-artifact@v4
+        with: 
+          name: OrganizationSettingsEditor_${{ env.NewVersion  }}.zip
+          path: ${{  env.managedZipDirectory  }}
