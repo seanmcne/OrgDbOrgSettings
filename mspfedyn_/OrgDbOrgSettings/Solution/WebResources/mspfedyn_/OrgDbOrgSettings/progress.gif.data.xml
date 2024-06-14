@@ -1,0 +1,13 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<WebResource>
+  <WebResourceId>{e01ff374-7ac4-e211-97c8-18a905f32500}</WebResourceId>
+  <Name>mspfedyn_/orgdborgsettings/progress.gif</Name>
+  <DisplayName>progress.gif</DisplayName>
+  <Description>Progress gif</Description>
+  <WebResourceType>7</WebResourceType>
+  <IntroducedVersion>1.0.1.23</IntroducedVersion>
+  <IsCustomizable>1</IsCustomizable>
+  <CanBeDeleted>1</CanBeDeleted>
+  <IsHidden>0</IsHidden>
+  <FileName>/WebResources/mspfedyn_orgdborgsettingsprogressgifE01FF374-7AC4-E211-97C8-18A905F32500</FileName>
+</WebResource>

@@ -1,0 +1,13 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<WebResource>
+  <WebResourceId>{1f7b9b61-e9c2-e211-97c8-18a905f32500}</WebResourceId>
+  <Name>mspfedyn_/orgdborgsettings/settings.xml</Name>
+  <DisplayName>settings.xml</DisplayName>
+  <Description>Contains the orgdborgsettings documented in KB 2691237</Description>
+  <WebResourceType>4</WebResourceType>
+  <IntroducedVersion>1.0.1.23</IntroducedVersion>
+  <IsCustomizable>1</IsCustomizable>
+  <CanBeDeleted>1</CanBeDeleted>
+  <IsHidden>0</IsHidden>
+  <FileName>/WebResources/mspfedyn_orgdborgsettingssettingsxml1F7B9B61-E9C2-E211-97C8-18A905F32500</FileName>
+</WebResource>
