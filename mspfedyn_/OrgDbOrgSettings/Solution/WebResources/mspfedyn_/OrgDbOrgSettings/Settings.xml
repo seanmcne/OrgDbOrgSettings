@@ -211,7 +211,7 @@
     max="" 
     defaultValue="false" 
     settingType="Boolean" 
-    supportUrl="Is there a public doc link for this?" 
-    urlTitle="DocLink Title or Name" 
+    supportUrl="https://go.microsoft.com/fwlink/?linkid=2264254" 
+    urlTitle="KB 2691237" 
     description="Provide Description of setting and what the values do here." />
 </defaultOrgSettings>
