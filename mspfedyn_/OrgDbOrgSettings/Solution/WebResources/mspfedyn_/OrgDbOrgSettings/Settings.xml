@@ -202,4 +202,16 @@
   <orgSetting minSupportedVersion="9.2.24044.00114" maxSupportedVersion="9.999.9999.9999" name="DoNotEnforcePrimaryKeyOrgSettingRecycleBin" isOrganizationAttribute="false" min="" max="" defaultValue="true" settingType="Boolean" supportUrl="https://go.microsoft.com/fwlink/?linkid=2264254" urlTitle="Recycle Bin For Dataverse" description="Skip records move to RecycleBin due to PrimaryKey violation" />
   <orgSetting minSupportedVersion="9.2.24033.228" maxSupportedVersion="9.9999.9999.9999" name="BypassBusinessLogicExecutionStepIdsLimit" isOrganizationAttribute="false" min="" max="" defaultValue="3" settingType="Number" urlTitle="BypassBusinessLogicExecutionSteps optional parameter" supportUrl="https://aka.ms/NewBypassCustomLogicOptions" description="This setting controls the number of steps that can be set in BypassBusinessLogicExecutionStepIds header." />
   <orgSetting minSupportedVersion="9.2.24010.3" maxSupportedVersion="9.999.9999.9999" name="AddParentEntityToRelatedOnNewActivityCreate" isOrganizationAttribute="false" min="" max="" defaultValue="false" settingType="Boolean" supportUrl="https://go.microsoft.com/fwlink/?linkid=2264254" urlTitle="Recycle Bin For Dataverse" description="When the value is set to true, the Related column in activity records automatically populates when creating an activity within the context of a parent record. For example, if this setting is enabled, creating a new email activity from the timeline of an account automatically associates that record in the Related column." />
+  <orgSetting 
+    minSupportedVersion="9.2.24074.00170" 
+    maxSupportedVersion="9.999.9999.9999" 
+    name="DoNotDisplaySystemViewsNotSharedWithSecurityRoles" 
+    isOrganizationAttribute="false" 
+    min="" 
+    max="" 
+    defaultValue="false" 
+    settingType="Boolean" 
+    supportUrl="https://go.microsoft.com/fwlink/?linkid=2264254" 
+    urlTitle="KB 2691237" 
+    description="Provide Description of setting and what the values do here." />
 </defaultOrgSettings>
