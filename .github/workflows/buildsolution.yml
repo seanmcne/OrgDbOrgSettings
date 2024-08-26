@@ -82,5 +82,5 @@ jobs:
       - name: 'Upload Artifact Managed re-zipped File'
         uses: actions/upload-artifact@v4
         with: 
-          name: OrganizationSettingsEditor_${{ env.NewVersion  }}
+          name: OrganizationSettingsEditor_${{ env.NewVersion  }}_managed
           path: ${{  env.managedZipDirectory  }}
