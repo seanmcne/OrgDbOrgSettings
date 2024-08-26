@@ -44,11 +44,13 @@ jobs:
           $xml.Load($path)
           Write-Verbose "Writting XML: NewVersion $NewVersion"
           $xml.ImportExportXml.SolutionManifest.Version = $NewVersion
-          Write-Verbose "Writting XML: SolutionPackageVersion $($Env:SolutionPackageVersion)"
-          $xml.ImportExportXml.SolutionPackageVersion = $Env:SolutionPackageVersion
-          Write-Verbose "Writting XML: ImportExportXmlVersion $($NewVersion)"
-          $xml.ImportExportXml.version = $NewVersion
-          $xml.ImportExportXml
+          #this should be updated by solution packager but it isn't working - default to 8.0
+          #Write-Verbose "Writting XML: SolutionPackageVersion $($Env:SolutionPackageVersion)"
+          #$xml.ImportExportXml.SolutionPackageVersion = $Env:SolutionPackageVersion
+          #this should be updated by solution packager but it isn't working - default to 8.0.0.0
+          #Write-Verbose "Writting XML: ImportExportXmlVersion $($NewVersion)"
+          #$xml.ImportExportXml.version = $NewVersion
+          #$xml.ImportExportXml
           $xml.Save($path)
           Write-Host "Version $NewVersion applied to Solution.xml"
       - name: Install Power Platform Tools
