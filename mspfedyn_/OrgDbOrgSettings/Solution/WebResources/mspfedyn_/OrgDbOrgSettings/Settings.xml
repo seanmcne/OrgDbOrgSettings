@@ -205,7 +205,7 @@
   <orgSetting 
     minSupportedVersion="9.2.24074.00170" 
     maxSupportedVersion="9.999.9999.9999" 
-    name="DoNotDisplaySystemViewsNotSharedWithSecurityRoles" 
+    name="EnableRoleBasedSystemViews" 
     isOrganizationAttribute="false" 
     min="" 
     max="" 
@@ -213,5 +213,5 @@
     settingType="Boolean" 
     supportUrl="https://go.microsoft.com/fwlink/?linkid=2264254" 
     urlTitle="KB 2691237" 
-    description="Provide Description of setting and what the values do here." />
+    description="Manage entity list views with security roles, this allows views to be visible or hidden based on end users role." />
 </defaultOrgSettings>
