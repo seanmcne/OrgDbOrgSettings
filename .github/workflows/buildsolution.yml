@@ -28,6 +28,27 @@ jobs:
           echo "ZipPath=$zipPath" >> $env:GITHUB_ENV
           write-host "ZipPath: $ZipPath"
           write-host "currentPath: $currentPath"
+      - name: Validate XML files
+        uses: action-pack/valid-xml@v1
+        with:
+          path: '\\mspfedyn_\\OrgDbOrgSettings\\Solution\\WebResources\\mspfedyn_\\OrgDbOrgSettings\\'
+          file-endings: '.xml'
+      - name: Validate XML files and check for unescaped characters
+        shell: pwsh
+        run: |
+          $xmlPath = 'mspfedyn_\OrgDbOrgSettings\Solution\WebResources\mspfedyn_\OrgDbOrgSettings\settings.xml'
+          try {
+              [System.Xml.XmlDocument]$xmlDoc = New-Object System.Xml.XmlDocument
+              $xmlDoc.Load($xmlPath)
+              Write-Host "XML is well-formed."
+          } catch {
+              Write-Host "Error: XML is not well-formed."
+              Write-Host $_.Exception.Message
+              if ($_.Exception.InnerException) {
+                  Write-Host $_.Exception.InnerException.Message
+              }
+              exit 1
+          }
       - name: apply updated version
         run: | 
           #edit settings.xml build number 
