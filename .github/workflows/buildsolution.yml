@@ -36,8 +36,12 @@ jobs:
       - name: Check for Unescaped Characters
         shell: pwsh
         run: |
-          if (Select-String -Path 'mspfedyn_/OrgDbOrgSettings/Solution/WebResources/mspfedyn_/OrgDbOrgSettings/settings.xml' -Pattern '<[^<]*[^&lt;]') {
-            Write-Host "Error: Unescaped characters detected in XML files."
+          $matches = Select-String -Path 'mspfedyn_/OrgDbOrgSettings/Solution/WebResources/mspfedyn_/OrgDbOrgSettings/settings.xml' -Pattern '<[^<]*[^&lt;]' -Context 0,0
+          if ($matches) {
+            Write-Host "Error: Unescaped characters detected in XML files at lines:"
+            foreach ($match in $matches) {
+              Write-Host "Line $($match.LineNumber): $($match.Line)"
+            }
             exit 1
           } else {
             Write-Host "No unescaped characters found."
