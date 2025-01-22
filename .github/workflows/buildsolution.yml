@@ -31,7 +31,7 @@ jobs:
       - name: Validate XML files
         uses: action-pack/valid-xml@v1
         with:
-          path: '$(Get-Location)\mspfedyn_\OrgDbOrgSettings\Solution\WebResources\mspfedyn_\OrgDbOrgSettings\settings.xml'
+          path: '\\mspfedyn_\\OrgDbOrgSettings\\Solution\\WebResources\\mspfedyn_\\OrgDbOrgSettings\\'
           file-endings: '.xml'
       - name: apply updated version
         run: | 
