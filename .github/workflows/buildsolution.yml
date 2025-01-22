@@ -33,14 +33,15 @@ jobs:
         with:
           path: '\\mspfedyn_\\OrgDbOrgSettings\\Solution\\WebResources\\mspfedyn_\\OrgDbOrgSettings\\'
           file-endings: '.xml'
-      - name: Check for Unescaped Characters in the validated xml files
+      - name: Check for Unescaped Characters
+        shell: pwsh
         run: |
-          if grep -q '<[^<]*[^&lt;]' 'mspfedyn_/OrgDbOrgSettings/Solution/WebResources/mspfedyn_/OrgDbOrgSettings/settings.xml'; then
-            echo "Error: Unescaped characters detected in XML files."
+          if (Select-String -Path 'mspfedyn_/OrgDbOrgSettings/Solution/WebResources/mspfedyn_/OrgDbOrgSettings/settings.xml' -Pattern '<[^<]*[^&lt;]') {
+            Write-Host "Error: Unescaped characters detected in XML files."
             exit 1
-          else
-            echo "No unescaped characters found."
-          fi
+          } else {
+            Write-Host "No unescaped characters found."
+          }
       - name: apply updated version
         run: | 
           #edit settings.xml build number 
