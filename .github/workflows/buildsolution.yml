@@ -33,18 +33,21 @@ jobs:
         with:
           path: '\\mspfedyn_\\OrgDbOrgSettings\\Solution\\WebResources\\mspfedyn_\\OrgDbOrgSettings\\'
           file-endings: '.xml'
-      - name: Check for Unescaped Characters
+      - name: Validate XML files and check for unescaped characters
         shell: pwsh
         run: |
-          $matches = Select-String -Path 'mspfedyn_/OrgDbOrgSettings/Solution/WebResources/mspfedyn_/OrgDbOrgSettings/settings.xml' -Pattern '<[^<]*[^&lt;]' -Context 0,0
-          if ($matches) {
-            Write-Host "Error: Unescaped characters detected in XML files at lines:"
-            foreach ($match in $matches) {
-              Write-Host "Line $($match.LineNumber): $($match.Line)"
-            }
-            exit 1
-          } else {
-            Write-Host "No unescaped characters found."
+          $xmlPath = 'mspfedyn_\OrgDbOrgSettings\Solution\WebResources\mspfedyn_\OrgDbOrgSettings\settings.xml'
+          try {
+              [System.Xml.XmlDocument]$xmlDoc = New-Object System.Xml.XmlDocument
+              $xmlDoc.Load($xmlPath)
+              Write-Host "XML is well-formed."
+          } catch {
+              Write-Host "Error: XML is not well-formed."
+              Write-Host $_.Exception.Message
+              if ($_.Exception.InnerException) {
+                  Write-Host $_.Exception.InnerException.Message
+              }
+              exit 1
           }
       - name: apply updated version
         run: | 
