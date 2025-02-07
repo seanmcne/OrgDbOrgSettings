@@ -214,4 +214,16 @@
     supportUrl="https://go.microsoft.com/fwlink/?linkid=2264254" 
     urlTitle="KB 2691237" 
     description="Manage entity list views with security roles, this allows views to be visible or hidden based on end users role." />
+  <orgSetting 
+    minSupportedVersion="9.2.24113.0" 
+    maxSupportedVersion="9.999.9999.9999" 
+    name="AllowOverwriteMaskedDataToDatabase" 
+    isOrganizationAttribute="false" 
+    min="" 
+    max="" 
+    defaultValue="false" 
+    settingType="Boolean" 
+    supportUrl="https://go.microsoft.com/fwlink/?linkid=2264254" 
+    urlTitle="KB 2691237" 
+    description="&lt;b&gt;Warning:&lt;/b&gt; enabling &lt;b&gt;(true)&lt;b/&gt; this setting will allow fields which are masked using secured masking rules to be updated to values containing masked characters. This means the original unmasked data will be overwritten and masked characters will be stored in the database, and the original values will not be able to be recovered by Microsoft. &lt;b&gt;This should only be enabled if this implication is fully understood and acceptable.&lt;/b&gt; When this value is disabled &lt;b&gt;false&lt;/b&gt;, the system protects the unmasked data from being overwritten by failing the update request." />
 </defaultOrgSettings>
