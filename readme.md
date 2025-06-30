@@ -17,9 +17,12 @@ The link to the releases is somewhat hidden in plain sight - to help with this, 
 The OrgDBSettings utility is installed as a managed Dataverse solution. This utility utilizes the Solution Configuration Page to provide access to the editor.  To find the editor: 
 - log into the **Maker Portal** for your environment and geography (US customers would utilize make.powerapps.com)
 - navigate to **Solutions**, then **click** to open the **Organization Settings Editor** managed solution
-- within the managed solution **Click** the **Switch to Classic** button in the top toolbar of the maker portal (typically it's under the ellipsis or "..." near the "Publish All Customizations" button).  
+- within the managed solution **Click** the **Switch to Classic** button in the top toolbar of the maker portal (typically it's under the ellipsis or "..." near the "Publish All Customizations" button).
+  - ![image](https://github.com/user-attachments/assets/a2902463-4397-4fd6-b6d3-9b420e2c2873)
 - When you click **Switch to Classic** your browser will open a new page to the classic solution editor
 - Once that page renders you should see the orgdborgsettings Editor page as pictured below
+
+
 
 _**Why isn't there a dedicated App, Sitemap page, or ribbon button?** In early testing I received feedback asking for the utility to have it's own place in the sitemap however, after discussing with partners, developers, and ISV's they asked to remain out of apps, sitemaps, and the ribbon due to potential dependency conflicts._
 
