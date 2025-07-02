@@ -247,7 +247,7 @@
     max="90" 
     defaultValue="30" 
     settingType="Number" 
-    supportUrl="http://support.microsoft.com/kb/2691237" 
+    supportUrl="https://support.microsoft.com/kb/2691237"
     urlTitle="KB 2691237" 
     description="Retention period for successfully completed system jobs. System jobs older than the retention period will be cleaned by backend deletion service." />
   <orgSetting 
