@@ -262,7 +262,6 @@
     supportUrl="http://support.microsoft.com/kb/2691237" 
     urlTitle="KB 2691237" 
     description="Retention period for failed system jobs. System jobs older than the retention period will be cleaned by backend deletion service." />
-
   <orgSetting 
     minSupportedVersion="9.2.25053.00220" 
     maxSupportedVersion="9.9.9999.9999" 
