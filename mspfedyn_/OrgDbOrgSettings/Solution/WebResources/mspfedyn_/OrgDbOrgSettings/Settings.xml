@@ -238,4 +238,52 @@
     supportUrl="https://learn.microsoft.com/en-us/power-platform/admin/create-users#how-stub-users-are-created" 
     urlTitle="Create users - How stub users are created" 
     description="When set to 'true', the standard behavior will be overriden and a default security role will NOT automatically be assigned to newly created stub users." />
+  <orgSetting 
+    minSupportedVersion="9.2.25053.00220" 
+    maxSupportedVersion="9.9.9999.9999" 
+    name="SucceededSystemJobPersistenceInDays" 
+    isOrganizationAttribute="false" 
+    min="0" 
+    max="90" 
+    defaultValue="30" 
+    settingType="Number" 
+    supportUrl="https://support.microsoft.com/kb/2691237"
+    urlTitle="KB 2691237" 
+    description="Retention period for successfully completed system jobs. System jobs older than the retention period will be cleaned by backend deletion service." />
+  <orgSetting 
+    minSupportedVersion="9.2.25053.00220" 
+    maxSupportedVersion="9.9.9999.9999" 
+    name="FailedSystemJobPersistenceInDays" 
+    isOrganizationAttribute="false" 
+    min="0" 
+    max="180" 
+    defaultValue="60" 
+    settingType="Number" 
+    supportUrl="http://support.microsoft.com/kb/2691237" 
+    urlTitle="KB 2691237" 
+    description="Retention period for failed system jobs. System jobs older than the retention period will be cleaned by backend deletion service." />
+  <orgSetting 
+    minSupportedVersion="9.2.25053.00220" 
+    maxSupportedVersion="9.9.9999.9999" 
+    name="CanceledSystemJobPersistenceInDays" 
+    isOrganizationAttribute="false" 
+    min="0" 
+    max="180" 
+    defaultValue="60" 
+    settingType="Number" 
+    supportUrl="http://support.microsoft.com/kb/2691237" 
+    urlTitle="KB 2691237" 
+    description="Retention period for canceled system jobs. System jobs older than the retention period will be cleaned by backend deletion service." />
+  <orgSetting 
+    minSupportedVersion="9.2.25053.00220" 
+    maxSupportedVersion="9.9.9999.9999" 
+    name="EnableSystemJobCleanup" 
+    isOrganizationAttribute="false" 
+    min="" 
+    max="" 
+    defaultValue="false" 
+    settingType="Boolean" 
+    supportUrl="http://support.microsoft.com/kb/2691237" 
+    urlTitle="KB 2691237" 
+    description="Online only setting to enable System Job cleanup from the backend deletion service." />
 </defaultOrgSettings>
