@@ -1,0 +1,206 @@
+name: Create Draft Pre-Release (on-demand)
+
+on:
+  workflow_dispatch:
+    inputs:
+      upstream_workflow_name:
+        description: "Name of the upstream build workflow to pull artifacts from"
+        required: false
+        default: "GitHub Actions OrgDbOrgSettings Build"
+      upstream_branch:
+        description: "Branch to search in the upstream workflow"
+        required: false
+        default: "master"
+      dry_run:
+        description: "If true, only preview title/notes and skip creating/editing the release"
+        required: false
+        default: "false"
+
+permissions:
+  contents: write   # needed to create/edit releases
+  actions: read     # needed to read runs & download artifacts from another run
+
+jobs:
+  build_release_from_latest_success:
+    runs-on: ubuntu-latest
+    env:
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      WF_NAME: ${{ inputs.upstream_workflow_name }}
+      UPSTREAM_BRANCH: ${{ inputs.upstream_branch }}
+      DRY_RUN: ${{ inputs.dry_run }}
+
+    steps:
+      - name: Checkout (shallow)
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Resolve latest successful upstream run on branch
+        id: find_run
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          echo "Looking for latest successful run of workflow: '$WF_NAME' on branch: '$UPSTREAM_BRANCH' (event=push)"
+          RUN_ID="$(gh run list \
+            --workflow "$WF_NAME" \
+            --branch "$UPSTREAM_BRANCH" \
+            --status success \
+            --event push \
+            --limit 1 \
+            --json databaseId \
+            --jq '.[0].databaseId')"
+
+          HEAD_SHA="$(gh run list \
+            --workflow "$WF_NAME" \
+            --branch "$UPSTREAM_BRANCH" \
+            --status success \
+            --event push \
+            --limit 1 \
+            --json headSha \
+            --jq '.[0].headSha')"
+
+          if [[ -z "${RUN_ID}" || "${RUN_ID}" == "null" || -z "${HEAD_SHA}" || "${HEAD_SHA}" == "null" ]]; then
+            echo "ERROR: No successful run found for workflow '$WF_NAME' on branch '$UPSTREAM_BRANCH'."
+            exit 1
+          fi
+
+          echo "run_id=${RUN_ID}"   >> "$GITHUB_OUTPUT"
+          echo "head_sha=${HEAD_SHA}" >> "$GITHUB_OUTPUT"
+          echo "Upstream run id: ${RUN_ID}"
+          echo "Upstream head sha: ${HEAD_SHA}"
+
+      - name: Download artifacts from that run
+        uses: actions/download-artifact@v4
+        with:
+          run-id: ${{ steps.find_run.outputs.run_id }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          # Download all artifacts and filter files next
+          path: artifacts
+          merge-multiple: false
+      - name: Locate the single ZIP matching OrganizationSettingsEditor_*_managed.zip
+        id: find_zip
+        shell: bash
+        run: |
+          set -euo pipefail
+          mapfile -t matches < <(find artifacts -type f -regextype posix-extended \
+            -regex '.*/OrganizationSettingsEditor_[0-9]+(\.[0-9]+)*_managed\.zip' | sort)
+
+          echo "Found ${#matches[@]} candidate file(s):"
+          printf ' - %s\n' "${matches[@]:-}"
+
+          if [[ ${#matches[@]} -eq 0 ]]; then
+            echo "ERROR: No matching artifact file found."
+            exit 1
+          elif [[ ${#matches[@]} -gt 1 ]]; then
+            echo "ERROR: Multiple matching artifact files found; expected exactly one."
+            exit 1
+          fi
+
+          FILE="${matches[0]}"
+          BASENAME="$(basename "$FILE")"
+          if [[ "$BASENAME" =~ ^OrganizationSettingsEditor_([0-9]+(\.[0-9]+)*)_managed\.zip$ ]]; then
+            VERSION="${BASH_REMATCH[1]}"
+          else
+            echo "ERROR: Could not parse version from $BASENAME"
+            exit 1
+          fi
+
+          TAG="v${VERSION}"
+
+          echo "zip_path=$FILE"       >> "$GITHUB_OUTPUT"
+          echo "zip_name=$BASENAME"   >> "$GITHUB_OUTPUT"
+          echo "version=$VERSION"     >> "$GITHUB_OUTPUT"
+          echo "tag=$TAG"             >> "$GITHUB_OUTPUT"
+
+      - name: Build release title & body from upstream commit message
+        id: commit_msg
+        shell: bash
+        env:
+          HEAD_SHA: ${{ steps.find_run.outputs.head_sha }}
+        run: |
+          set -euo pipefail
+          # Retrieve canonical commit message for that SHA
+          MSG="$(gh api repos/${GITHUB_REPOSITORY}/commits/${HEAD_SHA} --jq '.commit.message')"
+          MSG="${MSG%\"}"; MSG="${MSG#\"}"   # strip quotes if present
+          printf '%s\n' "$MSG" > commit_message.txt
+
+          TITLE="$(head -n1 commit_message.txt || true)"
+          BODY="$(tail -n +2 commit_message.txt || true)"
+          BODY="$(printf '%s\n' "$BODY" | sed '1{/^$/d;}')"  # trim leading blank lines
+
+          if [[ -z "$TITLE" ]]; then
+            TITLE="Build ${{ steps.find_zip.outputs.version }}"
+          fi
+
+          printf '%s\n' "$BODY" > release-notes.txt
+
+          {
+            echo "title<<EOF"
+            printf '%s\n' "$TITLE"
+            echo "EOF"
+          } >> "$GITHUB_OUTPUT"
+
+      - name: DRY RUN — print what would happen
+        if: ${{ env.DRY_RUN == 'true' }}
+        shell: bash
+        run: |
+          echo "DRY RUN: Would create/update release:"
+          echo "  Tag:      ${{ steps.find_zip.outputs.tag }}"
+          echo "  Version:  ${{ steps.find_zip.outputs.version }}"
+          echo "  Head SHA: ${{ steps.find_run.outputs.head_sha }}"
+          echo "  Title:    ${{ steps.commit_msg.outputs.title }}"
+          echo "  Notes:"
+          sed 's/^/    /' release-notes.txt
+          echo "  Asset:    ${{ steps.find_zip.outputs.zip_path }}"
+
+      - name: Check if tag already has a release
+        if: ${{ env.DRY_RUN != 'true' }}
+        id: check_release
+        shell: bash
+        run: |
+          set -euo pipefail
+          TAG="${{ steps.find_zip.outputs.tag }}"
+          if gh release view "$TAG" >/dev/null 2>&1; then
+            echo "exists=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "exists=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Create draft pre-release (first time)
+        if: ${{ env.DRY_RUN != 'true' && steps.check_release.outputs.exists == 'false' }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          TAG="${{ steps.find_zip.outputs.tag }}"
+          ASSET="${{ steps.find_zip.outputs.zip_path }}"
+          TITLE="${{ steps.commit_msg.outputs.title }}"
+          HEAD_SHA="${{ steps.find_run.outputs.head_sha }}"
+
+          gh release create "$TAG" "$ASSET" \
+            --title "$TITLE" \
+            --notes-file release-notes.txt \
+            --draft \
+            --prerelease \
+            --latest \
+            --target "$HEAD_SHA"
+
+      - name: Update existing draft pre-release (idempotent)
+        if: ${{ env.DRY_RUN != 'true' && steps.check_release.outputs.exists == 'true' }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          TAG="${{ steps.find_zip.outputs.tag }}"
+          ASSET="${{ steps.find_zip.outputs.zip_path }}"
+          TITLE="${{ steps.commit_msg.outputs.title }}"
+          HEAD_SHA="${{ steps.find_run.outputs.head_sha }}"
+
+          gh release edit "$TAG" \
+            --title "$TITLE" \
+            --notes-file release-notes.txt \
+            --draft \
+            --prerelease \
+            --latest \
+            --target "$HEAD_SHA"
+
+          gh release upload "$TAG" "$ASSET" --clobber
