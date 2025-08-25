@@ -206,7 +206,7 @@
     minSupportedVersion="9.2.24074.00170" 
     maxSupportedVersion="9.999.9999.9999" 
     name="EnableRoleBasedSystemViews" 
-    isOrganizationAttribute="false" 
+    isOrganizationAttribute="true" 
     min="" 
     max="" 
     defaultValue="false" 
@@ -287,3 +287,4 @@
     urlTitle="KB 2691237" 
     description="Online only setting to enable System Job cleanup from the backend deletion service." />
 </defaultOrgSettings>
+
