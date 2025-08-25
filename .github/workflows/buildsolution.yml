@@ -1,11 +1,9 @@
 name: GitHub Actions OrgDbOrgSettings Build
 run-name: ${{ github.actor }} is building the OrgDbOrgSettings solution 🚀
 on:
-  push:
-    branches: 
-      - '**' #run on any branch push - no tag pushes  
   pull_request:
-    types: [opened, synchronize, reopened]
+    branches: [ master ]
+    types: [ opened, synchronize, reopened ]
 jobs:
   Build-OrgDbOrgSettings-GitHub-Actions:
     runs-on: windows-latest
