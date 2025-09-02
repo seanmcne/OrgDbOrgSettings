@@ -287,7 +287,7 @@
     urlTitle="KB 2691237" 
     description="Online only setting to enable System Job cleanup from the backend deletion service." />
   <orgSetting 
-    minSupportedVersion="9.2.25053.00220" 
+    minSupportedVersion="9.2.23083.00018" 
     maxSupportedVersion="9.9.9999.9999" 
     name="ForceOrganizerSyncForAttendeeTrackedAppointment" 
     isOrganizationAttribute="false" 
@@ -299,6 +299,7 @@
     urlTitle="KB 2691237" 
     description="When the value is set to true, appointments that are tracked by CRM attendees will be synchronized using the CRM organizer’s mailbox. Note: The organizer must be a CRM user whose mailbox is enabled for Appointment, Contact, and Task (ACT) synchronization." />
 </defaultOrgSettings>
+
 
 
 
