@@ -3,7 +3,7 @@ run-name: ${{ github.actor }} is building the OrgDbOrgSettings solution 🚀
 on:
   pull_request:
     branches: [ master ]
-    types: [ opened, synchronize, reopened ]
+    types: [ opened, synchronize, reopened, closed ]
 jobs:
   Build-OrgDbOrgSettings-GitHub-Actions:
     runs-on: windows-latest
