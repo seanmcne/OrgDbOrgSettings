@@ -18,7 +18,7 @@
     <script type="text/javascript">
         //CRM Required
         var o$ = {};
-        o$ = jQuery.noConflict(false);
+        o$ = jQuery.noConflict(true);
         if (typeof (SDK) == "undefined") {
             SDK = { __namespace: true };
         };
@@ -1684,3 +1684,4 @@
     <div><button style="visibility: hidden;" id="ResetYammerButton" onclick="resetYammerAttributes();">Remove Yammer Configuration</button></div>
 </body>
 </html>
+
