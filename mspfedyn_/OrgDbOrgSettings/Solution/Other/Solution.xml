@@ -83,14 +83,13 @@
       </Addresses>
     </Publisher>
     <RootComponents>
-      <RootComponent type="61" schemaName="mspfedyn_/orgdborgsettings/jquery1_11_0.js" behavior="0" />
       <RootComponent type="61" schemaName="mspfedyn_/orgdborgsettings/jquery-3.7.1.min.js" behavior="0" />
       <RootComponent type="61" schemaName="mspfedyn_/orgdborgsettings/jquery-migrate-3.6.0.min.js" behavior="0" />
-      <RootComponent type="61" schemaName="mspfedyn_/orgdborgsettings/json2.js" behavior="0" />
       <RootComponent type="61" schemaName="mspfedyn_/orgdborgsettings/orgdborgsettings.html" behavior="0" />
       <RootComponent type="61" schemaName="mspfedyn_/orgdborgsettings/progress.gif" behavior="0" />
       <RootComponent type="61" schemaName="mspfedyn_/orgdborgsettings/settings.xml" behavior="0" />
     </RootComponents>
     <MissingDependencies />
   </SolutionManifest>
+
 </ImportExportXml>
