@@ -19,7 +19,7 @@
     <script type="text/javascript">
         //CRM Required
         var o$ = {};
-        o$ = jQuery.noConflict(true);
+        o$ = jQuery.noConflict(false);
         if (typeof (SDK) == "undefined") {
             SDK = { __namespace: true };
         };
@@ -153,7 +153,7 @@
                     datatype: "json",
                     //method: "MERGE", //not working on some IE/JQUERY versions 
                     url: rootUrl + this.getVersionSpecificWebApiUrl() + "/organizations" + "(" + organizationId + ")",
-                    data: oJSON.stringify({ orgdborgsettings: orgDbOrgSettingXml }),
+                    data: JSON.stringify({ orgdborgsettings: orgDbOrgSettingXml }),
                     beforeSend: function (XMLHttpRequest) {
                         XMLHttpRequest.setRequestHeader("Accept", "application/json");
                         //XMLHttpRequest.setRequestHeader("X-HTTP-Method", "MERGE");
@@ -195,7 +195,7 @@
                     contentType: "application/json; charset=utf-8",
                     datatype: "json",
                     url: rootUrl + this.getVersionSpecificWebApiUrl() + "/organizations" + "(" + organizationId + ")",
-                    data: oJSON.stringify(update),
+                    data: JSON.stringify(update),
                     beforeSend: function (XMLHttpRequest) {
                         XMLHttpRequest.setRequestHeader("Accept", "application/json");
                         //XMLHttpRequest.setRequestHeader("X-HTTP-Method", "MERGE");
@@ -225,7 +225,7 @@
                     contentType: "application/json; charset=utf-8",
                     datatype: "json",
                     url: rootUrl + this.getVersionSpecificWebApiUrl() + "/organizations" + "(" + organizationId + ")",
-                    data: oJSON.stringify(update),
+                    data: JSON.stringify(update),
                     beforeSend: function (XMLHttpRequest) {
                         XMLHttpRequest.setRequestHeader("Accept", "application/json");
                         //XMLHttpRequest.setRequestHeader("X-HTTP-Method", "MERGE");
@@ -1685,5 +1685,6 @@
     <div><button style="visibility: hidden;" id="ResetYammerButton" onclick="resetYammerAttributes();">Remove Yammer Configuration</button></div>
 </body>
 </html>
+
 
 
