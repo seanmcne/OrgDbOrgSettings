@@ -1302,8 +1302,18 @@
              - then paint the grid? 
              */
             //alert user of other settings if OnPrem
-            var urlFunction = Xrm.Page.context.getClientUrl() || Xrm.Page.context.getServerUrl(); 
-            if (!(urlFunction.toLowerCase().indexOf(".dynamics.com") !== -1)) {
+            var urlFunction = Xrm.Page.context.getClientUrl() || Xrm.Page.context.getServerUrl();
+            var isOnline = false;
+            try {
+                // Use the URL API to safely extract the hostname and check for Dynamics 365 Online
+                var parsedUrl = new URL(urlFunction);
+                var host = (parsedUrl.hostname || "").toLowerCase();
+                isOnline = (host === "dynamics.com") || host.endsWith(".dynamics.com");
+            } catch (e) {
+                // If parsing fails, treat as non-online (on-premise or unknown)
+                isOnline = false;
+            }
+            if (!isOnline) {
                 updateBanner("Your environment is OnPremise, these settings may need to be checked against the ConfigDB(PowerShell) and Registry settings.", false, "onpremmsg");
             }
             window.setTimeout(function () {
