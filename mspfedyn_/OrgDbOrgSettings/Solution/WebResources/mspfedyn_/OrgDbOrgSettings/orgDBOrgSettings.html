@@ -1301,9 +1301,7 @@
         };
         function clearAutoUpdateCache(alertUser) {
             ///<param name='alertUser' type='Boolean'>show user an alert?</param>
-            if (alertUser) {
-                alert('Clearing Azure cache date.');
-            }
+            //override this to false and silently clear cache settings, user will be alerted if they forced a check via Ctrl+B
             localStorage.removeItem(orgLocalStorage.cacheKey);
             localStorage.removeItem(orgLocalStorage.newVersionAlertKey);
             localStorage.removeItem(orgLocalStorage.slnBuildVerKey);
@@ -1450,5 +1448,6 @@
     <div><button style="visibility: hidden;" id="ResetYammerButton" onclick="resetYammerAttributes();">Remove Yammer Configuration</button></div>
 </body>
 </html>
+
 
 
