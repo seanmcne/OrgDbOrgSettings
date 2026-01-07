@@ -328,91 +328,12 @@
                 }
                 return new Error(errorMessage);
             },
-            //following two functions are not used now
-            updateSolution: function (base64String) {
-                ///<param name='base64String' type='String'>A Base64 Encoded string of a CRM solution zip file</param>
-                ///<summary>Takes in a base64 string and updates the managed solution automatically</summary>
-                var request = [
-                  '<s:Envelope xmlns:s=\"http://schemas.xmlsoap.org/soap/envelope/\">',
-                   '<s:Body>',
-                    '<Execute xmlns="http://schemas.microsoft.com/xrm/2011/Contracts/Services" xmlns:i="http://www.w3.org/2001/XMLSchema-instance">',
-                     '<request i:type="b:ImportSolutionRequest" xmlns:a="http://schemas.microsoft.com/xrm/2011/Contracts" xmlns:b="http://schemas.microsoft.com/crm/2011/Contracts">',
-                       '<a:Parameters xmlns:c="http://schemas.datacontract.org/2004/07/System.Collections.Generic">',
-                            '<a:KeyValuePairOfstringanyType>',
-                              '<c:key>OverwriteUnmanagedCustomizations</c:key>',
-                              '<c:value i:type="d:boolean" xmlns:d="http://www.w3.org/2001/XMLSchema">false</c:value>',
-                            '</a:KeyValuePairOfstringanyType>',
-                            '<a:KeyValuePairOfstringanyType>',
-                              '<c:key>PublishWorkflows</c:key>',
-                              '<c:value i:type="d:boolean" xmlns:d="http://www.w3.org/2001/XMLSchema">false</c:value>',
-                            '</a:KeyValuePairOfstringanyType>',
-                            '<a:KeyValuePairOfstringanyType>',
-                              '<c:key>CustomizationFile</c:key>',
-                              '<c:value i:type="d:base64Binary" xmlns:d="http://www.w3.org/2001/XMLSchema">',
-                              base64String,
-                              '</c:value>',
-                            '</a:KeyValuePairOfstringanyType>',
-                            '<a:KeyValuePairOfstringanyType>',
-                              '<c:key>ImportJobId</c:key>',
-                              '<c:value i:type="d:guid" xmlns:d="http://schemas.microsoft.com/2003/10/Serialization/">00000000-0000-0000-0000-000000000000</c:value>',
-                            '</a:KeyValuePairOfstringanyType>',
-                       '</a:Parameters>',
-                       '<a:RequestId i:nil="true"/>',
-                       '<a:RequestName>ImportSolution</RequestName>',
-                     '</request>',
-                    '</Execute>',
-                   '</s:Body>',
-                  '</s:Envelope>'].join("");
-                var req = new XMLHttpRequest();
-                req.open("POST", (SDK.SOAP.getOrgRootUrl() + "/XRMServices/2011/Organization.svc/web"), true);
-                //try { req.responseType = 'msxml-document' } catch (e) { }
-                req.setRequestHeader("Accept", "application/xml, text/xml, */*");
-                req.setRequestHeader("Content-Type", "text/xml; charset=utf-8");
-                req.setRequestHeader("Content-Length", request.length);//experimental to increase soap message size. 
-                req.setRequestHeader("SOAPAction", "http://schemas.microsoft.com/xrm/2011/Contracts/Services/IOrganizationService/Execute");
-                req.onreadystatechange = function () {
-                    if (req.readyState == 4 /* complete */) {
-                        req.onreadystatechange = null; //Addresses potential memory leak issue with IE8
-                        if (req.status == 200) {
-                            //Success				
-                            var doc = req.responseXML;
-                            alert('we did it!');
-                        }
-                        else {
-                            alert('there was an error importing the solution update: ' + ((req.responseText) || "no error"));
-                        }
-                    }
-                };
-                req.send(request);
-            },
-            downloadAzureBlob: function (blobId) {
-                ///<param name='blobId' type='Number'>blobId</param>
-                //if (blobId) {
-                //    var query = client.getTable('applicationVersion').select('id', 'SolutionZip').where({
-                //        id:blobId
-                //    }).take(1).read().done(function (results) {
-                //        //32000 char limit :( -- SDK.SOAP.updateSolution(results[0].SolutionZip); 
-                //        //alert(JSON.stringify(results));
-                //        //var url = "data:application/octet-stream;base64," + results[0].SolutionZip;
-                //        URL.createObjectURL(
-                //        var url = "data:application/octet-stream;charset=utf-8;base64," + results[0].SolutionZip;
-                //        o$('#downloader').prop('href', url);
-                //        //document.location.href = url;
-                //        //return window.open(url);
-                //    }, function (err) {
-                //        alert("Error: " + err);
-                //    });
-                //}
-            },
             __namespace: true
         };
         SDK.Settings = {
             ajaxTimeout: 300000,
             crmServerDBVersion: new BuildVersion(0,0,0,0), 
-            azureClient: null, 
             daysOfCache: 7,
-            azureMobileUrl: "https://orgdborgsettings.azure-mobile.net/", 
-            azureMobileKey: "SJJAJKWgJGFTMkJmXsetIytXmxMxqM37",
             minWindowHeight: 825,
             OrganizationId: null,
             OrganizationName: Xrm.Page.context.getOrgUniqueName(),
@@ -463,149 +384,7 @@
             __namespace: true
         };
         var orgLocalStorage = SDK.Settings.LocalStorage;
-        function checkAzureMobileForUpdates(forceUpdateCheck) {
-            ///<summary>Checks the CRM Solution version, then fires off checks to azureMobile based on a cached date</summary>
-            ///<param name='forceUpdateCheck' type='Boolean'>Forces a check against AzureMobile</param>
-            if (forceUpdateCheck === null) {
-                forceUpdateCheck = false; //default to false if not passed
-            }
-            if (forceUpdateCheck) {
-                enableProgressDiv(true);
-            }
-
-            SDK.SOAP.getCrmSolutionVersion().done(function (results, textStatus, XmlHttpRequest) {
-                if (results && results.value.length > 0) {
-                    var isManaged = results.value[0].ismanaged;
-                    var version = results.value[0].version;
-                    var versionNumber = results.value[0].versionnumber;
-                    var slnBuildVersion = BuildVersion.parseBuildNumber(version);
-                    var slnModDate = new Date(parseInt(results.value[0].modifiedon.replace("/Date(", "").replace(")/", ""), 10));
-                    //compare the localStorage lastLoadedBuild# - if it's less than the current SLN version then force a check to make sure we're current
-                    try {
-                        if (orgLocalStorage.contains(orgLocalStorage.slnBuildVerKey)) {
-                            var lastLoadedBuildNum = orgLocalStorage.localStorageValue(orgLocalStorage.slnBuildVerKey);//get value from localstorage
-                            if (lastLoadedBuildNum != "") {
-                                var localStorageBuild = BuildVersion.parseBuildNumber(lastLoadedBuildNum);
-                                if (!localStorageBuild.equals(slnBuildVersion)) {
-                                    //if our tracked build# is less than our current build# - then force a check
-                                    forceUpdateCheck = true;
-                                    localStorage.setItem(orgLocalStorage.slnBuildVerKey, slnBuildVersion.toBuildNumberString());
-                                }
-                            }
-                        }
-                        else {
-                            //not set yet or doesn't have localstorage - let's check and set it 
-                            if (orgLocalStorage.supports_html5_storage()) {
-                                localStorage.setItem(orgLocalStorage.slnBuildVerKey, slnBuildVersion.toBuildNumberString());
-                            }
-                        }
-                    } catch (e) { };
-                    if (!isManaged) {
-                        updateBanner("Warning: You are not running the managed solution of the settings editor.\rPlease download and use the managed version.", false, "managedslnmsg");
-                    }
-                    try {
-                        //using azureMobile for xdr's to read newer versions if the enviornment has internet access: 
-                        if ((shouldCheckAzureForUpdates(SDK.Settings.daysOfCache) || forceUpdateCheck) && supportedBrowser && slnBuildVersion) {
-                            clearAutoUpdateCache(false); //dump the cache if we require a check for updates
-                            //we must get the org version *BEFORE* calling into AzureMobile
-                            SDK.SOAP.getCrmOrgDBVersion(
-                                onSuccess = function (serverBuildVersion) {
-                                    SDK.Settings.azureClient.getTable('applicationVersion')
-                                    .select('VersionNumber', 'DownloadUrl', 'PublishedDate')
-                                    .where(
-                                    function (dateCompare, majorVersion) {
-                                        return (this.PublishedDate <= dateCompare && (this.MinCrmVersion <= majorVersion && this.MaxCrmVersion >= majorVersion));
-                                    }, new Date().toISOString(), serverBuildVersion.major)
-                                    .take(1)
-                                    .orderByDescending('PublishedDate')
-                                    .read()
-                                    .done(
-                                        function (results) {
-                                            //on successful Azure check 
-                                            localStorage.setItem(orgLocalStorage.cacheKey, Date.now());
-                                            //no results return and wait until next time 
-                                            if (results.length == 0) {
-                                                //reset version alert then 
-                                                localStorage.removeItem(orgLocalStorage.newVersionAlertKey);
-                                                return;
-                                            }
-                                            var latestAzureSln = BuildVersion.parseBuildNumber(results[0].VersionNumber);
-                                            if (latestAzureSln.isGreaterThan(slnBuildVersion)) {
-                                                alert("You are not running the latest available version!\rSee the yellow ribbon for a download URL for the latest solution.");
-                                                var openerCmd = 'javascript:try { openStdWindow(SDK.SOAP.getOrgRootUrl() + "/tools/solution/import/solutionimportwizard.aspx", "Import", 600,500); } catch ($exception) { console.log("An Error Occurred while trying to launch the import dialog, please import the solution via Settings|Customizations|Solutions instead.") }';
-                                                var message = "<b>Version " +
-                                                        latestAzureSln.toBuildNumberString() +
-                                                        " is now available! <a target='_blank' href='" +
-                                                        (results[0].DownloadUrl || "https://github.com/seanmcne/OrgDbOrgSettings/releases") +
-                                                        "'>Download</a> and save the new solution package, then <a href='#' onclick='" + openerCmd + "'>Import</a> it into CRM. Once completed press F5 to reload this page.</b>" +
-                                                        "</br>If you believe you're reaching this message in error <a href='#' onclick='javascript:checkAzureMobileForUpdates(true);'>Click here</a> to force another update check.";
-                                                updateBanner(message, false, "azureNewVersionMsg"); //alert admin of new version 
-                                                localStorage.setItem(orgLocalStorage.newVersionAlertKey, message); //set new version in localStroage
-                                            }
-                                            else {
-                                                //we know that we've checked and there is NOT a newer version, if there was we wouldn't be here so time to clear out new version alert 
-                                                localStorage.removeItem(orgLocalStorage.newVersionAlertKey);
-                                                localStorage.setItem(orgLocalStorage.slnBuildVerKey, slnBuildVersion.toBuildNumberString());
-                                                SDK.Settings.OrganizationSettings.clear(); //clear currently stored settings
-                                                resetBanner(); //reset the banner
-                                                retrieveAndDisplaySettings(); 
-                                            }
-                                        },
-                                        function (error) {
-                                            updateBanner("Error in message response from AzureMobile: " + err, false, "azureResponseErrorMsg");
-                                            clearAutoUpdateCache(false);
-                                        });
-                                }, 
-                                onError = function (error) {
-                                    console.log("Failed to check AzureMobile!");
-                                    alert(error); 
-                                });
-                        }
-                        else if (orgLocalStorage.contains(orgLocalStorage.newVersionAlertKey)) {
-                            //if we already know we need a new version, then we should continue alerting the admin
-                            updateBanner(orgLocalStorage.localStorageValue(orgLocalStorage.newVersionAlertKey), false, "azureNewVersionMsg");
-                        }
-                    }
-                    catch (e) {
-                        /*this is somewhat experimental - if it fails we want to gracefully fail and queue up another update check*/
-                        updateBanner("An error was encountered when comparing solution build versions to AzureMobile.  Please manually check for updates at the <a href='" + SDK.Settings.projectUrl + "' target='_blank'>project site</a>.", false, "versionErrorMsg");
-                        //dumpErrorInBanner(e); 
-                        clearAutoUpdateCache(false);
-                    }
-                }
-                else {
-                    updateBanner("Unable to find the source OrgDbOrgSettings Solution in your CRM organization.", false, "orgDbOrgSettingsNotFoundMsg");
-                }
-            }).fail(function (jqXHR, textStatus, errorThrown) {
-                SDK.SOAP.getSoapError(errorThrown);
-            }).always(function (XMLHttpRequest, status) {
-                if (forceUpdateCheck) {
-                    enableProgressDiv(false);
-                }
-            })
-        };
-        function shouldCheckAzureForUpdates(minDaysInCache) {
-            ///<param name='minDaysInCache' type='Number'>Minimum days between checking azure</param>
-            ///<returns type='Boolean'>indicates if azure should be checked</returns>
-            if (orgLocalStorage.supports_html5_storage()) {
-                var lastUpdateDateString = localStorage.getItem(orgLocalStorage.cacheKey);
-                if (lastUpdateDateString) {
-                    var lastUpdateDate = parseInt(lastUpdateDateString);
-                    if ((Date.now() < (lastUpdateDate + (minDaysInCache * 86400000)))) {
-                        return false;
-                    }
-                    else {
-                        return true;
-                    }
-                }
-                else {
-                    //the value doesn't exist so we'll check for updates //localStorage.setItem(orgLocalStorage.cacheKey, Date.now()); 
-                    return true;
-                }
-            }
-            return false;
-        };
-
+        
         function BuildVersion(major, minor, build, revision) {
             ///<summary>BuildVersion</summary>
             ///<param name='major' type='Number'>Major Build Number</param>
@@ -1240,17 +1019,7 @@
         };
         o$(document).ready(function () {
             //functions to run only when the page loads and never again 
-            //try to load AzureMobile, if we fail we'll do it silently - problem here is that we cannot catch the error message from AzureMobile :(
-            try {
-                if (supportedBrowser) {
-                    SDK.Settings.azureClient = new WindowsAzure.MobileServiceClient(
-                        SDK.Settings.azureMobileUrl,
-                        SDK.Settings.azureMobileKey);
-                }
-            }
-            catch (e) {
-                dumpErrorInBanner(e);
-            }
+            
             //IE9 and earlier does not support toISOString - so we'll make our own if it doesn't exist
             Date.prototype.toISOString = Date.prototype.toISOString || function () {
                 return this.getUTCFullYear() + "-"
@@ -1274,13 +1043,11 @@
                     e.preventDefault();
                     if (orgLocalStorage.supports_html5_storage()) {
                         clearAutoUpdateCache(true);
-                        try { checkAzureMobileForUpdates(true) } catch (e) { alert("The forced update check has failed with an error" + (e.message || "null")); };
+                        try {  alert("Checking for updates is no longer supported") } catch (e) { alert("Checking for updates is no longer supported" + (e.message || "null")); };
                     }
                     return false;
                 }
             });
-            //check Azure for newer solution versions 
-            checkAzureMobileForUpdates(false);
         });
 
         function resetBanner() {
@@ -1536,7 +1303,7 @@
         function clearAutoUpdateCache(alertUser) {
             ///<param name='alertUser' type='Boolean'>show user an alert?</param>
             if (alertUser) {
-                alert('Clearing Azure cache date, this will force a check for updates back to AzureMobile.');
+                alert('Clearing Azure cache date.');
             }
             localStorage.removeItem(orgLocalStorage.cacheKey);
             localStorage.removeItem(orgLocalStorage.newVersionAlertKey);
