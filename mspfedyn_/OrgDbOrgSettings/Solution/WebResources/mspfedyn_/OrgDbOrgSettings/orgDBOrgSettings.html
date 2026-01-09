@@ -730,7 +730,7 @@
             ///<summary>Safely extracts an error message from any error type</summary>
             ///<param name='e' type='Object'>Error object of any type</param>
             ///<returns type='String'>Error message string</returns>
-            if (e instanceof Error) return e.message || e.toString();
+            if (e instanceof Error) return e.message || e.name || e.toString();
             if (typeof e === 'string') return e;
             if (e && typeof e === 'object') {
                 if (e.message) return e.message;
