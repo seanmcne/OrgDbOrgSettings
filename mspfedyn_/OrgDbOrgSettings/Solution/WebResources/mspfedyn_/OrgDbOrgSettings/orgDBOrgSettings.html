@@ -735,7 +735,7 @@
             if (e && typeof e === 'object') {
                 return e.message || e.statusText || e.responseText || JSON.stringify(e);
             }
-            return String(e) || 'Unknown error';
+            return e != null ? String(e) : 'Unknown error';
         };
         function resetYammerAttributes() {
             try { //double confirmation for this setting, just in case. 
