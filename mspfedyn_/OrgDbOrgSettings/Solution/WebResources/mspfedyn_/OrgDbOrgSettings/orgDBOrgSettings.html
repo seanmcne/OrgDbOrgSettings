@@ -547,7 +547,7 @@
             
             // Handle empty or null max values for Number/Double types
             var parsedMax = parseFloat(max);
-            if (isNaN(parsedMax) || max === "" || max === null) {
+            if (isNaN(parsedMax) || max === "" || max === null || max === undefined) {
                 // For Number/Double types, use Int32.MaxValue as default max
                 this.maxNumber = (type && (type.toString().toLowerCase() === "number" || type.toString().toLowerCase() === "double")) ? 2147483647 : null;
             } else {
