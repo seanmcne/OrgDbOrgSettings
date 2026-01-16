@@ -84,8 +84,9 @@ This sends an empty string to clear all settings.
 
 ### Step 2: Rebuild Without the Deleted Setting
 
-```javascript
+```javascript 
 // Loop through all settings EXCEPT the one being deleted
+// rebuilds all the settings in javascript to be submitted
 forEach(setting) {
     if (setting.name != strSettingToDelete) {
         finalXmlUpdate += setting.toRawXmlSetting();
@@ -118,19 +119,19 @@ Body: { "orgdborgsettings": "<orgSettings>... all settings except deleted one...
    [UPDATE/ADD]            [DELETE]                [READ]
         │                       │                       │
         ▼                       ▼                       ▼
-   Clone setting          Confirm x2              GET /organizations
+   Clone setting (in js)    Confirm x2           GET /organizations
         │                       │                       │
         ▼                       │                       ▼
    Validate value               │              Parse orgdborgsettings
         │                       │                  XML field
         ▼                       ▼
-   Serialize to XML       PATCH #1: Clear
-   <Setting>val</Setting>  { orgdborgsettings:  "" }
+   Serialize to XML        PATCH #1: Clear
+<Setting>val</Setting>   { orgdborgsettings:  "" }
         │                       │
         ▼                       ▼
    PATCH request          Rebuild XML without
-   { orgdborgsettings:     deleted setting
-     "<orgSettings>..." }       │
+   {orgdborgsettings:      deleted setting
+     "<orgSettings>..."}        │
         │                       ▼
         │                 PATCH #2: Write back
         │                 { orgdborgsettings:  "..." }
