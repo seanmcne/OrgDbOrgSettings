@@ -298,7 +298,20 @@
     supportUrl="http://support.microsoft.com/kb/2691237" 
     urlTitle="KB 2691237" 
     description="When the value is set to true, appointments that are tracked by CRM attendees will be synchronized using the CRM organizer’s mailbox. Note: The organizer must be a CRM user whose mailbox is enabled for Appointment, Contact, and Task (ACT) synchronization." />
+  <orgSetting 
+    minSupportedVersion="9.2.23091.00002" 
+    maxSupportedVersion="9.9.9999.9999" 
+    name="CorrelatedSubjectChangedRegex" 
+    isOrganizationAttribute="false" 
+    min="" 
+    max="" 
+    defaultValue="(?i)(re|r|ref|回复|回覆|sv|antw|vs|aw|ΑΠ|ΣΧΕΤ|השב|Vá|Rif|返信|BLS|atb\.|res|Odp|பதில்|YNT|atb):\s+" 
+    settingType="String" 
+    supportUrl="https://learn.microsoft.com/en-us/dynamics365/customer-service/administer/arc-email-sub-chg" 
+    urlTitle="KB 2691237" 
+    description="Administrators can use regex expressions to define whether a new case should be created when the email subject changes on a reply or a forwarded email that has a related active or resolved case." />
 </defaultOrgSettings>
+
 
 
 
