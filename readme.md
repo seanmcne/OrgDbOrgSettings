@@ -35,11 +35,10 @@ Browser Supportability:
 
 The importing of this managed solution will include the following components: 
 - JQuery [http://jquery.com/](http://jquery.com/)
-- JSON2 [http://www.json.org/](http://www.json.org/)
 - OrgDBOrgSettings.html [How to use the editor](How-to-use-the-editor.md)
 - settings.xml [What is Settings.xml](What-is-Settings.xml.md)
-- Azure Mobile Apps [Azure Portal](http://portal.azure.com), MSDN [AzureMobile Services](https://azure.microsoft.com/en-us/services/app-service/mobile/) - this service is used for the browser to call back and check for any new updates of the editor solution (and prompt you to download an update, if one is available). 
 
 ### What about On-Prem CRM?
 OnPrem Editions are supported for editting organization database settings otherwise known as OrgDBOrgSettings as well as some selected Organization attributes, please understand that onprem may or may not have the same settings - _mileage may vary_ for onprem and you'll want to be sure your version of onprem contains the setting you want to change. 
+
 
