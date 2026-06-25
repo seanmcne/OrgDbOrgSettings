@@ -310,6 +310,18 @@
     supportUrl="https://learn.microsoft.com/en-us/dynamics365/customer-service/administer/arc-email-sub-chg" 
     urlTitle="KB 2691237" 
     description="Administrators can use regex expressions to define whether a new case should be created when the email subject changes on a reply or a forwarded email that has a related active or resolved case." />
+  <orgSetting 
+    minSupportedVersion="9.2.24065.0" 
+    maxSupportedVersion="9.9.9999.9999" 
+    name="PreserveEmailSenderRecipientParties" 
+    isOrganizationAttribute="false" 
+    min="" 
+    max="" 
+    defaultValue="false" 
+    settingType="Boolean" 
+    supportUrl="https://learn.microsoft.com/en-us/power-platform/admin/orgdborgsettings" 
+    urlTitle="OrgDBOrgSettings" 
+    description="Default: &lt;b&gt;false&lt;/b&gt;. When set to &lt;b&gt;true&lt;/b&gt;, the original sender / To / Cc / Bcc activity-party data (AddressUsed, PartyIdName) on existing email activities is preserved when a party record's (contact, systemuser, queue, etc.) email address or name is later changed. By default the platform cascades the new address/name down to all activity parties, including the parties on historical emails, which can retroactively change the recorded recipients on old emails. &lt;b&gt;Note:&lt;/b&gt; this is not retroactive (it only affects address/name changes made after the setting is enabled) and also requires the platform flag AllowPreserveEmailSenderRecipientParties (true by default)." />
 </defaultOrgSettings>
 
 
